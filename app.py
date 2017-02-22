@@ -15,13 +15,13 @@ working_name = {}
 url = 'https://raw.githubusercontent.com/rrLero/git-blog-content/master/README.md'
 response = urllib.request.urlopen(url)
 data = response.read()
+file = data.decode('utf-8')
 
 
 @app.route('/index')
 @app.route('/')
 def homepage():
     return render_template('base.html')
-
 
 # логинемся
 @app.route('/logout')
