@@ -11,17 +11,22 @@ app.config.update(dict(
 ))
 working_name = {}
 
+
 # считываем с репозитория git-blog-content файл README.md и читаем в переменную file
-url = 'https://raw.githubusercontent.com/rrLero/git-blog-content/master/README.md'
-response = urllib.request.urlopen(url)
-data = response.read()
-file = data.decode('utf-8')
+def get_file(git_name, git_repository):
+    url = 'https://raw.githubusercontent.com/%s/%s/master/README.md' % (git_name, git_repository)
+    print(url)
+    response = urllib.request.urlopen(url)
+    data = response.read()
+    file = data.decode('utf-8')
+    return file
 
 
 @app.route('/index')
 @app.route('/')
 def homepage():
     return render_template('base.html')
+
 
 # логинемся
 @app.route('/logout')
@@ -43,6 +48,7 @@ def blog():
     gitrepositoryblog = request.form['gitrepositoryblog']
     working_name['gitname'] = gitname
     working_name['gitrepositoryblog'] = gitrepositoryblog
+    file = get_file(gitname, gitrepositoryblog)
     return render_template('blog.html', gitname=gitname, gitrepositoryblog=gitrepositoryblog, file=file)
 
 
