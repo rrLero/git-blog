@@ -38,18 +38,18 @@ def logout():
 
 @app.route('/blog/', methods=['POST'])
 def blog():
-    if request.form['gitname'] and request.form['gitrepositoryblog']:
+    if request.form['git_name'] and request.form['git_repository_blog']:
         session['logged_in'] = True
         flash('You were logged in')
     else:
         session['logged_in'] = False
         return redirect(url_for('base.html'))
-    gitname = request.form['gitname']
-    gitrepositoryblog = request.form['gitrepositoryblog']
-    working_name['gitname'] = gitname
-    working_name['gitrepositoryblog'] = gitrepositoryblog
-    file = get_file(gitname, gitrepositoryblog)
-    return render_template('blog.html', gitname=gitname, gitrepositoryblog=gitrepositoryblog, file=file)
+    git_name = request.form['git_name']
+    git_repository_blog = request.form['git_repository_blog']
+    working_name['git_name'] = git_name
+    working_name['git_repository_blog'] = git_repository_blog
+    file = get_file(git_name, git_repository_blog)
+    return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file)
 
 
 if __name__ == '__main__':
