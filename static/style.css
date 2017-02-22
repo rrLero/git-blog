@@ -1,1 +1,5 @@
-p           { font-size: 2.7em; }
+body {
+	margin: 0;
+	padding: 0;
+}
+
