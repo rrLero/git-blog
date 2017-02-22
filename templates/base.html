@@ -19,7 +19,7 @@
 
 <h1> Big start for git-blog </h1>
 {% if not session.logged_in %}
-  <form action="{{ url_for('blog') }}" method=post>
+  <form action="{{ url_for('blog') }}" method="post">
     <dl>
       <dt>GitName:
       <dd><input type=text name=gitname>
