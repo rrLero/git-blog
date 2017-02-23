@@ -33,9 +33,13 @@ def get_file(git_name, git_repository):
         resource = urllib.request.urlopen(url)
         data = resource.readlines()
         for el in data:
-            if (el.decode('utf-8')).split(':'):
+            if ':' in el.decode('utf-8'):
                 x,y = (el.decode('utf-8')).split(':')
                 val[x] = y.rstrip()
+            else:
+                val['date'] = 'ERROR'
+                val['title'] = "can't build blog"
+                val['text'] = 'your file should be with title:...., date:....., text:.....'
         list_git_files.append(val)
     return list_git_files
 
