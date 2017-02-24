@@ -19,15 +19,27 @@
 
 <h1> Big start for git-blog </h1>
 {% if not session.logged_in %}
-  <form action="{{ url_for('blog') }}" method="post">
-    <dl>
-      <dt>GitName:
-      <dd><input type=text name=git_name>
-      <dt>GitRepositoryBlog:
-      <dd><input type=text name=git_repository_blog>
-      <dd><input type=submit value=Blog>
-    </dl>
-  </form>
+  <form action="{{ url_for('blog') }}" method="post" class="form-horizontal">
+    <div class="container">
+
+      <div class="form-group">  
+        <label for="git_name" class="col-sm-2">GitName:</label>
+        <input type="text" id="git_name" class="form-control col-sm-6" name="git_name" placeholder="Enter your name in git">
+      </div>
+
+      <div class="form-group">  
+        <label for="git_repository" class="col-sm-2">GitRepositoryBlog:</label>
+        <input type="email" id="git_repository col-sm-6" class="form-control" name="git_repository_blog" placeholder="Enter git repository">
+      </div>
+
+      <div class="form-group">
+      <input type="submit" class="btn btn-primary col-sm-4" value="Blog" >
+        <div class="col-sm-8">
+          <label class="checkbox-inline"><input type="checkbox" value="">Remember me</label>
+        </div>  
+      </div>
+
+    </div>
 {% else %}
     <a href="{{ url_for('logout') }}">logout</a>
 {% endif %}
