@@ -2,5 +2,13 @@
 {% block body %}
 <h4>You where login like github user - {{ git_name }}</h4>
 <h4>Your repository for blog - {{ git_repository_blog }}</h4>
-{{ file }}
+{% for el in file %}
+<ul>
+    <li>{{ el['title'] }}</li>
+    <li>{{ el['date'] }}</li>
+    <li>{{ el['text'] }}</li>
+</ul>
+
+{% endfor %}
+
 {% endblock %}
