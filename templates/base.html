@@ -19,7 +19,7 @@
 
 <h1> Big start for git-blog </h1>
 {% if not session.logged_in %}
-  <form action="{{ url_for('blog') }}" method="post" class="form-horizontal">
+  <form action="{{ url_for('login') }}" method="post" class="form-horizontal">
     <div class="container">
 
       <div class="form-group">  
@@ -43,6 +43,17 @@
 {% else %}
     <a href="{{ url_for('logout') }}">logout</a>
 {% endif %}
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
 {% block body %}
 {% endblock %}    
 
