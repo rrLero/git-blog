@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 {% block body %}
-<h4>You where login like github user - {{ git_name }}</h4>
-<h4>Your repository for blog - {{ git_repository_blog }}</h4>
+
+<ul class=entries>
 {% for el in file %}
-<ul>
-    <li>{{ el['title'] }}</li>
-    <li>{{ el['date'] }}</li>
-    <li>{{ el['text'] }}</li>
-</ul>
+      <li>
+          <div class="date"> {{ el['date'] }}</div>
+          <h2 class="entres-h2">{{ el['title'] }} </h2>
+          <p>{{ el['text'] }} </p>
+          <div style="clear:both;"></div>
+      </li>
 
 {% endfor %}
-
+ </ul>
 {% endblock %}

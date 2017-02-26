@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, session, flash, redirect, url_for
-import os
+import datetime
 import urllib.request
 import urllib
 import json
+import requests
 
 
 app = Flask(__name__)
@@ -23,28 +24,50 @@ app.config.update(dict(
 # считываем с репозитория git-blog-content файл README.md и читаем в переменную file
 def get_file(git_name, git_repository):
     list_git_files = []
-    try:
-        git_objects = urllib.request.urlopen('https://api.github.com/repos/%s/%s/contents/' % (git_name, git_repository))
-    except urllib.error.HTTPError:
+    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/' % (git_name, git_repository))
+    git_objects = git_objects.json()
+    if str(type(git_objects)) == "<class 'dict'>":
         session['logged_in'] = False
         return False
-    git_objects = git_objects.read()
-    git_objects = json.loads(git_objects)
     for git_object in git_objects:
         url = git_object['download_url']
         val = {}
-        resource = urllib.request.urlopen(url)
-        data = resource.readlines()
-        for el in data:
-            if ':' in el.decode('utf-8'):
-                x,y = (el.decode('utf-8')).split(':')
-                val[x] = y.rstrip()
-            else:
-                val['date'] = 'ERROR'
-                val['title'] = "can't build blog"
-                val['text'] = 'your file should be with title:...., date:....., text:.....'
+        s = git_object['name'].rfind('.')
+        if s != -1:
+            val['date'] = git_object['name'][0: s]
+        else:
+            val['date'] = git_object['name']
+        try:
+            val['date'] = datetime.datetime.strptime(val['date'], "%H:%M %d-%m-%Y")
+        except:
+            val['date'] = 'No date'
+        val['title'] = 'No title'
+        resource = requests.get(url)
+        data = resource.content.decode('utf-8')
+        data = [i for i in data.split('\n')]
+        data.remove('')
+        val['text'] = ''
+        if len(data) > 5:
+            for i in range(5):
+                key, string = test_string(data[i])
+                val[key] = string
+            for i in range(5, len(data)):
+                val['text'] = val['text'] + ' ' + data[i]
+        else:
+            val['text'] = 'your file not in right format'
         list_git_files.append(val)
-    return sorted(list_git_files, key=lambda d: d['date'], reverse=True)
+    return sorted(list_git_files, key=lambda d: str(d['date']), reverse=True)
+
+
+def test_string(test):
+    if '---' in test:
+        return 'symbol', test
+    if 'title' in test and ':' in test:
+        return 'title', test.split(':')[1].strip()
+    if 'tegs' in test and ':' in test:
+        return 'tegs', test.split(':')[1]
+    if 'layout' in test and ':' in test:
+        return 'layout', test.split(':')[1]
 
 
 @app.route('/index')
@@ -75,8 +98,8 @@ def login():
 @app.route('/<git_name>/<git_repository_blog>/')
 def blog(git_name, git_repository_blog):
     session['logged_in'] = True
-    if get_file(git_name, git_repository_blog):
-        file = get_file(git_name, git_repository_blog)
+    file = get_file(git_name, git_repository_blog)
+    if file:
         return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file)
     else:
         session['logged_in'] = False
