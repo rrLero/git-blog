@@ -1,15 +1,42 @@
 {% extends "base.html" %}
 {% block body %}
 
+
+<form action="{{ url_for('blog' , git_name=git_name, git_repository_blog=git_repository_blog) }}" method="get">
+    <p><select size="3" multiple name="teg">
+        <option disabled>ВыберитеТеги</option>
+        <option value="None">Все</option>
+        {% for teg in tegs %}
+        <option value="{{ teg }}" >{{ teg }}</option>
+        {% endfor %}
+    </select></p>
+    <p><input type="submit" value="Отправить"></p>
+</form>
+
 <ul class=entries>
+
 {% for el in file %}
+    {% if sort  %}
+    {% if sort == el['tegs'] %}
       <li>
           <div class="date"> {{ el['date'] }}</div>
+          <h4 align="right"> {{ el['tegs'] }}</h4>
           <h2 class="entres-h2">{{ el['title'] }} </h2>
           <p>{{ el['text'] }} </p>
           <div style="clear:both;"></div>
       </li>
-
+    {% endif %}
+    {% else %}
+          <li>
+          <div class="date"> {{ el['date'] }}</div>
+          <h4 align="right"> {{ el['tegs'] }}</h4>
+          <h2 class="entres-h2">{{ el['title'] }} </h2>
+          <p>{{ el['text'] }} </p>
+          <div style="clear:both;"></div>
+      </li>
+    {% endif %}
 {% endfor %}
- </ul>
+
+</ul>
+
 {% endblock %}
