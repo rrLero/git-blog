@@ -3,4 +3,32 @@ body {
 	padding: 0;
 }
 
+.entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.entries > li {
+  margin: 0 1em 1.8em;
+  border-bottom: 1px solid grey;
+  padding: 15px;
+}
+.entries > li h2 {
+  margin-left: -1em;
+}
+.date {
+  font-size: 0.7em;
+  text-align: left;
+  color: grey;
+}
+.entres-h2 {
+  text-align: left;
+  font-weight: 300;
+  padding: 10px 0 2px 27px;
+  font-family: sans-serif;
+  color: #377ba8;
+  }
+.entries li p {
+  padding-top: 5px;
+}
 

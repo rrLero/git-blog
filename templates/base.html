@@ -17,8 +17,8 @@
 
     <title>git-blog</title>
 </head>
+{% include  'header.html' %}
 <body>
-
 <h1> Big start for git-blog </h1>
 {% if not session.logged_in %}
   <form action="{{ url_for('login') }}" method="post" class="form-horizontal">
@@ -63,6 +63,6 @@
 {% block body %}
 {% endblock %}    
 
-
 </body>
+{% include 'footer.html' %}
 </html>
