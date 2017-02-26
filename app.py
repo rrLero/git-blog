@@ -123,8 +123,8 @@ def blog(git_name, git_repository_blog, sort=None):
                                tegs=tegs, sort=sort)
     else:
         file = get_file(git_name, git_repository_blog)
-        tegs = {i['tegs'] for i in file}
     if file:
+        tegs = {i['tegs'] for i in file}
         return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file, tegs=tegs, sort=sort)
     else:
         session['logged_in'] = False
