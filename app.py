@@ -23,7 +23,7 @@ f.close()
 #     print(el['name'])
 
 
-# считываем с репозитория git-blog-content файл README.md и читаем в переменную file
+# reading from reposytory git-blog-content file README.md variable in file
 def get_file(git_name, git_repository):
     list_git_files = []
     git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository))
@@ -104,8 +104,7 @@ def login():
         session['logged_in'] = False
         return redirect(url_for('homepage'))
 
-
-# Переадресация на страницу not_found.html
+# redirect on page not_found.html
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('not_found.html'), 404
