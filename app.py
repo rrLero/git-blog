@@ -26,7 +26,7 @@ f.close()
 # считываем с репозитория git-blog-content файл README.md и читаем в переменную file
 def get_file(git_name, git_repository):
     list_git_files = []
-    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository))
+    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository), auth=('rrlero', '7M7T9nHH'))
     git_objects = git_objects.json()
     if str(type(git_objects)) == "<class 'dict'>":
         session['logged_in'] = False
@@ -36,8 +36,11 @@ def get_file(git_name, git_repository):
         val = {}
         resource = requests.get(url)
         data = resource.content.decode('utf-8')
-        data = [i for i in data.split('\n')]
-        data.remove('')
+        if '\n' in data:
+            data = [i for i in data.split('\n')]
+            data.remove('')
+        elif '\r' in data:
+            data = [i for i in data.split('\r')]
         val['date'] = ''
         val['text'] = ''
         val['tags'] = 'No tags'
