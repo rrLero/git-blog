@@ -26,7 +26,7 @@ f.close()
 # reading from reposytory git-blog-content file README.md variable in file
 def get_file(git_name, git_repository):
     list_git_files = []
-    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository), auth=('rrlero', '7M7T9nHH'))
+    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository))
     git_objects = git_objects.json()
     if str(type(git_objects)) == "<class 'dict'>":
         session['logged_in'] = False
@@ -41,7 +41,14 @@ def get_file(git_name, git_repository):
             data.remove('')
         elif '\r' in data:
             data = [i for i in data.split('\r')]
-        val['date'] = ''
+        if len(git_object['name']) > 9:
+            try:
+                datetime.datetime.strptime(git_object['name'][2:10], "%y-%m-%d")
+                val['date'] = git_object['name'][0:10]
+            except:
+                val['date'] = 'no date'
+        else:
+            val['date'] = 'no date'
         val['text'] = ''
         val['tags'] = 'No tags'
         val['author'] = ''
@@ -74,6 +81,10 @@ def test_string(test):
     if 'date' in test and ':' in test:
         test = test[test.find('date:') + len('date:'):].strip()
         test = test.strip('"')
+        try:
+            datetime.datetime.strptime(test[2:10], "%y-%m-%d")
+        except:
+            test = 'no date'
         return 'date', test
     if 'author' in test and ':' in test:
         return 'author', test[test.find('author:')+len('author:'):].strip()

@@ -14,27 +14,23 @@
 </form>
 
 <ul class=entries>
-
 {% for el in file %}
     {% if sort  %}
     {% if sort in el['tags'] %}
       <li>
-          <div class="date"> {{ el['date'] }}</div>
           <h4 align="right"> {% for tag in el['tags'] %} {{ tag }} {% endfor %}</h4>
+          <div class="date"> {{ el['date'] }}</div>
           <h2 class="entres-h2">{{ el['title'] }} </h2>
-
               {% for line in el['text'] %}
              <br>{{ line }}
               {% endfor %}
-
-
           <div style="clear:both;"></div>
       </li>
     {% endif %}
     {% else %}
           <li>
-          <div class="date"> {{ el['date'] }}</div>
           <h4 align="right"> {% for tag in el['tags'] %} {{ tag }}, {% endfor %}</h4>
+          <div class="date"> {{ el['date'] }}</div>
           <h2 class="entres-h2">{{ el['title'] }} </h2>
               {% for line in el['text'] %}
              <br>{{ line }}
