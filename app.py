@@ -105,6 +105,10 @@ def login():
         session['logged_in'] = False
         return redirect(url_for('homepage'))
 
+# Переадресация на страницу not_found.html
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('not_found.html'), 404
 
 @app.route('/<git_name>/<git_repository_blog>/', methods=['GET', 'POST'])
 def blog(git_name, git_repository_blog, sort=None):
@@ -133,4 +137,4 @@ def blog(git_name, git_repository_blog, sort=None):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True)
