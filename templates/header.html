@@ -14,11 +14,38 @@
 
   	<!-- Latest compiled and minified JavaScript -->
   	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	
+	<script type="text/javascript">
+		$(function(){
+			$('#tegs li').hover(function() {
+				$(this).children('ul').stop(false, true).fadeIn(300);
+			},function() {
+				$(this).children('ul').stop(false, true).fadeOut(300);
+			});
+		})
+		
+	</script>
 
     <title>git-blog</title>
 </head>
-<header>
-	<div id="header">
-	
-	</div>
-</header>
+
+<div id="header">
+    <div class="menu">
+        <nav>
+          <ul>
+            <li><a href="{{ url_for('logout') }}">logout</a></li>
+
+            <div id="tegs">
+            	<li><a class="show" href="#">Выберете тег</a></li>
+	            
+	            <ul>
+					<li><a href="#">Все</a></li>
+					<li><a href="#">Программирование</a></li>
+					<li><a href="#">Юмор</a></li>
+	            </ul>
+            </div>
+            <li><a href="#">bla-bla</a></li>
+            <li><a href="#">bla-bla</a></li>
+          </ul>
+        </nav>
+</div>
