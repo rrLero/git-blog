@@ -26,7 +26,7 @@ f.close()
 # reading from reposytory git-blog-content file README.md variable in file
 def get_file(git_name, git_repository):
     list_git_files = []
-    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/' % (git_name, git_repository))
+    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository))
     git_objects = git_objects.json()
     if str(type(git_objects)) == "<class 'dict'>":
         session['logged_in'] = False
@@ -34,31 +34,31 @@ def get_file(git_name, git_repository):
     for git_object in git_objects:
         url = git_object['download_url']
         val = {}
-        s = git_object['name'].rfind('.')
-        if s != -1:
-            val['date'] = git_object['name'][0: s]
-        else:
-            val['date'] = git_object['name']
-        try:
-            val['date'] = datetime.datetime.strptime(val['date'], "%H:%M %d-%m-%Y")
-            val['date'] = str(val['date'])
-        except:
-            val['date'] = 'No date'
-        val['title'] = 'No title'
         resource = requests.get(url)
         data = resource.content.decode('utf-8')
-        data = [i for i in data.split('\n')]
-        data.remove('')
-        val['text'] = ''
-        val['tegs'] = 'No tegs'
-        if len(data) > 5:
-            for i in range(5):
-                key, string = test_string(data[i])
-                val[key] = string
-            for i in range(5, len(data)):
-                val['text'] = val['text'] + ' ' + data[i]
+        if '\n' in data:
+            data = [i for i in data.split('\n')]
+            data.remove('')
+        elif '\r' in data:
+            data = [i for i in data.split('\r')]
+        if len(git_object['name']) > 9:
+            try:
+                datetime.datetime.strptime(git_object['name'][2:10], "%y-%m-%d")
+                val['date'] = git_object['name'][0:10]
+            except:
+                val['date'] = 'no date'
         else:
-            val['text'] = 'your file not in right format'
+            val['date'] = 'no date'
+        val['text'] = ''
+        val['tags'] = 'No tags'
+        val['author'] = ''
+        val['layout'] = ''
+        i = 1
+        while '---' != data[i]:
+            key, string = test_string(data[i])
+            val[key] = string
+            i += 1
+        val['text'] = [data[j] for j in range(i+1, len(data))]
         list_git_files.append(val)
         f = open('static/temp.txt', 'w')
         f.write(json.dumps(list_git_files))
@@ -67,14 +67,27 @@ def get_file(git_name, git_repository):
 
 
 def test_string(test):
-    if '---' in test:
-        return 'symbol', test
-    if 'title' in test and ':' in test:
-        return 'title', test.split(':')[1].strip()
-    if 'tegs' in test and ':' in test:
-        return 'tegs', test.split(':')[1].strip()
+    if 'title:' in test and ':' in test:
+        return 'title', test[test.find('title:')+len('title:'):].strip()
+    if 'tags' in test and ':' in test:
+        test = test[test.find('tags:')+len('tags:'):].strip()
+        if ',' in test:
+            tags = [j.strip() for j in test.split(',')]
+        else:
+            tags = [test]
+        return 'tags', tags
     if 'layout' in test and ':' in test:
-        return 'layout', test.split(':')[1].strip()
+        return 'layout', test[test.find('layout:')+len('layout:'):].strip()
+    if 'date' in test and ':' in test:
+        test = test[test.find('date:') + len('date:'):].strip()
+        test = test.strip('"')
+        try:
+            datetime.datetime.strptime(test[2:10], "%y-%m-%d")
+        except:
+            test = 'no date'
+        return 'date', test
+    if 'author' in test and ':' in test:
+        return 'author', test[test.find('author:')+len('author:'):].strip()
 
 
 @app.route('/index')
@@ -110,10 +123,11 @@ def login():
 def page_not_found(e):
     return render_template('not_found.html'), 404
 
+
 @app.route('/<git_name>/<git_repository_blog>/', methods=['GET', 'POST'])
 def blog(git_name, git_repository_blog, sort=None):
     if request.method == 'GET':
-        sort = request.args.get('teg')
+        sort = request.args.get('tag')
         if sort == 'None':
             sort = None
     session['logged_in'] = True
@@ -121,15 +135,23 @@ def blog(git_name, git_repository_blog, sort=None):
     temp = f.readline()
     if temp:
         file = sorted(json.loads(temp), key=lambda d: d['date'], reverse=True)
-        tegs = {i['tegs'] for i in file}
+        tags = []
+        for i in file:
+            for j in i['tags']:
+                tags.append(j)
+        tags = list(set(tags))
         f.close()
         return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file,
-                               tegs=tegs, sort=sort)
+                               tags=tags, sort=sort)
     else:
         file = get_file(git_name, git_repository_blog)
     if file:
-        tegs = {i['tegs'] for i in file}
-        return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file, tegs=tegs, sort=sort)
+        tags = []
+        for i in file:
+            for j in i['tags']:
+                tags.append(j)
+        tags = list(set(tags))
+        return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file, tags=tags, sort=sort)
     else:
         session['logged_in'] = False
         flash('No such name or repository or both')
@@ -137,4 +159,4 @@ def blog(git_name, git_repository_blog, sort=None):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
