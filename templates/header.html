@@ -23,7 +23,7 @@
 				$(this).children('ul').stop(false, true).fadeOut(300);
 			});
 		})
-		
+
 	</script>
 
     <title>git-blog</title>
@@ -33,11 +33,12 @@
     <div class="menu">
         <nav>
           <ul>
+            {% if session.logged_in %}
             <li><a href="{{ url_for('logout') }}">logout</a></li>
-
+            {% endif %}
             <div id="tegs">
             	<li><a class="show" href="#">Выберете тег</a></li>
-	            
+
 	            <ul>
 					<li><a href="#">Все</a></li>
 					<li><a href="#">Программирование</a></li>
@@ -48,4 +49,6 @@
             <li><a href="#">bla-bla</a></li>
           </ul>
         </nav>
+    </div>
+
 </div>
