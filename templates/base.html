@@ -1,6 +1,7 @@
 {% include  'header.html' %}
+<div class=page>
 <body>
-
+<h1 align="center">Big-Blog</h1>
 {% if not session.logged_in %}
   <form action="{{ url_for('login') }}" method="post" class="form-horizontal">
     <div class="container">
@@ -27,8 +28,6 @@
       </div>
 
     </div>
-{% else %}
-    <a href="{{ url_for('logout') }}">logout</a>
 {% endif %}
 
 {% with messages = get_flashed_messages() %}
@@ -41,8 +40,9 @@
   {% endif %}
 {% endwith %}
 
-{% block body %}
-{% endblock %}    
 
+{% block body %}
+{% endblock %}
+</div>
 
 {% include 'footer.html' %}

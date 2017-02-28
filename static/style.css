@@ -36,6 +36,9 @@ body {
   padding-top: 5px;
 }
 
+.page           { margin: 2em auto; width: 65em;
+                  padding: 0.8em; }
+
 /*****************************/
 /******Styles for header******/
 /*****************************/
@@ -76,7 +79,7 @@ body {
 }
 
 #tegs ul {
-	display: none;
+display: None;
 }
 
 #tegs li a {
