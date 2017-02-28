@@ -3,16 +3,15 @@
 
 
 <form action="{{ url_for('blog' , git_name=git_name, git_repository_blog=git_repository_blog) }}" method="get">
-    <p><select size="3" multiple name="teg">
+    <select size="3" multiple name="teg">
         <option disabled>ВыберитеТеги</option>
         <option value="None">Все</option>
         {% for teg in tegs %}
         <option value="{{ teg }}" >{{ teg }}</option>
         {% endfor %}
-    </select></p>
-    <p><input type="submit" value="Отправить"></p>
+    </select>
+    <p><input type="submit" value="Выбрать"></p>
 </form>
-
 <ul class=entries>
 
 {% for el in file %}

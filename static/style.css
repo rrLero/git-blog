@@ -36,8 +36,58 @@ body {
   padding-top: 5px;
 }
 
+/*****************************/
+/******Styles for header******/
+/*****************************/
+.menu {
+  width:100%;
+   box-shadow: 0px 4px 3px rgba(0,0,0,0.45);
+}
 
-#not_found{
+#header nav {
+  background-color:#3498db;
+}
+
+#header nav ul {
+  list-style: none;
+  overflow: hidden;
+}
+
+#header nav ul li {
+  float: right;
+}
+
+#header nav ul li a {
+  display: block;
+  padding: 20px;
+  color:#fff;
+  outline: none;
+  text-decoration: none;
+}
+
+ #header nav ul li a:hover{
+  background: #2980b9;
+ }
+/*Стили для выбора тегов*/
+
+#tegs li {
+  float: left;
+  text-align: center;
+}
+
+#tegs ul {
+	display: none;
+}
+
+#tegs li a {
+  display: block;
+}
+
+/*****************************/
+/*Styles for page "not found"*/
+/*****************************/
+
+#not_found {
 	transition: all 0.6s;
 	font-family: 'Lato', sans-serif;
     color: #888;
@@ -48,19 +98,19 @@ body {
     text-align: center;
 }
 
-.not_found{
+.not_found {
 	  display: table-cell;
 	  vertical-align: middle;
 }
 
-.not_found h1{
+.not_found h1 {
 	  font-size: 50px;
 	  display: inline-block;
 	  padding-right: 12px;
 	  animation: type .5s alternate infinite;
 }
 
-@keyframes type{
+@keyframes type {
 	  from{box-shadow: inset -3px 0px 0px #888;}
 	  to{box-shadow: inset -3px 0px 0px transparent;}
 }
