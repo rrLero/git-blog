@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block body %}
+<ul class=entries>
+{% for el in file %}
+    {% if title == el['title'] %}
+      <li>
+          <h4 align="right"> {% for tag in el['tags'] %} {{ tag }} {% endfor %}</h4>
+          <h2 class="entres-h2">{{ el['title'] }} </h2>
+          <div class="date"> {{ el['date'] }}</div>
+          <div class="date"> автор: {{ el['author'] }}</div>
+          {% for line in el['text'] %}
+                <br>{{ line }}
+          {% endfor %}
+                <div style="clear:both;"></div>
+      </li>
+    {% endif %}
+{% endfor %}
+</ul>
+<a href="{{ url_for('blog' , git_name=git_name, git_repository_blog=git_repository_blog) }}">Назад</a>
+{% endblock %}

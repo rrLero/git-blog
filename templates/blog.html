@@ -24,7 +24,7 @@
           <div class="date"> {{ el['date'] }}</div>
           <div class="date"> автор: {{ el['author'] }}</div>
 
-             <br>{{el['text'][0]}}...<a href="{{ url_for('post', git_name=git_name, git_repository_blog=git_repository_blog, title=el['title']) }}">read more</a>
+             <br>{{el['text'][0][0:75]}}...<a href="{{ url_for('post', git_name=git_name, git_repository_blog=git_repository_blog, title=el['title']) }}">read more</a>
 
           <div style="clear:both;"></div>
       </li>
@@ -35,7 +35,7 @@
           <h2 class="entres-h2">{{ el['title'] }} </h2>
           <div class="date"> {{ el['date'] }}</div>
           <div class="date"> автор: {{ el['author'] }}</div>
-             <br>{{el['text'][0]}}...<a href="{{ url_for('post', git_name=git_name, git_repository_blog=git_repository_blog, title=el['title']) }}">read more</a>
+             <br>{{el['text'][0][0:75]}}...<a href="{{ url_for('post', git_name=git_name, git_repository_blog=git_repository_blog, title=el['title']) }}">read more</a>
           <div style="clear:both;"></div>
       </li>
     {% endif %}
