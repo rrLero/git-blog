@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, request, session, flash, redirect, url_for
-from flask_cors import CORS, cross_origin
+from flask import Flask, render_template, request, session, flash, redirect
 import datetime
 import urllib.request
 import urllib
@@ -94,7 +93,6 @@ def test_string(test):
 
 
 @app.route('/index')
-@cross_origin()
 @app.route('/')
 def homepage():
     f = open('static/temp.txt', 'w')
@@ -112,7 +110,6 @@ def logout():
 
 
 @app.route('/login', methods=['POST'])
-@cross_origin()
 def login():
     if request.form['git_name'] and request.form['git_repository_blog']:
         session['logged_in'] = True
@@ -131,7 +128,6 @@ def page_not_found(e):
 
 
 @app.route('/<git_name>/<git_repository_blog>/', methods=['GET', 'POST'])
-@cross_origin()
 def blog(git_name, git_repository_blog, sort=None):
     if request.method == 'GET':
         sort = request.args.get('tag')
@@ -166,7 +162,6 @@ def blog(git_name, git_repository_blog, sort=None):
 
 
 @app.route('/<git_name>/<git_repository_blog>/post/<title>/')
-@cross_origin()
 def post(git_name, git_repository_blog, title):
     f = open('static/temp.txt')
     temp = f.readline()
