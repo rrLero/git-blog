@@ -3,13 +3,57 @@ from flask import Flask, render_template, request, session, flash, redirect, url
 import datetime
 import json
 import requests
-
+from datetime import timedelta
+from flask import make_response, request, current_app
+from functools import update_wrapper
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config.update(dict(
     SECRET_KEY='development key',
 ))
+
+
+def crossdomain(origin=None, methods=None, headers=None,
+                max_age=21600, attach_to_all=True,
+                automatic_options=True):
+    if methods is not None:
+        methods = ', '.join(sorted(x.upper() for x in methods))
+    if headers is not None and not isinstance(headers, str):
+        headers = ', '.join(x.upper() for x in headers)
+    if not isinstance(origin, str):
+        origin = ', '.join(origin)
+    if isinstance(max_age, timedelta):
+        max_age = max_age.total_seconds()
+
+    def get_methods():
+        if methods is not None:
+            return methods
+
+        options_resp = current_app.make_default_options_response()
+        return options_resp.headers['allow']
+
+    def decorator(f):
+        def wrapped_function(*args, **kwargs):
+            if automatic_options and request.method == 'OPTIONS':
+                resp = current_app.make_default_options_response()
+            else:
+                resp = make_response(f(*args, **kwargs))
+            if not attach_to_all and request.method != 'OPTIONS':
+                return resp
+
+            h = resp.headers
+
+            h['Access-Control-Allow-Origin'] = origin
+            h['Access-Control-Allow-Methods'] = get_methods()
+            h['Access-Control-Max-Age'] = str(max_age)
+            if headers is not None:
+                h['Access-Control-Allow-Headers'] = headers
+            return resp
+
+        f.provide_automatic_options = False
+        return update_wrapper(wrapped_function, f)
+    return decorator
 
 
 def get_date(string_date):
@@ -34,7 +78,7 @@ def get_file(git_name, git_repository):
     f = open('static/%s.txt' % git_name, 'w')
     f.close()
     list_git_files = []
-    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository))
+    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository), auth=('rrlero', '7M7T9nHH'))
     git_objects = git_objects.json()
     if str(type(git_objects)) == "<class 'dict'>":
         session['logged_in'] = False
@@ -163,15 +207,18 @@ def post(git_name, git_repository_blog, title):
     return render_template('post.html', file=file, title=title, git_repository_blog=git_repository_blog, git_name=git_name)
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/get', methods=['GET'])
+@app.route('/<git_name>/<git_repository_blog>/api/get', methods=['GET', 'OPTIONS'])
+@crossdomain(origin='*')
 def get_get_blog(git_name, git_repository_blog):
     i = 0
     git_blog_data = {}
+    data = []
     for file in get_file(git_name, git_repository_blog):
         git_blog_data['file_%s' %i] = file
         i += 1
-    return jsonify(git_blog_data)
+        data.append(git_blog_data)
+    return jsonify(data)
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
