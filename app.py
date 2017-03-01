@@ -210,13 +210,13 @@ def post(git_name, git_repository_blog, title):
 @app.route('/<git_name>/<git_repository_blog>/api/get', methods=['GET', 'OPTIONS'])
 @crossdomain(origin='*')
 def get_get_blog(git_name, git_repository_blog):
-    i = 0
-    git_blog_data = {}
-    data = []
-    for file in get_file(git_name, git_repository_blog):
-        git_blog_data['file_%s' %i] = file
-        i += 1
-        data.append(git_blog_data)
+    # i = 0
+    # git_blog_data = {}
+    data = get_file(git_name, git_repository_blog)
+    # for file in get_file(git_name, git_repository_blog):
+    #     git_blog_data['file_%s' %i] = file
+    #     i += 1
+    #     data.append(git_blog_data)
     return jsonify(data)
 
 
