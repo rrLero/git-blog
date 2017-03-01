@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-
 from flask import Flask, render_template, request, session, flash, redirect, url_for, jsonify
-from flask_cors import CORS, cross_origin
 import datetime
 import json
 import requests
 from datetime import timedelta
 from flask import make_response, request, current_app
 from functools import update_wrapper
+
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -135,7 +134,6 @@ def test_string(test):
 
 
 @app.route('/index')
-@cross_origin()
 @app.route('/')
 def homepage():
     return render_template('base.html')
@@ -148,8 +146,7 @@ def logout():
     return redirect(url_for('homepage'))
 
 
-@app.route('/login', methods=['POST'])
-@cross_origin()
+@app.route('/login', methods=['POST', 'OPTIONS'])
 def login():
     if request.form['git_name'] and request.form['git_repository_blog']:
         session['logged_in'] = True
@@ -170,7 +167,6 @@ def page_not_found(e):
 
 
 @app.route('/<git_name>/<git_repository_blog>/', methods=['GET', 'POST'])
-@cross_origin()
 def blog(git_name, git_repository_blog, sort=None):
     if request.method == 'GET':
         sort = request.args.get('tag')
@@ -205,7 +201,6 @@ def blog(git_name, git_repository_blog, sort=None):
 
 
 @app.route('/<git_name>/<git_repository_blog>/post/<title>/')
-@cross_origin()
 def post(git_name, git_repository_blog, title):
     f = open('static/%s.txt' % git_name)
     temp = f.readline()
@@ -224,6 +219,7 @@ def get_get_blog(git_name, git_repository_blog):
     #     i += 1
     #     data.append(git_blog_data)
     return jsonify(data)
+
 
 
 if __name__ == '__main__':
