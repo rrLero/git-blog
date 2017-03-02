@@ -14,6 +14,7 @@ app.config.update(dict(
     SECRET_KEY='development key',
 ))
 
+
 # accept cross-server requests, need for api
 def crossdomain(origin=None, methods=None, headers=None,
                 max_age=21600, attach_to_all=True,
@@ -56,7 +57,9 @@ def crossdomain(origin=None, methods=None, headers=None,
         return update_wrapper(wrapped_function, f)
     return decorator
 
-# extract date from posts files
+
+# функция получает строку и в ней находит(если есть) дату, пока в двух вариантах %y-%m-%d %H:%M и %y-%m-%d
+# и приводит к стандартному виду
 def get_date(string_date):
     for i in range(len(string_date)):
         try:
@@ -75,6 +78,8 @@ def get_date(string_date):
         return 'No Date'
 
 
+# Функция получает имя пользователя и репозиторий. при помощи АПИ ГИТА функция переберает файлы и создает словарь из
+# постов
 def get_file(git_name, git_repository):
     f = open('static/%s.txt' % git_name, 'w')
     f.close()
@@ -113,6 +118,7 @@ def get_file(git_name, git_repository):
     return sorted(list_git_files, key=lambda d: d['date'], reverse=True)
 
 
+# функция к которой обращается предидущая функция для получения заголовков отделенных ---   ---
 def test_string(test):
     if 'title:' in test and ':' in test:
         return 'title', test[test.find('title:')+len('title:'):].strip()
@@ -133,6 +139,7 @@ def test_string(test):
         return 'author', test[test.find('author:')+len('author:'):].strip()
 
 
+# начальная страница
 @app.route('/index')
 @app.route('/')
 def homepage():
@@ -148,10 +155,12 @@ def logout():
 
 @app.route('/login', methods=['POST', 'OPTIONS'])
 def login():
+    # Если пришли формы то запоминает их в переменные
     if request.form['git_name'] and request.form['git_repository_blog']:
         session['logged_in'] = True
         git_name = request.form['git_name']
         git_repository_blog = request.form['git_repository_blog']
+        # Обновляем файл с данными
         f = open('static/%s.txt' % git_name, 'w')
         f.close()
         return redirect(url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog))
@@ -173,10 +182,12 @@ def blog(git_name, git_repository_blog, sort=None):
         if sort == 'None':
             sort = None
     session['logged_in'] = True
+    # Если существует файл с данными то обращается к файлу если нет то берет с гита
     f = open('static/%s.txt' % git_name)
     temp = f.readline()
     if temp:
         file = sorted(json.loads(temp), key=lambda d: d['date'], reverse=True)
+    # Получаем список тегов для отфильтровки на странице
         tags = []
         for i in file:
             for j in i['tags']:
@@ -188,6 +199,7 @@ def blog(git_name, git_repository_blog, sort=None):
     else:
         file = get_file(git_name, git_repository_blog)
     if file:
+        # Получаем список тегов для отфильтровки на странице
         tags = []
         for i in file:
             for j in i['tags']:
@@ -200,6 +212,7 @@ def blog(git_name, git_repository_blog, sort=None):
         return redirect(url_for('homepage'))
 
 
+# берет конкретный пост и отображает его при нажатии на readmore
 @app.route('/<git_name>/<git_repository_blog>/post/<title>/')
 def post(git_name, git_repository_blog, title):
     f = open('static/%s.txt' % git_name)
@@ -208,18 +221,12 @@ def post(git_name, git_repository_blog, title):
     return render_template('post.html', file=file, title=title, git_repository_blog=git_repository_blog, git_name=git_name)
 
 
+# Апи отдает данные с гита
 @app.route('/<git_name>/<git_repository_blog>/api/get', methods=['GET', 'OPTIONS'])
 @crossdomain(origin='*')
 def get_get_blog(git_name, git_repository_blog):
-    # i = 0
-    # git_blog_data = {}
     data = get_file(git_name, git_repository_blog)
-    # for file in get_file(git_name, git_repository_blog):
-    #     git_blog_data['file_%s' %i] = file
-    #     i += 1
-    #     data.append(git_blog_data)
     return jsonify(data)
-
 
 
 if __name__ == '__main__':
