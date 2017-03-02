@@ -14,7 +14,7 @@ app.config.update(dict(
     SECRET_KEY='development key',
 ))
 
-
+# accept cross-server requests, need for api
 def crossdomain(origin=None, methods=None, headers=None,
                 max_age=21600, attach_to_all=True,
                 automatic_options=True):
@@ -56,7 +56,7 @@ def crossdomain(origin=None, methods=None, headers=None,
         return update_wrapper(wrapped_function, f)
     return decorator
 
-
+# extract date from posts files
 def get_date(string_date):
     for i in range(len(string_date)):
         try:
