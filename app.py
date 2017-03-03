@@ -199,13 +199,6 @@ class Pagination:
 
     def has_next(self):
         return self.has_next
-pag = Pagination(3,3,7)
-print(pag.last_post)
-print(pag.first_post)
-print(pag.next_num)
-print(pag.prev_num)
-print(pag.has_prev)
-print(pag.has_next)
 
 
 # начальная страница
