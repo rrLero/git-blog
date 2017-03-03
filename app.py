@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, session, flash, redirect, url
 import datetime
 import json
 import requests
+import math
 from datetime import timedelta
 from flask import make_response, request, current_app
 from functools import update_wrapper
@@ -84,7 +85,7 @@ def get_file(git_name, git_repository):
     f = open('static/%s.txt' % git_name, 'w')
     f.close()
     list_git_files = []
-    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository))
+    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository), auth=('rrlero', '7M7T9nHH'))
     git_objects = git_objects.json()
     if str(type(git_objects)) == "<class 'dict'>":
         session['logged_in'] = False
@@ -139,6 +140,74 @@ def test_string(test):
         return 'author', test[test.find('author:')+len('author:'):].strip()
 
 
+# Получение данных из файла, если такой есть
+def try_file(git_name):
+    f = open('static/%s.txt' % git_name)
+    temp = f.readline()
+    if temp:
+        file = sorted(json.loads(temp), key=lambda d: d['date'], reverse=True)
+        return file
+    else:
+        return False
+
+
+# Функция для получения списка тем из постов
+def get_tags(file):
+    tags = []
+    for i in file:
+        for j in i['tags']:
+            tags.append(j)
+    tags = list(set(tags))
+    return tags
+
+
+# Получение данных для пагинации исходя из количество постов на странице, количества постов, и текущей страницы
+class Pagination:
+    def __init__(self, per_page, page, count):
+        self.per_page = per_page
+        self.page = page
+        self.count = count
+        self.first_post = self.per_page * (self.page - 1)
+        self.last_post = self.per_page * (self.page - 1) + self.per_page - 1
+        if self.last_post >= count - 1:
+            self.last_post = count - 1
+        if self.first_post > 1:
+            self.has_prev = True
+        else:
+            self.has_prev = False
+        if self.page < math.ceil(self.count/self.per_page):
+            self.has_next = True
+        else:
+            self.has_next = False
+        if self.page > 1:
+            self.prev_num = page - 1
+        else:
+            self.prev_num = False
+        if self.page < math.ceil(self.count/self.per_page):
+            self.next_num = self.page + 1
+        else:
+            self.next_num = False
+
+    def first_post(self):
+        return self.first_post
+
+    def last_post(self):
+        return self.last_post
+
+    def has_prev(self):
+        return self.has_prev
+
+    def has_next(self):
+        return self.has_next
+pag = Pagination(3,3,7)
+print(pag.last_post)
+print(pag.first_post)
+print(pag.next_num)
+print(pag.prev_num)
+print(pag.has_prev)
+print(pag.has_next)
+
+
 # начальная страница
 @app.route('/index')
 @app.route('/')
@@ -175,37 +244,22 @@ def page_not_found(e):
     return render_template('not_found.html'), 404
 
 
-@app.route('/<git_name>/<git_repository_blog>/', methods=['GET', 'POST'])
-def blog(git_name, git_repository_blog, sort=None):
-    if request.method == 'GET':
-        sort = request.args.get('tag')
-        if sort == 'None':
-            sort = None
+@app.route('/<git_name>/<git_repository_blog>/<int:page>/')
+@app.route('/<git_name>/<git_repository_blog>/')
+def blog(git_name, git_repository_blog, page=1):
     session['logged_in'] = True
     # Если существует файл с данными то обращается к файлу если нет то берет с гита
-    f = open('static/%s.txt' % git_name)
-    temp = f.readline()
-    if temp:
-        file = sorted(json.loads(temp), key=lambda d: d['date'], reverse=True)
-    # Получаем список тегов для отфильтровки на странице
-        tags = []
-        for i in file:
-            for j in i['tags']:
-                tags.append(j)
-        tags = list(set(tags))
-        f.close()
+    if try_file(git_name):
+        file = try_file(git_name)
+        paginate = Pagination(3, page, len(file))
         return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file,
-                               tags=tags, sort=sort)
+                               paginate=paginate, page=page)
     else:
         file = get_file(git_name, git_repository_blog)
     if file:
-        # Получаем список тегов для отфильтровки на странице
-        tags = []
-        for i in file:
-            for j in i['tags']:
-                tags.append(j)
-        tags = list(set(tags))
-        return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file, tags=tags, sort=sort)
+        paginate = Pagination(3, page, len(file))
+        return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file,
+                               paginate=paginate, page=page)
     else:
         session['logged_in'] = False
         flash('No such name or repository or both')
@@ -213,12 +267,12 @@ def blog(git_name, git_repository_blog, sort=None):
 
 
 # берет конкретный пост и отображает его при нажатии на readmore
-@app.route('/<git_name>/<git_repository_blog>/post/<title>/')
-def post(git_name, git_repository_blog, title):
+@app.route('/<git_name>/<git_repository_blog>/<int:page>/post/<title>/')
+def post(git_name, git_repository_blog, title, page=1):
     f = open('static/%s.txt' % git_name)
     temp = f.readline()
     file = sorted(json.loads(temp), key=lambda d: d['date'], reverse=True)
-    return render_template('post.html', file=file, title=title, git_repository_blog=git_repository_blog, git_name=git_name)
+    return render_template('post.html', file=file, title=title, git_repository_blog=git_repository_blog, git_name=git_name, page=page)
 
 
 # Апи отдает данные с гита
