@@ -16,5 +16,5 @@
     {% endif %}
 {% endfor %}
 </ul>
-<a href="{{ url_for('blog' , git_name=git_name, git_repository_blog=git_repository_blog) }}">Назад</a>
+<a href="{{ url_for('blog' , git_name=git_name, git_repository_blog=git_repository_blog, page=page) }}">Назад</a>
 {% endblock %}

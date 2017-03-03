@@ -1,46 +1,24 @@
 {% extends "base.html" %}
 {% block body %}
-    <div align="right">
-        <form action="{{ url_for('blog' , git_name=git_name, git_repository_blog=git_repository_blog) }}" method="get">
-        <p><select size="3" multiple name="tag">
-        <option disabled>ВыберитеТеги</option>
-        <option value="None">Все</option>
-        {% for tag in tags %}
-        <option value="{{ tag }}" >{{ tag }}</option>
-        {% endfor %}
-        </select>
-        <p><input type="submit" value="Выбрать"></p>
-        </form>
-    </div>
 
-
+<div class=pagination>
+{% if paginate.has_prev -%}<a href="{{ url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog,
+    page = paginate.prev_num )}}">&laquo; Prev</a>{%- else -%}<span class=disabled>&laquo; Prev</span>{% endif %}{#
+  #} <strong>{{ paginate.page }}</strong> {#
+  #}
+{% if paginate.has_next %}<a href="{{ url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog,
+    page = paginate.next_num )}}">Next &raquo;</a>{% else %}<span class=disabled>Next &raquo;</span>{% endif %}
+</div>
 <ul class=entries>
-{% for el in file %}
-    {% if sort  %}
-    {% if sort in el['tags'] %}
+{% for i in range(paginate.first_post, paginate.last_post+1) %}
       <li>
-          <h4 align="right"> {% for tag in el['tags'] %} {{ tag }} {% endfor %}</h4>
-          <h2 class="entres-h2">{{ el['title'] }} </h2>
-          <div class="date"> {{ el['date'] }}</div>
-          <div class="date"> автор: {{ el['author'] }}</div>
-
-             <br>{{el['text'][0][0:75]}}...<a href="{{ url_for('post', git_name=git_name, git_repository_blog=git_repository_blog, title=el['title']) }}">read more</a>
-
+          <h4 align="right"> {% for tag in file[i]['tags'] %} {{ tag }} {% endfor %}</h4>
+          <h2 class="entres-h2">{{ file[i]['title'] }} </h2>
+          <div class="date"> {{ file[i]['date'] }}</div>
+          <div class="date"> автор: {{ file[i]['author'] }}</div>
+             <br>{{file[i]['text'][0][0:75]}}...<a href="{{ url_for('post', git_name=git_name, git_repository_blog=git_repository_blog, title=file[i]['title'], page=page  )}}">read more</a>
           <div style="clear:both;"></div>
       </li>
-    {% endif %}
-    {% else %}
-          <li>
-          <h4 align="right"> {% for tag in el['tags'] %} {{ tag }}, {% endfor %}</h4>
-          <h2 class="entres-h2">{{ el['title'] }} </h2>
-          <div class="date"> {{ el['date'] }}</div>
-          <div class="date"> автор: {{ el['author'] }}</div>
-             <br>{{el['text'][0][0:75]}}...<a href="{{ url_for('post', git_name=git_name, git_repository_blog=git_repository_blog, title=el['title']) }}">read more</a>
-          <div style="clear:both;"></div>
-      </li>
-    {% endif %}
 {% endfor %}
-
 </ul>
-
 {% endblock %}
