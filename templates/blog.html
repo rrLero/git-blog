@@ -3,20 +3,25 @@
 
 <div class=pagination>
 {% if paginate.has_prev -%}<a href="{{ url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog,
-    page = paginate.prev_num )}}">&laquo; Prev</a>{%- else -%}<span class=disabled>&laquo; Prev</span>{% endif %}{#
+    page = paginate.prev_num, tags = tags )}}">&laquo; Prev</a>{%- else -%}<span class=disabled>&laquo; Prev</span>{% endif %}{#
   #} <strong>{{ paginate.page }}</strong> {#
   #}
 {% if paginate.has_next %}<a href="{{ url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog,
-    page = paginate.next_num )}}">Next &raquo;</a>{% else %}<span class=disabled>Next &raquo;</span>{% endif %}
+    page = paginate.next_num, tags = tags)}}">Next &raquo;</a>{% else %}<span class=disabled>Next &raquo;</span>{% endif %}
 </div>
 <ul class=entries>
 {% for i in range(paginate.first_post, paginate.last_post+1) %}
       <li>
-          <h4 align="right"> {% for tag in file[i]['tags'] %} {{ tag }} {% endfor %}</h4>
+          <h4 align="right">
+              {% for tag in file[i]['tags'] %}
+              <a href="{{ url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog,
+                tags = tag , page=page)}}">{{ tag }}</a>
+              {% endfor %}
+          </h4>
           <h2 class="entres-h2">{{ file[i]['title'] }} </h2>
           <div class="date"> {{ file[i]['date'] }}</div>
           <div class="date"> автор: {{ file[i]['author'] }}</div>
-             <br>{{file[i]['text'][0][0:75]}}...<a href="{{ url_for('post', git_name=git_name, git_repository_blog=git_repository_blog, title=file[i]['title'], page=page  )}}">read more</a>
+             <br>{{file[i]['text'][0][0:75]}}...<a href="{{ url_for('post', git_name=git_name, git_repository_blog=git_repository_blog, title=file[i]['title'], page=page, tags=tags)}}">read more</a>
           <div style="clear:both;"></div>
       </li>
 {% endfor %}

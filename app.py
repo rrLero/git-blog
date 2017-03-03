@@ -161,6 +161,15 @@ def get_tags(file):
     return tags
 
 
+# Функция получает список постов и тег, а отдает список постов только с этим тегом отсортированные по дате
+def sorted_by_tags(list, tag):
+    sorted_list = []
+    for one_post in list:
+        if tag in one_post['tags']:
+            sorted_list.append(one_post)
+    return sorted(sorted_list, key=lambda d: d['date'], reverse=True)
+
+
 # Получение данных для пагинации исходя из количество постов на странице, количества постов, и текущей страницы
 class Pagination:
     def __init__(self, per_page, page, count):
@@ -237,22 +246,27 @@ def page_not_found(e):
     return render_template('not_found.html'), 404
 
 
+@app.route('/<git_name>/<git_repository_blog>/<int:page>/<tags>')
 @app.route('/<git_name>/<git_repository_blog>/<int:page>/')
 @app.route('/<git_name>/<git_repository_blog>/')
-def blog(git_name, git_repository_blog, page=1):
+def blog(git_name, git_repository_blog, tags=None, page=1):
     session['logged_in'] = True
     # Если существует файл с данными то обращается к файлу если нет то берет с гита
     if try_file(git_name):
         file = try_file(git_name)
+        if tags:
+            file = sorted_by_tags(file, tags)
         paginate = Pagination(3, page, len(file))
         return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file,
-                               paginate=paginate, page=page)
+                               paginate=paginate, page=page, tags=tags)
     else:
         file = get_file(git_name, git_repository_blog)
     if file:
+        if tags:
+            file = sorted_by_tags(file, tags)
         paginate = Pagination(3, page, len(file))
         return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file,
-                               paginate=paginate, page=page)
+                               paginate=paginate, page=page, tags=tags)
     else:
         session['logged_in'] = False
         flash('No such name or repository or both')
@@ -261,7 +275,7 @@ def blog(git_name, git_repository_blog, page=1):
 
 # берет конкретный пост и отображает его при нажатии на readmore
 @app.route('/<git_name>/<git_repository_blog>/<int:page>/post/<title>/')
-def post(git_name, git_repository_blog, title, page=1):
+def post(git_name, git_repository_blog, title, page=1, tags=None):
     f = open('static/%s.txt' % git_name)
     temp = f.readline()
     file = sorted(json.loads(temp), key=lambda d: d['date'], reverse=True)
