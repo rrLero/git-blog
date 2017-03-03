@@ -39,6 +39,16 @@ body {
 .page           { margin: 2em auto; width: 65em;
                   padding: 0.8em; }
 
+/* pagination */
+div.pagination {
+  margin: 0 0 10px 0;
+  text-align: center;
+}
+div.pagination strong {
+  font-weight: normal;
+  font-style: italic;
+}
+
 /*****************************/
 /******Styles for header******/
 /*****************************/
