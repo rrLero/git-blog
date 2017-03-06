@@ -242,6 +242,16 @@ def login():
         return redirect(url_for('homepage'))
 
 
+def search(data, key, args):
+    query_length = len(args)
+    search_result = []
+    for i in data:
+        key_value = i[key][:query_length].lower()
+        if key_value == args.lower():
+            search_result.append({'title': i['title']})
+    return jsonify(search_result)
+
+
 # redirect on page not_found.html
 @app.errorhandler(404)
 def page_not_found(e):
@@ -294,7 +304,11 @@ def get_get_blog(git_name, git_repository_blog, title=None):
         one_post = [post for post in data if post['title'] == title]
         return jsonify(one_post[0])
     else:
-        return jsonify(data)
+        args = request.args.get('title', '')
+        if args:
+            return search(data, 'title', args)
+        else:
+            return jsonify(data)
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/update', methods=['GET', 'OPTIONS'])
