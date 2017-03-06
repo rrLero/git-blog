@@ -82,7 +82,7 @@ def get_date(string_date):
 # Функция получает имя пользователя и репозиторий. при помощи АПИ ГИТА функция переберает файлы и создает словарь из
 # постов
 def get_file(git_name, git_repository):
-    f = open('static/%s.txt' % git_name, 'w')
+    f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
     f.close()
     list_git_files = []
     git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository))
@@ -113,7 +113,7 @@ def get_file(git_name, git_repository):
                 i += 1
             val['text'] = [data[j] for j in range(i+1, len(data))]
             list_git_files.append(val)
-            f = open('static/%s.txt' % git_name, 'w')
+            f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
             f.write(json.dumps(list_git_files))
             f.close()
     return sorted(list_git_files, key=lambda d: d['date'], reverse=True)
@@ -141,8 +141,8 @@ def test_string(test):
 
 
 # Получение данных из файла, если такой есть
-def try_file(git_name):
-    f = open('static/%s.txt' % git_name)
+def try_file(git_name, git_repository_blog):
+    f = open('static/%s_%s.txt' % (git_name, git_repository_blog))
     temp = f.readline()
     if temp:
         file = sorted(json.loads(temp), key=lambda d: d['date'], reverse=True)
@@ -232,7 +232,7 @@ def login():
         git_name = request.form['git_name']
         git_repository_blog = request.form['git_repository_blog']
         # Обновляем файл с данными
-        f = open('static/%s.txt' % git_name, 'w')
+        f = open('static/%s_%s.txt' % (git_name, git_repository_blog), 'w')
         f.close()
         return redirect(url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog))
     else:
@@ -252,8 +252,8 @@ def page_not_found(e):
 def blog(git_name, git_repository_blog, tags=None, page=1):
     session['logged_in'] = True
     # Если существует файл с данными то обращается к файлу если нет то берет с гита
-    if try_file(git_name):
-        file = try_file(git_name)
+    if try_file(git_name, git_repository_blog):
+        file = try_file(git_name, git_repository_blog)
         if tags:
             file = sorted_by_tags(file, tags)
         paginate = Pagination(3, page, len(file))
@@ -276,7 +276,7 @@ def blog(git_name, git_repository_blog, tags=None, page=1):
 # берет конкретный пост и отображает его при нажатии на readmore
 @app.route('/<git_name>/<git_repository_blog>/<int:page>/post/<title>/')
 def post(git_name, git_repository_blog, title, page=1, tags=None):
-    f = open('static/%s.txt' % git_name)
+    f = open('static/%s_%s.txt' % (git_name, git_repository_blog))
     temp = f.readline()
     file = sorted(json.loads(temp), key=lambda d: d['date'], reverse=True)
     return render_template('post.html', file=file, title=title, git_repository_blog=git_repository_blog, git_name=git_name, page=page)
@@ -288,6 +288,15 @@ def post(git_name, git_repository_blog, title, page=1, tags=None):
 def get_get_blog(git_name, git_repository_blog):
     data = get_file(git_name, git_repository_blog)
     return jsonify(data)
+
+@app.route('/<git_name>/<git_repository_blog>/api/get/fullmd', methods=['GET', 'OPTIONS'])
+@crossdomain(origin='*')
+def get_full_md(git_name, git_repository_blog):
+    f = open('static/%s_%s.txt' % (git_name, git_repository_blog))
+    full_md = f.read()
+    return jsonify(full_md)
+
+
 
 
 if __name__ == '__main__':
