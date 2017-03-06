@@ -83,17 +83,22 @@ def get_date(string_date):
 # постов
 def get_file(git_name, git_repository):
     list_git_files = []
+    full_md = {}
+    full_md_list = []
     git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository))
     git_objects = git_objects.json()
     if str(type(git_objects)) == "<class 'dict'>":
         session['logged_in'] = False
         return False
     for git_object in git_objects:
+        print(git_object['name'])
         if git_object['type'] == 'file':
             url = git_object['download_url']
             val = {}
             resource = requests.get(url)
             data = resource.content.decode('utf-8')
+            full_md[git_object['name']] = data
+            # full_md_list.append(full_md)
             if '\n' in data:
                 data = [i for i in data.split('\n')]
                 data.remove('')
@@ -111,9 +116,12 @@ def get_file(git_name, git_repository):
                 i += 1
             val['text'] = [data[j] for j in range(i+1, len(data))]
             list_git_files.append(val)
-            f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
-            f.write(json.dumps(list_git_files))
-            f.close()
+    f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
+    f.write(json.dumps(list_git_files))
+    f.close()
+    f = open('static/%s_%s_fullmd.txt' % (git_name, git_repository), 'w')
+    f.write(json.dumps(full_md))
+    f.close()
     return sorted(list_git_files, key=lambda d: d['date'], reverse=True)
 
 
@@ -207,7 +215,7 @@ class Pagination:
     def has_next(self):
         return self.has_next
 
-
+# get_file('rrlero', 'git-blog')
 # начальная страница
 @app.route('/index')
 @app.route('/')
@@ -282,15 +290,25 @@ def post(git_name, git_repository_blog, title, page=1, tags=None):
 @app.route('/<git_name>/<git_repository_blog>/api/get', methods=['GET', 'OPTIONS'])
 @crossdomain(origin='*')
 def get_get_blog(git_name, git_repository_blog):
-    data = get_file(git_name, git_repository_blog)
+    data = try_file(git_name, git_repository_blog)
     return jsonify(data)
+
 
 @app.route('/<git_name>/<git_repository_blog>/api/get/fullmd', methods=['GET', 'OPTIONS'])
 @crossdomain(origin='*')
 def get_full_md(git_name, git_repository_blog):
-    f = open('static/%s_%s.txt' % (git_name, git_repository_blog))
-    full_md = f.read()
-    return jsonify(full_md)
+    f = open('static/%s_%s_fullmd.txt' % (git_name, git_repository_blog))
+    full_md = f.readline()
+    full_md = json.loads(full_md)
+    new_list = [full_md]
+    return jsonify(new_list)
+
+
+@app.route('/<git_name>/<git_repository_blog>/api/update', methods=['GET', 'OPTIONS'])
+@crossdomain(origin='*')
+def update(git_name, git_repository_blog):
+    get_file(git_name, git_repository_blog)
+    return redirect(url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog, tags=None, page=1))
 
 
 if __name__ == '__main__':
