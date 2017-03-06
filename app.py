@@ -100,6 +100,7 @@ def get_file(git_name, git_repository):
                 data.remove('')
             elif '\r' in data:
                 data = [i for i in data.split('\r')]
+            val['id'] = git_object['name']
             val['date'] = get_date(git_object['name'])
             val['text'] = ''
             val['tags'] = 'No tags'
@@ -296,12 +297,19 @@ def post(git_name, git_repository_blog, title, page=1, tags=None):
 
 # Апи отдает данные с гита
 @app.route('/<git_name>/<git_repository_blog>/api/get/<title>', methods=['GET', 'OPTIONS'])
+@app.route('/<git_name>/<git_repository_blog>/api/get/id/<id>', methods=['GET', 'OPTIONS'])
 @app.route('/<git_name>/<git_repository_blog>/api/get', methods=['GET', 'OPTIONS'])
 @crossdomain(origin='*')
-def get_get_blog(git_name, git_repository_blog, title=None):
+def get_get_blog(git_name, git_repository_blog, title=None, id=None ):
     data = try_file(git_name, git_repository_blog)
+
     if title:
         one_post = [post for post in data if post['title'] == title]
+        one_post.append({'message': 'no such post'})
+        return jsonify(one_post[0])
+    elif id:
+        one_post = [post for post in data if post['id'] == id]
+        one_post.append({'message': 'no such post'})
         return jsonify(one_post[0])
     else:
         args = request.args.get('title', '')
