@@ -83,22 +83,17 @@ def get_date(string_date):
 # постов
 def get_file(git_name, git_repository):
     list_git_files = []
-    full_md = {}
-    full_md_list = []
     git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository))
     git_objects = git_objects.json()
     if str(type(git_objects)) == "<class 'dict'>":
         session['logged_in'] = False
         return False
     for git_object in git_objects:
-        print(git_object['name'])
         if git_object['type'] == 'file':
             url = git_object['download_url']
             val = {}
             resource = requests.get(url)
             data = resource.content.decode('utf-8')
-            full_md[git_object['name']] = data
-            # full_md_list.append(full_md)
             if '\n' in data:
                 data = [i for i in data.split('\n')]
                 data.remove('')
@@ -115,12 +110,10 @@ def get_file(git_name, git_repository):
                 val[key] = string
                 i += 1
             val['text'] = [data[j] for j in range(i+1, len(data))]
+            val['text_full'] = ''.join([str(data[j]) for j in range(i+1, len(data))])
             list_git_files.append(val)
     f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
     f.write(json.dumps(list_git_files))
-    f.close()
-    f = open('static/%s_%s_fullmd.txt' % (git_name, git_repository), 'w')
-    f.write(json.dumps(full_md))
     f.close()
     return sorted(list_git_files, key=lambda d: d['date'], reverse=True)
 
@@ -148,8 +141,11 @@ def test_string(test):
 
 # Получение данных из файла, если такой есть
 def try_file(git_name, git_repository_blog):
-    f = open('static/%s_%s.txt' % (git_name, git_repository_blog))
-    temp = f.readline()
+    try:
+        f = open('static/%s_%s.txt' % (git_name, git_repository_blog))
+        temp = f.readline()
+    except:
+        return False
     if temp:
         file = sorted(json.loads(temp), key=lambda d: d['date'], reverse=True)
         return file
@@ -214,6 +210,7 @@ class Pagination:
 
     def has_next(self):
         return self.has_next
+
 
 # get_file('rrlero', 'git-blog')
 # начальная страница
