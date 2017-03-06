@@ -111,7 +111,6 @@ def get_file(git_name, git_repository):
                 val[key] = string
                 i += 1
             val['text'] = [data[j] for j in range(i+1, len(data))]
-            val['text_full'] = ''.join([str(data[j]) for j in range(i+1, len(data))])
             val['text_full_strings'] = full_string[full_string.rfind('---')+3:]
             list_git_files.append(val)
     f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
@@ -286,21 +285,18 @@ def post(git_name, git_repository_blog, title, page=1, tags=None):
 
 
 # Апи отдает данные с гита
+@app.route('/<git_name>/<git_repository_blog>/api/get/<title>', methods=['GET', 'OPTIONS'])
 @app.route('/<git_name>/<git_repository_blog>/api/get', methods=['GET', 'OPTIONS'])
 @crossdomain(origin='*')
-def get_get_blog(git_name, git_repository_blog):
-    data = try_file(git_name, git_repository_blog)
-    return jsonify(data)
+def get_get_blog(git_name, git_repository_blog, title=None):
+    if title:
+        data = try_file(git_name, git_repository_blog)
+        one_post = [post for post in data if post['title'] == title]
+        return jsonify(one_post)
 
-
-@app.route('/<git_name>/<git_repository_blog>/api/get/fullmd', methods=['GET', 'OPTIONS'])
-@crossdomain(origin='*')
-def get_full_md(git_name, git_repository_blog):
-    f = open('static/%s_%s_fullmd.txt' % (git_name, git_repository_blog))
-    full_md = f.readline()
-    full_md = json.loads(full_md)
-    new_list = [full_md]
-    return jsonify(new_list)
+    else:
+        data = try_file(git_name, git_repository_blog)
+        return jsonify(data)
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/update', methods=['GET', 'OPTIONS'])
