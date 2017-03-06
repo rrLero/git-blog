@@ -289,13 +289,11 @@ def post(git_name, git_repository_blog, title, page=1, tags=None):
 @app.route('/<git_name>/<git_repository_blog>/api/get', methods=['GET', 'OPTIONS'])
 @crossdomain(origin='*')
 def get_get_blog(git_name, git_repository_blog, title=None):
+    data = try_file(git_name, git_repository_blog)
     if title:
-        data = try_file(git_name, git_repository_blog)
         one_post = [post for post in data if post['title'] == title]
-        return jsonify(one_post)
-
+        return jsonify(one_post[0])
     else:
-        data = try_file(git_name, git_repository_blog)
         return jsonify(data)
 
 
