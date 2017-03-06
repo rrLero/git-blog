@@ -2,6 +2,7 @@
 title: Тренировачный МД
 date: 17-03-06 18:50 
 tags: Маркдаун
+author: rrlero
 ---
 # TITLE
 ## Second title
