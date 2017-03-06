@@ -82,8 +82,6 @@ def get_date(string_date):
 # Функция получает имя пользователя и репозиторий. при помощи АПИ ГИТА функция переберает файлы и создает словарь из
 # постов
 def get_file(git_name, git_repository):
-    f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
-    f.close()
     list_git_files = []
     git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository))
     git_objects = git_objects.json()
@@ -232,8 +230,6 @@ def login():
         git_name = request.form['git_name']
         git_repository_blog = request.form['git_repository_blog']
         # Обновляем файл с данными
-        f = open('static/%s_%s.txt' % (git_name, git_repository_blog), 'w')
-        f.close()
         return redirect(url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog))
     else:
         session['logged_in'] = False
@@ -295,8 +291,6 @@ def get_full_md(git_name, git_repository_blog):
     f = open('static/%s_%s.txt' % (git_name, git_repository_blog))
     full_md = f.read()
     return jsonify(full_md)
-
-
 
 
 if __name__ == '__main__':
