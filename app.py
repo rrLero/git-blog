@@ -94,6 +94,7 @@ def get_file(git_name, git_repository):
             val = {}
             resource = requests.get(url)
             data = resource.content.decode('utf-8')
+            full_string = data
             if '\n' in data:
                 data = [i for i in data.split('\n')]
                 data.remove('')
@@ -111,6 +112,7 @@ def get_file(git_name, git_repository):
                 i += 1
             val['text'] = [data[j] for j in range(i+1, len(data))]
             val['text_full'] = ''.join([str(data[j]) for j in range(i+1, len(data))])
+            val['text_full_strings'] = full_string[full_string.rfind('---')+3:]
             list_git_files.append(val)
     f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
     f.write(json.dumps(list_git_files))
