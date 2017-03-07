@@ -319,7 +319,7 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None ):
             return jsonify(data)
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/update', methods=['GET', 'OPTIONS'])
+@app.route('/<git_name>/<git_repository_blog>/api/update', methods=['GET', 'OPTIONS', 'POST'])
 @crossdomain(origin='*')
 def update(git_name, git_repository_blog):
     get_file(git_name, git_repository_blog)
