@@ -97,7 +97,10 @@ def get_file(git_name, git_repository):
             full_string = data
             if '\n' in data:
                 data = [i for i in data.split('\n')]
-                data.remove('')
+                try:
+                    data.remove('')
+                except:
+                    pass
             elif '\r' in data:
                 data = [i for i in data.split('\r')]
             val['id'] = git_object['name']
