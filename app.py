@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, request, session, flash, redirect, url_for, jsonify
+from flask import Flask, render_template, request, session, flash, redirect, url_for, jsonify, abort
 import datetime
 import json
 import requests
@@ -97,9 +97,13 @@ def get_file(git_name, git_repository):
             full_string = data
             if '\n' in data:
                 data = [i for i in data.split('\n')]
-                data.remove('')
+                try:
+                    data.remove('')
+                except:
+                    pass
             elif '\r' in data:
                 data = [i for i in data.split('\r')]
+            val['id'] = git_object['name']
             val['date'] = get_date(git_object['name'])
             val['text'] = ''
             val['tags'] = 'No tags'
@@ -111,7 +115,6 @@ def get_file(git_name, git_repository):
                 val[key] = string
                 i += 1
             val['text'] = [data[j] for j in range(i+1, len(data))]
-            val['text_full'] = ''.join([str(data[j]) for j in range(i+1, len(data))])
             val['text_full_strings'] = full_string[full_string.rfind('---')+3:]
             list_git_files.append(val)
     f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
@@ -243,6 +246,16 @@ def login():
         return redirect(url_for('homepage'))
 
 
+def search(data, key, args):
+    query_length = len(args)
+    search_result = []
+    for i in data:
+        key_value = i[key][:query_length].lower()
+        if key_value == args.lower():
+            search_result.append({'title': i['title']})
+    return jsonify(search_result)
+
+
 # redirect on page not_found.html
 @app.errorhandler(404)
 def page_not_found(e):
@@ -286,28 +299,44 @@ def post(git_name, git_repository_blog, title, page=1, tags=None):
 
 
 # Апи отдает данные с гита
+@app.route('/<git_name>/<git_repository_blog>/api/get/<title>', methods=['GET', 'OPTIONS'])
+@app.route('/<git_name>/<git_repository_blog>/api/get/id/<id>', methods=['GET', 'OPTIONS'])
 @app.route('/<git_name>/<git_repository_blog>/api/get', methods=['GET', 'OPTIONS'])
 @crossdomain(origin='*')
-def get_get_blog(git_name, git_repository_blog):
+def get_get_blog(git_name, git_repository_blog, title=None, id=None ):
     data = try_file(git_name, git_repository_blog)
-    return jsonify(data)
+
+    if title:
+        one_post = [post for post in data if post['title'] == title]
+        one_post.append({'message': 'no such post'})
+        return jsonify(one_post[0])
+    elif id:
+        one_post = [post for post in data if post['id'] == id]
+        one_post.append({'message': 'no such post'})
+        return jsonify(one_post[0])
+    else:
+        args = request.args.get('title', '')
+        if args:
+            return search(data, 'title', args)
+        else:
+            return jsonify(data)
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/get/fullmd', methods=['GET', 'OPTIONS'])
-@crossdomain(origin='*')
-def get_full_md(git_name, git_repository_blog):
-    f = open('static/%s_%s_fullmd.txt' % (git_name, git_repository_blog))
-    full_md = f.readline()
-    full_md = json.loads(full_md)
-    new_list = [full_md]
-    return jsonify(new_list)
-
-
-@app.route('/<git_name>/<git_repository_blog>/api/update', methods=['GET', 'OPTIONS'])
+@app.route('/<git_name>/<git_repository_blog>/api/update', methods=['GET', 'OPTIONS', 'POST'])
 @crossdomain(origin='*')
 def update(git_name, git_repository_blog):
     get_file(git_name, git_repository_blog)
     return redirect(url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog, tags=None, page=1))
+
+
+@app.route('/<git_name>/<git_repository_blog>/web_hook', methods=['GET', 'OPTIONS', 'POST'])
+@crossdomain(origin='*')
+def web_hook(git_name, git_repository_blog):
+    if request.method == 'POST':
+        get_file(git_name, git_repository_blog)
+        return '', 200
+    else:
+        abort(400)
 
 
 if __name__ == '__main__':
