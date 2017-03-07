@@ -105,16 +105,19 @@ def get_file(git_name, git_repository):
                 data = [i for i in data.split('\r')]
             val['id'] = git_object['name']
             val['date'] = get_date(git_object['name'])
-            val['text'] = ''
-            val['tags'] = 'No tags'
+            val['tags'] = ''
             val['author'] = ''
             val['layout'] = ''
-            i = 1
-            while '---' != data[i]:
+            val['text_full_strings'] = ''
+            counter = 0
+            for i in range(len(data)):
+                if '---' == data[i]:
+                    counter += 1
+                if counter == 2:
+                    break
                 key, string = test_string(data[i])
-                val[key] = string
-                i += 1
-            val['text'] = [data[j] for j in range(i+1, len(data))]
+                if key and string:
+                    val[key] = string
             val['text_full_strings'] = full_string[full_string.rfind('---')+3:]
             list_git_files.append(val)
     f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
@@ -127,21 +130,23 @@ def get_file(git_name, git_repository):
 def test_string(test):
     if 'title:' in test and ':' in test:
         return 'title', test[test.find('title:')+len('title:'):].strip()
-    if 'tags' in test and ':' in test:
+    elif 'tags' in test and ':' in test:
         test = test[test.find('tags:')+len('tags:'):].strip()
         if ',' in test:
             tags = [j.strip() for j in test.split(',')]
         else:
             tags = [test]
         return 'tags', tags
-    if 'layout' in test and ':' in test:
+    elif 'layout' in test and ':' in test:
         return 'layout', test[test.find('layout:')+len('layout:'):].strip()
-    if 'date' in test and ':' in test:
+    elif 'date' in test and ':' in test:
         test = test[test.find('date:') + len('date:'):].strip()
         test = test.strip('"')
         return 'date', get_date(test)
-    if 'author' in test and ':' in test:
+    elif 'author' in test and ':' in test:
         return 'author', test[test.find('author:')+len('author:'):].strip()
+    else:
+        return None, None
 
 
 # Получение данных из файла, если такой есть
@@ -217,7 +222,6 @@ class Pagination:
         return self.has_next
 
 
-# get_file('rrlero', 'git-blog')
 # начальная страница
 @app.route('/index')
 @app.route('/')
@@ -305,7 +309,6 @@ def post(git_name, git_repository_blog, title, page=1, tags=None):
 @crossdomain(origin='*')
 def get_get_blog(git_name, git_repository_blog, title=None, id=None ):
     data = try_file(git_name, git_repository_blog)
-
     if title:
         one_post = [post for post in data if post['title'] == title]
         one_post.append({'message': 'no such post'})

@@ -8,9 +8,7 @@
           <h2 class="entres-h2">{{ el['title'] }} </h2>
           <div class="date"> {{ el['date'] }}</div>
           <div class="date"> автор: {{ el['author'] }}</div>
-          {% for line in el['text'] %}
-                <br>{{ line }}
-          {% endfor %}
+          <p class="myclass">{{ el['text_full_strings'] }}</p>
                 <div style="clear:both;"></div>
       </li>
     {% endif %}
