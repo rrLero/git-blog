@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, request, session, flash, redirect, url_for, jsonify
+from flask import Flask, render_template, request, session, flash, redirect, url_for, jsonify, abort
 import datetime
 import json
 import requests
@@ -324,6 +324,16 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None ):
 def update(git_name, git_repository_blog):
     get_file(git_name, git_repository_blog)
     return redirect(url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog, tags=None, page=1))
+
+
+@app.route('/<git_name>/<git_repository_blog>/web_hook', methods=['GET', 'OPTIONS', 'POST'])
+@crossdomain(origin='*')
+def web_hook(git_name, git_repository_blog):
+    if request.method == 'POST':
+        get_file(git_name, git_repository_blog)
+        return '', 200
+    else:
+        abort(400)
 
 
 if __name__ == '__main__':
