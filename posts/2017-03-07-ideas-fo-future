@@ -8,7 +8,7 @@ date: 17-03-07 16:20
 Для того что-бы использовать webhook на своем репозитории необходимо:
 * в своем репозитории зайти в настройки
 * затем выбрать add webhook
-* Payload url вставить http://gitblog.pythonanywhere.com/<git_username>/<git_rep_name>/web_hook (в моем случае это http://gitblog.pythonanywhere.com/rrlero/git-blog/web_hook)
+* Payload url вставить http://gitblog.pythonanywhere.com/git_username/git_rep_name/web_hook (в моем случае это http://gitblog.pythonanywhere.com/rrlero/git-blog/web_hook)
 * в content type выбрать application/json
 * затем галочку на Just the push event и Active
 * финальный аккорд Update Webhook
