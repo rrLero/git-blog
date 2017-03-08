@@ -4,16 +4,32 @@ import datetime
 import json
 import requests
 import math
+import os
 from datetime import timedelta
 from flask import make_response, request, current_app
 from functools import update_wrapper
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from models.users import Users
 
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config.update(dict(
     SECRET_KEY='development key',
+    DATABASE=os.path.join(app.root_path, 'git-blog.sqlite'),
 ))
+
+
+def open_base():
+    Base = declarative_base()
+    engine = create_engine('sqlite:///git-blog.sqlite')
+    Base.metadata.create_all(engine)
+    Base.metadata.bind = engine
+    DBSession = sessionmaker(bind=engine)
+    session_git = DBSession()
+    return session_git
 
 
 # accept cross-server requests, need for api
@@ -105,16 +121,19 @@ def get_file(git_name, git_repository):
                 data = [i for i in data.split('\r')]
             val['id'] = git_object['name']
             val['date'] = get_date(git_object['name'])
-            val['text'] = ''
-            val['tags'] = 'No tags'
+            val['tags'] = ''
             val['author'] = ''
             val['layout'] = ''
-            i = 1
-            while '---' != data[i]:
+            val['text_full_strings'] = ''
+            counter = 0
+            for i in range(len(data)):
+                if '---' == data[i]:
+                    counter += 1
+                if counter == 2:
+                    break
                 key, string = test_string(data[i])
-                val[key] = string
-                i += 1
-            val['text'] = [data[j] for j in range(i+1, len(data))]
+                if key and string:
+                    val[key] = string
             val['text_full_strings'] = full_string[full_string.rfind('---')+3:]
             list_git_files.append(val)
     f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
@@ -127,21 +146,23 @@ def get_file(git_name, git_repository):
 def test_string(test):
     if 'title:' in test and ':' in test:
         return 'title', test[test.find('title:')+len('title:'):].strip()
-    if 'tags' in test and ':' in test:
+    elif 'tags' in test and ':' in test:
         test = test[test.find('tags:')+len('tags:'):].strip()
         if ',' in test:
             tags = [j.strip() for j in test.split(',')]
         else:
             tags = [test]
         return 'tags', tags
-    if 'layout' in test and ':' in test:
+    elif 'layout' in test and ':' in test:
         return 'layout', test[test.find('layout:')+len('layout:'):].strip()
-    if 'date' in test and ':' in test:
+    elif 'date' in test and ':' in test:
         test = test[test.find('date:') + len('date:'):].strip()
         test = test.strip('"')
         return 'date', get_date(test)
-    if 'author' in test and ':' in test:
+    elif 'author' in test and ':' in test:
         return 'author', test[test.find('author:')+len('author:'):].strip()
+    else:
+        return None, None
 
 
 # Получение данных из файла, если такой есть
@@ -217,7 +238,6 @@ class Pagination:
         return self.has_next
 
 
-# get_file('rrlero', 'git-blog')
 # начальная страница
 @app.route('/index')
 @app.route('/')
@@ -235,14 +255,20 @@ def logout():
 @app.route('/login', methods=['POST', 'OPTIONS'])
 def login():
     # Если пришли формы то запоминает их в переменные
+    session['logged_in'] = False
     if request.form['git_name'] and request.form['git_repository_blog']:
-        session['logged_in'] = True
         git_name = request.form['git_name']
         git_repository_blog = request.form['git_repository_blog']
         # Обновляем файл с данными
-        return redirect(url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog))
+        session_git = open_base()
+        users = session_git.query(Users)
+        for user in users:
+            if user.user_name == git_name and user.user_repo_name == git_repository_blog:
+                session['logged_in'] = True
+                session_git.close()
+                return redirect(url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog))
+        return redirect(url_for('homepage'))
     else:
-        session['logged_in'] = False
         return redirect(url_for('homepage'))
 
 
@@ -266,7 +292,12 @@ def page_not_found(e):
 @app.route('/<git_name>/<git_repository_blog>/<int:page>/')
 @app.route('/<git_name>/<git_repository_blog>/')
 def blog(git_name, git_repository_blog, tags=None, page=1):
-    session['logged_in'] = True
+    session_git = open_base()
+    users = session_git.query(Users)
+    for user in users:
+        if user.user_name == git_name and user.user_repo_name == git_repository_blog:
+            session['logged_in'] = True
+            session_git.close()
     # Если существует файл с данными то обращается к файлу если нет то берет с гита
     if try_file(git_name, git_repository_blog):
         file = try_file(git_name, git_repository_blog)
@@ -280,6 +311,12 @@ def blog(git_name, git_repository_blog, tags=None, page=1):
     if file:
         if tags:
             file = sorted_by_tags(file, tags)
+        session_git = open_base()
+        new_user = Users(user_name=git_name, user_repo_name=git_repository_blog)
+        session_git.add(new_user)
+        session_git.commit()
+        session_git.close()
+        session['logged_in'] = True
         paginate = Pagination(3, page, len(file))
         return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file,
                                paginate=paginate, page=page, tags=tags)
@@ -305,7 +342,6 @@ def post(git_name, git_repository_blog, title, page=1, tags=None):
 @crossdomain(origin='*')
 def get_get_blog(git_name, git_repository_blog, title=None, id=None ):
     data = try_file(git_name, git_repository_blog)
-
     if title:
         one_post = [post for post in data if post['title'] == title]
         one_post.append({'message': 'no such post'})

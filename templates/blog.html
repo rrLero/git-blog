@@ -21,7 +21,7 @@
           <h2 class="entres-h2">{{ file[i]['title'] }} </h2>
           <div class="date"> {{ file[i]['date'] }}</div>
           <div class="date"> автор: {{ file[i]['author'] }}</div>
-             <br>{{file[i]['text'][0][0:75]}}...<a href="{{ url_for('post', git_name=git_name, git_repository_blog=git_repository_blog, title=file[i]['title'], page=page, tags=tags)}}">read more</a>
+             <br>{{file[i]['text_full_strings'][0:45]}}...<a href="{{ url_for('post', git_name=git_name, git_repository_blog=git_repository_blog, title=file[i]['title'], page=page, tags=tags)}}">read more</a>
           <div style="clear:both;"></div>
       </li>
 {% endfor %}

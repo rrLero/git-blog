@@ -49,6 +49,13 @@ div.pagination strong {
   font-style: italic;
 }
 
+.myclass {
+     white-space: pre-line;
+
+
+
+ }
+
 /*****************************/
 /******Styles for header******/
 /*****************************/
