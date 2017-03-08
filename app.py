@@ -374,7 +374,7 @@ def web_hook(git_name, git_repository_blog):
         abort(400)
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/put/<id>', methods=['OPTIONS', 'POST'])
+@app.route('/<git_name>/<git_repository_blog>/api/put/<id>', methods=['OPTIONS', 'POST', 'PUT'])
 @crossdomain(origin='*')
 def add_file(git_name, git_repository_blog, id):
     f = open('%s' % id, 'w')
@@ -385,9 +385,9 @@ def add_file(git_name, git_repository_blog, id):
 
 # # # 'http://0.0.0.0:5000/rrlero/git-blog/api/put/test.md'
 # def send_request():
-#     x = {'file': 'test'}
+#     x = {'file2': 'test2'}
 #     x = json.dumps(x)
-#     url = 'http://gitblog.pythonanywhere.com/rrlero/git-blog/api/put/testtest.md'
+#     url = 'http://gitblog.pythonanywhere.com/rrlero/git-blog/api/put/testtest2.md'
 #     r = requests.post(url, json=x)
 #     print(r)
 #     return 'yes'
