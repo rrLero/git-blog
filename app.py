@@ -379,7 +379,7 @@ def web_hook(git_name, git_repository_blog):
 @cross_origin()
 def add_file(git_name, git_repository_blog, id):
     f = open('%s' % id, 'w')
-    f.write(request.json)
+    f.write(str(request.json))
     f.close()
     return '', 200
 
