@@ -310,15 +310,17 @@ def page_not_found(e):
 @app.route('/<git_name>/<git_repository_blog>/<int:page>/')
 @app.route('/<git_name>/<git_repository_blog>/')
 def blog(git_name, git_repository_blog, tags=None, page=1):
-    if session['logged_in']:
-        # Если существует файл с данными то обращается к файлу если нет то берет с гита
-        file = try_file(git_name, git_repository_blog)
+    # Если существует файл с данными то обращается к файлу если нет то берет с гита
+    file = try_file(git_name, git_repository_blog)
+    if file:
+        session['logged_in'] = True
         if tags:
             file = sorted_by_tags(file, tags)
         paginate = Pagination(3, page, len(file))
         return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file,
                                paginate=paginate, page=page, tags=tags)
     else:
+        session['logged_in'] = False
         return redirect(url_for('homepage'))
 
 
