@@ -137,6 +137,7 @@ def get_file(git_name, git_repository):
                 if key and string:
                     val[key] = string
             val['text_full_strings'] = full_string[full_string.rfind('---')+3:]
+            val['text_full_md'] = full_string
             list_git_files.append(val)
     f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
     f.write(json.dumps(list_git_files))
