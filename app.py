@@ -374,5 +374,22 @@ def web_hook(git_name, git_repository_blog):
         abort(400)
 
 
+@app.route('/<git_name>/<git_repository_blog>/api/put/<id>', methods=['POST'])
+def add_file(git_name, git_repository_blog, id):
+    f = open('%s' % id, 'w')
+    f.write(request.json)
+    f.close()
+    return '', 200
+
+# # 'http://0.0.0.0:5000/rrlero/git-blog/api/put/test.md'
+# def send_request():
+#     x = {'file': 'test'}
+#     x = json.dumps(x)
+#     url = 'http://httpbin.org/post'
+#     r = requests.post(url, json=x)
+#     print(r)
+#     return 'yes'
+# send_request()
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
