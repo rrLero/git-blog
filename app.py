@@ -12,9 +12,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from models.users import Users
-
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
+CORS(app)
 app.config.from_object(__name__)
 app.config.update(dict(
     SECRET_KEY='development key',
@@ -376,6 +377,7 @@ def web_hook(git_name, git_repository_blog):
 
 @app.route('/<git_name>/<git_repository_blog>/api/put/<id>', methods=['OPTIONS', 'POST', 'PUT'])
 @crossdomain(origin='*')
+@cross_origin()
 def add_file(git_name, git_repository_blog, id):
     f = open('%s' % id, 'w')
     f.write(request.json)
