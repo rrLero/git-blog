@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block body %}
-
+<h1 align="center"><a href="{{ url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog,
+    page = None, tags = None )}}">Big-Blog-{{git_name}}</a></h1>
 <div class=pagination>
 {% if paginate.has_prev -%}<a href="{{ url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog,
     page = paginate.prev_num, tags = tags )}}">&laquo; Prev</a>{%- else -%}<span class=disabled>&laquo; Prev</span>{% endif %}{#
