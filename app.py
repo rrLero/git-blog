@@ -19,9 +19,11 @@ app.config.from_object(__name__)
 app.config.update(dict(
     SECRET_KEY='development key',
     DATABASE=os.path.join(app.root_path, 'git-blog.sqlite'),
+    README=os.path.join(app.root_path, 'README.md'),
 ))
 
 
+# функция открывает базу данных для последующей работы с ней
 def open_base():
     Base = declarative_base()
     engine = create_engine('sqlite:///git-blog.sqlite')
@@ -266,8 +268,24 @@ def login():
             if user.user_name == git_name and user.user_repo_name == git_repository_blog:
                 session['logged_in'] = True
                 session_git.close()
+                flash('Welcome to Big-Blog %s' %git_name)
+                session['logged_in'] = True
                 return redirect(url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog))
-        return redirect(url_for('homepage'))
+
+        file = get_file(git_name, git_repository_blog)
+        if file:
+            session_git = open_base()
+            new_user = Users(user_name=git_name, user_repo_name=git_repository_blog)
+            session_git.add(new_user)
+            session_git.commit()
+            session_git.close()
+            session['logged_in'] = True
+            flash('You were registered')
+            session['logged_in'] = True
+            return redirect(url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog))
+        else:
+            flash('Your name or user name incorrect')
+            return redirect(url_for('homepage'))
     else:
         return redirect(url_for('homepage'))
 
@@ -292,14 +310,8 @@ def page_not_found(e):
 @app.route('/<git_name>/<git_repository_blog>/<int:page>/')
 @app.route('/<git_name>/<git_repository_blog>/')
 def blog(git_name, git_repository_blog, tags=None, page=1):
-    session_git = open_base()
-    users = session_git.query(Users)
-    for user in users:
-        if user.user_name == git_name and user.user_repo_name == git_repository_blog:
-            session['logged_in'] = True
-            session_git.close()
-    # Если существует файл с данными то обращается к файлу если нет то берет с гита
-    if try_file(git_name, git_repository_blog):
+    if session['logged_in']:
+        # Если существует файл с данными то обращается к файлу если нет то берет с гита
         file = try_file(git_name, git_repository_blog)
         if tags:
             file = sorted_by_tags(file, tags)
@@ -307,22 +319,6 @@ def blog(git_name, git_repository_blog, tags=None, page=1):
         return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file,
                                paginate=paginate, page=page, tags=tags)
     else:
-        file = get_file(git_name, git_repository_blog)
-    if file:
-        if tags:
-            file = sorted_by_tags(file, tags)
-        session_git = open_base()
-        new_user = Users(user_name=git_name, user_repo_name=git_repository_blog)
-        session_git.add(new_user)
-        session_git.commit()
-        session_git.close()
-        session['logged_in'] = True
-        paginate = Pagination(3, page, len(file))
-        return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file,
-                               paginate=paginate, page=page, tags=tags)
-    else:
-        session['logged_in'] = False
-        flash('No such name or repository or both')
         return redirect(url_for('homepage'))
 
 

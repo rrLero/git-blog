@@ -38,6 +38,9 @@ body {
 
 .page           { margin: 2em auto; width: 65em;
                   padding: 0.8em; }
+.rules   {width: 100%;
+
+            }
 
 /* pagination */
 div.pagination {
@@ -51,10 +54,8 @@ div.pagination strong {
 
 .myclass {
      white-space: pre-line;
-
-
-
  }
+
 
 /*****************************/
 /******Styles for header******/
