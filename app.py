@@ -340,7 +340,8 @@ def add_file(git_name, git_repository_blog, id_file, sha):
     changes = request.json
     changes = changes['text_full_strings']
     changes = changes.encode()
-    changes = base64.encodestring(changes)
+    changes = base64.encodebytes(changes)
+    changes = changes.decode()
     put_dict_git = {
       "message": "my commit message",
       "committer": {
@@ -350,8 +351,9 @@ def add_file(git_name, git_repository_blog, id_file, sha):
                 }
     put_dict_git['sha'] = sha
     put_dict_git['content'] = changes
-    url = 'https://api.github.com/repos/%s/%s/contents/%s' %(git_name, git_repository_blog, id_file)
-    return requests.put(url, put_dict_git, auth=('rrlero', '7M7T9nHH'))
+    url = 'https://api.github.com/repos/%s/%s/contents/posts/%s' %(git_name, git_repository_blog, id_file)
+    res = requests.put(url, json=put_dict_git, auth=('rrlero', '7M7T9nHH'))
+    return '', res.status_code
 
 
 @app.after_request
@@ -368,40 +370,6 @@ def add_cors(resp):
         resp.headers['Access-Control-Max-Age'] = '1'
     return resp
 
-
-# s = requests.get('https://api.github.com/repos/rrlero/git-blog/contents/posts/2017-03-07-how-to-use-webhook.md', auth=('rrlero', '7M7T9nHH'))
-# f = open('git_data.txt', 'w')
-# f.write(str(s.json()))
-# f.close()
-# f = open('static/2017-03-07-how-to-use-webhook.md')
-# x = f.readline()
-# z = json.dumps(x)
-# y = json.loads(z)
-# content = {'text_full_strings': 'zcjkndfkjsdfksdbfsdbf'}
-# content_2 = {
-#   "message": "my commit message",
-#   "committer": {
-#     "name": "rrlero",
-#     "email": "roman@xlan.com.ua"
-#   },
-#   "content": "bXkgdXBkYXRlZCBmaWxlIGNvbnRlbnRz",
-#   "sha": "82b1a3c2d36a644afcaa62ca72fdcf4ca902a7a6"
-# }
-# url = 'https://api.github.com/repos/rrlero/git-blog/contents/posts/2017-03-07-how-to-use-webhook.md'
-# requests.put(url, json=content_2)
-# print(z)
-# print(type(y))
-
-
-# # # 'http://0.0.0.0:5000/rrlero/git-blog/api/put/test.md'
-# def send_request():
-#     x = {'file3': 'test3'}
-#     x = json.dumps(x)
-#     url = 'http://gitblog.pythonanywhere.com/rrlero/git-blog/api/put/testtest23.md'
-#     r = requests.put(url, json=x)
-#     print(r)
-#     return 'yes'
-# send_request()
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
