@@ -337,7 +337,8 @@ def web_hook(git_name, git_repository_blog):
 @app.route('/<git_name>/<git_repository_blog>/api/put/<id_file>/<sha>', methods=['POST', 'PUT'])
 @cross_origin()
 def add_file(git_name, git_repository_blog, id_file, sha):
-    changes = request.json['text_full_strings']
+    changes = request.json
+    changes = changes['text_full_strings']
     changes = changes.encode()
     changes = base64.encodestring(changes)
     put_dict_git = {
