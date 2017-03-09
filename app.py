@@ -5,6 +5,7 @@ import json
 import requests
 import math
 import os
+import base64
 from datetime import timedelta
 from flask import make_response, request, current_app
 from functools import update_wrapper
@@ -35,49 +36,6 @@ def open_base():
     return session_git
 
 
-# # accept cross-server requests, need for api
-# def crossdomain(origin=None, methods=None, headers=None,
-#                 max_age=21600, attach_to_all=True,
-#                 automatic_options=True):
-#     if methods is not None:
-#         methods = ', '.join(sorted(x.upper() for x in methods))
-#     if headers is not None and not isinstance(headers, str):
-#         headers = ', '.join(x.upper() for x in headers)
-#     if not isinstance(origin, str):
-#         origin = ', '.join(origin)
-#     if isinstance(max_age, timedelta):
-#         max_age = max_age.total_seconds()
-#
-#     def get_methods():
-#         if methods is not None:
-#             return methods
-#
-#         options_resp = current_app.make_default_options_response()
-#         return options_resp.headers['allow']
-#
-#     def decorator(f):
-#         def wrapped_function(*args, **kwargs):
-#             if automatic_options and request.method == 'OPTIONS':
-#                 resp = current_app.make_default_options_response()
-#             else:
-#                 resp = make_response(f(*args, **kwargs))
-#             if not attach_to_all and request.method != 'OPTIONS':
-#                 return resp
-#
-#             h = resp.headers
-#
-#             h['Access-Control-Allow-Origin'] = origin
-#             h['Access-Control-Allow-Methods'] = get_methods()
-#             h['Access-Control-Max-Age'] = str(max_age)
-#             if headers is not None:
-#                 h['Access-Control-Allow-Headers'] = headers
-#             return resp
-#
-#         f.provide_automatic_options = False
-#         return update_wrapper(wrapped_function, f)
-#     return decorator
-
-
 # функция получает строку и в ней находит(если есть) дату, пока в двух вариантах %y-%m-%d %H:%M и %y-%m-%d
 # и приводит к стандартному виду
 def get_date(string_date):
@@ -102,7 +60,7 @@ def get_date(string_date):
 # постов
 def get_file(git_name, git_repository):
     list_git_files = []
-    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository))
+    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository), auth=('rrlero', '7M7T9nHH'))
     git_objects = git_objects.json()
     if str(type(git_objects)) == "<class 'dict'>":
         session['logged_in'] = False
@@ -122,6 +80,7 @@ def get_file(git_name, git_repository):
                     pass
             elif '\r' in data:
                 data = [i for i in data.split('\r')]
+            val['sha'] = git_object['sha']
             val['id'] = git_object['name']
             val['date'] = get_date(git_object['name'])
             val['tags'] = ''
@@ -375,13 +334,23 @@ def web_hook(git_name, git_repository_blog):
         abort(400)
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/put/<id>', methods=['POST', 'PUT'])
+@app.route('/<git_name>/<git_repository_blog>/api/put/<id_file>/<sha>', methods=['POST', 'PUT'])
 @cross_origin()
-def add_file(git_name, git_repository_blog, id):
-    f = open('%s' % id, 'w')
-    f.write(str(request.json))
-    f.close()
-    return '', 200
+def add_file(git_name, git_repository_blog, id_file, sha):
+    changes = request.json['text_full_strings']
+    changes = changes.encode()
+    changes = base64.encodestring(changes)
+    put_dict_git = {
+      "message": "my commit message",
+      "committer": {
+        "name": "rrlero",
+        "email": "roman@xlan.com.ua"
+                    },
+                }
+    put_dict_git['sha'] = sha
+    put_dict_git['content'] = changes
+    url = 'https://api.github.com/repos/%s/%s/contents/%s' %(git_name, git_repository_blog, id_file)
+    return requests.put(url, json=put_dict_git, auth=('rrlero', '7M7T9nHH'))
 
 
 @app.after_request
@@ -397,6 +366,32 @@ def add_cors(resp):
     if app.debug:
         resp.headers['Access-Control-Max-Age'] = '1'
     return resp
+
+
+# s = requests.get('https://api.github.com/repos/rrlero/git-blog/contents/posts/2017-03-07-how-to-use-webhook.md', auth=('rrlero', '7M7T9nHH'))
+# f = open('git_data.txt', 'w')
+# f.write(str(s.json()))
+# f.close()
+# f = open('static/2017-03-07-how-to-use-webhook.md')
+# x = f.readline()
+# z = json.dumps(x)
+# y = json.loads(z)
+# content = {'text_full_strings': 'zcjkndfkjsdfksdbfsdbf'}
+# content_2 = {
+#   "message": "my commit message",
+#   "committer": {
+#     "name": "rrlero",
+#     "email": "roman@xlan.com.ua"
+#   },
+#   "content": "bXkgdXBkYXRlZCBmaWxlIGNvbnRlbnRz",
+#   "sha": "82b1a3c2d36a644afcaa62ca72fdcf4ca902a7a6"
+# }
+# url = 'https://api.github.com/repos/rrlero/git-blog/contents/posts/2017-03-07-how-to-use-webhook.md'
+# requests.put(url, json=content_2)
+# print(z)
+# print(type(y))
+
+
 # # # 'http://0.0.0.0:5000/rrlero/git-blog/api/put/test.md'
 # def send_request():
 #     x = {'file3': 'test3'}
