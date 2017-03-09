@@ -350,7 +350,7 @@ def add_file(git_name, git_repository_blog, id_file, sha):
     put_dict_git['sha'] = sha
     put_dict_git['content'] = changes
     url = 'https://api.github.com/repos/%s/%s/contents/%s' %(git_name, git_repository_blog, id_file)
-    return requests.put(url, json=put_dict_git, auth=('rrlero', '7M7T9nHH'))
+    return requests.put(url, put_dict_git, auth=('rrlero', '7M7T9nHH'))
 
 
 @app.after_request
