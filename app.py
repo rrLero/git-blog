@@ -338,7 +338,7 @@ def web_hook(git_name, git_repository_blog):
 @cross_origin()
 def add_file(git_name, git_repository_blog, id_file, sha):
     changes = request.json
-    changes = changes['text_full_strings']
+    changes = changes['text_full_md']
     changes = changes.encode()
     changes = base64.encodebytes(changes)
     changes = changes.decode()
