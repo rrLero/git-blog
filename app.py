@@ -6,9 +6,7 @@ import requests
 import math
 import os
 import base64
-from datetime import timedelta
 from flask import make_response, request, current_app
-from functools import update_wrapper
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -62,7 +60,7 @@ def get_file(git_name, git_repository):
     f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
     f.close()
     list_git_files = []
-    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository), auth=('rrlero', '7M7T9nHH'))
+    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/?access_token=%s' % (git_name, git_repository, 'd53c51b765f24935d86a1f9e56d64eab350b0fb9'))
     git_objects = git_objects.json()
     if str(type(git_objects)) == "<class 'dict'>":
         session['logged_in'] = False
@@ -70,9 +68,9 @@ def get_file(git_name, git_repository):
     for git_object in git_objects:
         if git_object['type'] == 'file':
             # url = git_object['download_url']
-            url = 'https://api.github.com/repos/%s/%s/contents/posts/%s' % (git_name, git_repository, git_object['name'])
+            url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?access_token=%s' % (git_name, git_repository, git_object['name'], 'd53c51b765f24935d86a1f9e56d64eab350b0fb9')
             val = {}
-            resource = requests.get(url, auth=('rrlero', '7M7T9nHH'))
+            resource = requests.get(url)
             resource = resource.json()
             data = resource['content']
             data = base64.b64decode(data)
@@ -351,8 +349,8 @@ def add_file(git_name, git_repository_blog, id_file, sha):
     put_dict_git = {
       "message": "my commit message",
       "committer": {
-        "name": "rrlero",
-        "email": "roman@xlan.com.ua"
+        "name": git_name,
+        "email": "some@email.com"
                     },
                 }
     put_dict_git['sha'] = sha
@@ -368,8 +366,8 @@ def oauth(git_name, git_repository_blog):
     args = request.args.get('code')
     headers = {'Accept': 'application/json'}
     access_token = requests.post('https://github.com/login/oauth/access_token?client_id=48f5b894f42ae1f869d2'
-                  '&client_secret=e289a8e72533f127ba873f0dec05908e6846866b&code=%s&'
-                  '&redirect_uri=http://acid.zzz.com.ua/%s/%s/page/1' % (args, git_name, git_repository_blog), headers=headers)
+                                        '&client_secret=e289a8e72533f127ba873f0dec05908e6846866b&code=%s&'
+                                        '&redirect_uri=http://acid.zzz.com.ua/%s/%s/page/1' % (args, git_name, git_repository_blog), headers=headers)
     access_token = access_token.json()
     return access_token
 
