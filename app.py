@@ -69,10 +69,15 @@ def get_file(git_name, git_repository):
         return False
     for git_object in git_objects:
         if git_object['type'] == 'file':
-            url = git_object['download_url']
+            # url = git_object['download_url']
+            url = 'https://api.github.com/repos/%s/%s/contents/posts/%s' % (git_name, git_repository, git_object['name'])
             val = {}
-            resource = requests.get(url)
-            data = resource.content.decode('utf-8')
+            resource = requests.get(url, auth=('rrlero', '7M7T9nHH'))
+            resource = resource.json()
+            data = resource['content']
+            data = base64.b64decode(data)
+            data = data.decode('utf-8')
+            # data = resource.content.decode('utf-8')
             full_string = data
             if '\n' in data:
                 data = [i for i in data.split('\n')]
