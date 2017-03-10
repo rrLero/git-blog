@@ -83,9 +83,9 @@ def get_file(git_name, git_repository):
             val['sha'] = git_object['sha']
             val['id'] = git_object['name']
             val['date'] = get_date(git_object['name'])
-            val['tags'] = ''
-            val['author'] = ''
-            val['layout'] = ''
+            val['tags'] = 'No tags'
+            val['author'] = 'No author'
+            val['layout'] = 'No layout'
             val['text_full_strings'] = ''
             counter = 0
             for i in range(len(data)):
@@ -327,11 +327,8 @@ def update(git_name, git_repository_blog):
 @app.route('/<git_name>/<git_repository_blog>/web_hook', methods=['GET', 'POST'])
 @cross_origin()
 def web_hook(git_name, git_repository_blog):
-    if request.method == 'POST':
-        get_file(git_name, git_repository_blog)
-        return '', 200
-    else:
-        abort(400)
+    get_file(git_name, git_repository_blog)
+    return '', 200
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/put/<id_file>/<sha>', methods=['POST', 'PUT'])
