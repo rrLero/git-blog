@@ -328,7 +328,7 @@ def update(git_name, git_repository_blog):
 @cross_origin()
 def web_hook(git_name, git_repository_blog):
     get_file(git_name, git_repository_blog)
-    return '', 200
+    return redirect(url_for('update', git_name=git_name, git_repository_blog=git_repository_blog))
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/put/<id_file>/<sha>', methods=['POST', 'PUT'])
