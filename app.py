@@ -361,6 +361,16 @@ def add_file(git_name, git_repository_blog, id_file, sha):
     return '', res.status_code
 
 
+@app.route('/<git_name>/<git_repository_blog>/api/oauth', methods=['POST', 'PUT'])
+@cross_origin()
+def oauth(git_name, git_repository_blog):
+    oauth = request.json
+    f = open('static/oauth.txt', 'w')
+    f.write(json.dumps(oauth))
+    f.close()
+    return '', 200
+
+
 @app.after_request
 def add_cors(resp):
     """ Ensure all responses have the CORS headers. This ensures any failures are also accessible
