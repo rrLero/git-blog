@@ -324,7 +324,7 @@ def update(git_name, git_repository_blog):
     return redirect(url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog, tags=None, page=1))
 
 
-@app.route('/<git_name>/<git_repository_blog>/web_hook')
+@app.route('/<git_name>/<git_repository_blog>/web_hook', methods=['POST'])
 @cross_origin()
 def web_hook(git_name, git_repository_blog):
     get_file(git_name, git_repository_blog)
