@@ -342,6 +342,7 @@ def web_hook(git_name, git_repository_blog):
 @app.route('/<git_name>/<git_repository_blog>/api/put/<id_file>/<sha>', methods=['POST', 'PUT'])
 @cross_origin()
 def add_file(git_name, git_repository_blog, id_file, sha):
+    args = request.args.get('access_token')
     changes = request.json
     changes = changes['text_full_md']
     changes = changes.encode()
@@ -356,8 +357,8 @@ def add_file(git_name, git_repository_blog, id_file, sha):
                 }
     put_dict_git['sha'] = sha
     put_dict_git['content'] = changes
-    url = 'https://api.github.com/repos/%s/%s/contents/posts/%s' %(git_name, git_repository_blog, id_file)
-    res = requests.put(url, json=put_dict_git, auth=('rrlero', '7M7T9nHH'))
+    url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?access_token=%s' %(git_name, git_repository_blog, id_file, args)
+    res = requests.put(url, json=put_dict_git)
     return '', res.status_code
 
 
