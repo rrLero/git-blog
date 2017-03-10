@@ -59,6 +59,8 @@ def get_date(string_date):
 # Функция получает имя пользователя и репозиторий. при помощи АПИ ГИТА функция переберает файлы и создает словарь из
 # постов
 def get_file(git_name, git_repository):
+    f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
+    f.close()
     list_git_files = []
     git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository), auth=('rrlero', '7M7T9nHH'))
     git_objects = git_objects.json()
@@ -87,6 +89,7 @@ def get_file(git_name, git_repository):
             val['author'] = 'No author'
             val['layout'] = 'No layout'
             val['text_full_strings'] = ''
+            val['text_full_md'] = ''
             counter = 0
             for i in range(len(data)):
                 if '---' == data[i]:
