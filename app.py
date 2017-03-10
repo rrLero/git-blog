@@ -361,16 +361,16 @@ def add_file(git_name, git_repository_blog, id_file, sha):
     return '', res.status_code
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/oauth', methods=['GET','POST', 'PUT'])
+@app.route('/<git_name>/<git_repository_blog>/api/oauth', methods=['GET', 'POST', 'PUT'])
 @cross_origin()
 def oauth(git_name, git_repository_blog):
     args = request.args.get('code')
-
-    # oauth = request.json
-    # f = open('static/oauth.txt', 'w')
-    # f.write(json.dumps(oauth))
-    # f.close()
-    return args
+    headers = {'Accept': 'application/json'}
+    access_token = requests.post('https://github.com/login/oauth/access_token?client_id=48f5b894f42ae1f869d2'
+                  '&client_secret=e289a8e72533f127ba873f0dec05908e6846866b&code=%s&'
+                  '&redirect_uri=http://acid.zzz.com.ua/%s/%s/page/1' % (args, git_name, git_repository_blog), headers=headers)
+    access_token = access_token.json()
+    return access_token
 
 
 @app.after_request
