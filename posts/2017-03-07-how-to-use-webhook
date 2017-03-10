@@ -1,13 +1,16 @@
 ---
 layout: 
-title:  Идеи на будущее
+title:  Как использовать WebHook
 tags: Программирование
-author: Acid-base
-date: 17-03-07 15:39
+author: rrlero
+date: 17-03-07 16:39
 ---
-Есть пару идей на будущее, так сказать
-* на главной странице выводить инструкцию - что надо сделать, чтоб завести блог на нашей платформе
-* там же выводить список блогов, которые ведутся на нашей платформе
-* прикрутить авторизацию/регистрацию через github
-* test web_hook
-* test web_hook 2
+Для того что-бы использовать webhook на своем репозитории необходимо:
+* в своем репозитории зайти в настройки
+* затем выбрать add webhook
+* Payload url вставить http://gitblog.pythonanywhere.com/git_username/git_rep_name/web_hook (в моем случае это http://gitblog.pythonanywhere.com/rrlero/git-blog/web_hook)
+* в content type выбрать application/json
+* затем галочку на Just the push event и Active
+* финальный аккорд Update Webhook
+_____________________________________
+и вуаля, если все правильно, то делая пуш в свой репозиторий ваши изменения будут отображаться в блоге
