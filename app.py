@@ -350,7 +350,7 @@ def add_file(git_name, git_repository_blog, id_file, sha):
       "message": "my commit message",
       "author": {
         "name": git_name,
-        "email": "some@email.com"
+        "email": "%s@email.com" %git_repository_blog
                     },
                 }
     put_dict_git['sha'] = sha
