@@ -357,6 +357,9 @@ def add_file(git_name, git_repository_blog, id_file, sha):
     put_dict_git['content'] = changes
     url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?access_token=%s' %(git_name, git_repository_blog, id_file, args)
     res = requests.put(url, json=put_dict_git)
+    f = open('static/token.txt', 'w')
+    f.write(str(args))
+    f.close()
     return '', res.status_code
 
 
