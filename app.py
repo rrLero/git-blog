@@ -348,7 +348,7 @@ def add_file(git_name, git_repository_blog, id_file, sha):
     changes = changes.decode()
     put_dict_git = {
       "message": "my commit message",
-      "committer": {
+      "author": {
         "name": git_name,
         "email": "some@email.com"
                     },
