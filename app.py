@@ -373,6 +373,9 @@ def oauth(git_name, git_repository_blog):
                                         '&redirect_uri=http://acid.zzz.com.ua/%s/%s/page/1'
                                  '&scope=repo' % (args, git_name, git_repository_blog), headers=headers)
     access_token = access_token.json()
+    f = open('access_token.txt', 'w')
+    f.write(str(access_token))
+    f.close()
     return jsonify(access_token)
 
 
