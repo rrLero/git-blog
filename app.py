@@ -357,9 +357,6 @@ def add_file(git_name, git_repository_blog, id_file, sha):
     put_dict_git['content'] = changes
     url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?access_token=%s' %(git_name, git_repository_blog, id_file, args)
     res = requests.put(url, json=put_dict_git)
-    f = open('static/token.txt', 'w')
-    f.write(str(args))
-    f.close()
     return '', res.status_code
 
 
@@ -370,12 +367,8 @@ def oauth(git_name, git_repository_blog):
     headers = {'Accept': 'application/json'}
     access_token = requests.post('https://github.com/login/oauth/access_token?client_id=48f5b894f42ae1f869d2'
                                         '&client_secret=e289a8e72533f127ba873f0dec05908e6846866b&code=%s&'
-                                        '&redirect_uri=http://acid.zzz.com.ua/%s/%s/page/1'
-                                 '&scope=repo' % (args, git_name, git_repository_blog), headers=headers)
+                                        '&redirect_uri=http://acid.zzz.com.ua/%s/%s/page/1' % (args, git_name, git_repository_blog), headers=headers)
     access_token = access_token.json()
-    f = open('access_token.txt', 'w')
-    f.write(str(access_token))
-    f.close()
     return jsonify(access_token)
 
 
