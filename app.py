@@ -60,7 +60,7 @@ def get_file(git_name, git_repository):
     f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
     f.close()
     list_git_files = []
-    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository), auth=('rrlero', '7M7T9nHH'))
+    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/?client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2' % (git_name, git_repository))
     git_objects = git_objects.json()
     if str(type(git_objects)) == "<class 'dict'>":
         session['logged_in'] = False
@@ -68,9 +68,9 @@ def get_file(git_name, git_repository):
     for git_object in git_objects:
         if git_object['type'] == 'file':
             # url = git_object['download_url']
-            url = 'https://api.github.com/repos/%s/%s/contents/posts/%s' % (git_name, git_repository, git_object['name'])
+            url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2' % (git_name, git_repository, git_object['name'])
             val = {}
-            resource = requests.get(url, auth=('rrlero', '7M7T9nHH'))
+            resource = requests.get(url)
             resource = resource.json()
             data = resource['content']
             data = base64.b64decode(data)
