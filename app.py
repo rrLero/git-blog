@@ -369,7 +369,7 @@ def oauth(git_name, git_repository_blog):
                                         '&client_secret=e289a8e72533f127ba873f0dec05908e6846866b&code=%s&'
                                         '&redirect_uri=http://acid.zzz.com.ua/%s/%s/page/1' % (args, git_name, git_repository_blog), headers=headers)
     access_token = access_token.json()
-    return access_token
+    return jsonify(access_token)
 
 
 @app.after_request
