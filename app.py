@@ -57,12 +57,10 @@ def get_date(string_date):
 # Функция получает имя пользователя и репозиторий. при помощи АПИ ГИТА функция переберает файлы и создает словарь из
 # постов
 def get_file(git_name, git_repository):
-    tok = open('static/tok.txt')
-    tok = tok.read()
     f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
     f.close()
     list_git_files = []
-    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/?access_token=%s' % (git_name, git_repository, tok))
+    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/' % (git_name, git_repository), auth=('rrlero', '7M7T9nHH'))
     git_objects = git_objects.json()
     if str(type(git_objects)) == "<class 'dict'>":
         session['logged_in'] = False
@@ -70,9 +68,9 @@ def get_file(git_name, git_repository):
     for git_object in git_objects:
         if git_object['type'] == 'file':
             # url = git_object['download_url']
-            url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?access_token=%s' % (git_name, git_repository, git_object['name'], tok)
+            url = 'https://api.github.com/repos/%s/%s/contents/posts/%s' % (git_name, git_repository, git_object['name'])
             val = {}
-            resource = requests.get(url)
+            resource = requests.get(url, auth=('rrlero', '7M7T9nHH'))
             resource = resource.json()
             data = resource['content']
             data = base64.b64decode(data)
