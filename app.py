@@ -397,6 +397,15 @@ def oauth(git_name, git_repository_blog):
     return jsonify(access_token)
 
 
+@app.route('/<git_name>/<git_repository_blog>/api/blog_list', methods=['GET'])
+@cross_origin()
+def blog_list(git_name, git_repository_blog):
+    session_git = open_base()
+    users = session_git.query(Users)
+    blog_list_ = [{'name':user.user_name, 'repo': user.user_repo_name} for user in users]
+    return jsonify(blog_list_)
+
+
 @app.after_request
 def add_cors(resp):
     """ Ensure all responses have the CORS headers. This ensures any failures are also accessible
