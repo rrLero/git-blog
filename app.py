@@ -85,6 +85,7 @@ def get_file(git_name, git_repository):
                     pass
             elif '\r' in data:
                 data = [i for i in data.split('\r')]
+            val['title'] = 'No title'
             val['sha'] = git_object['sha']
             val['id'] = git_object['name']
             val['date'] = get_date(git_object['name'])
@@ -337,26 +338,46 @@ def web_hook(git_name, git_repository_blog):
     return '', 200
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/put/<id_file>/<sha>', methods=['POST', 'PUT'])
+# Функция для обработки изменений постов на ГитХабе
+@app.route('/<git_name>/<git_repository_blog>/api/put/<id_file>/<sha>', methods=['POST', 'PUT', 'DELETE'])
 @cross_origin()
-def add_file(git_name, git_repository_blog, id_file, sha):
-    args = request.args.get('access_token')
-    changes = request.json
-    changes = changes['text_full_md']
-    changes = changes.encode()
-    changes = base64.encodebytes(changes)
-    changes = changes.decode()
+def add_file(git_name, git_repository_blog, sha=None, id_file=None):
     put_dict_git = {
       "message": "my commit message",
-      "author": {
-        "name": git_name,
-        "email": "%s@email.com" %git_repository_blog
+      "author":     {
+                    "name": git_name,
+                    "email": "%s@email.com" %git_repository_blog
                     },
                 }
-    put_dict_git['sha'] = sha
-    put_dict_git['content'] = changes
-    url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?access_token=%s' %(git_name, git_repository_blog, id_file, args)
-    res = requests.put(url, json=put_dict_git)
+    args = request.args.get('access_token')
+    changes = request.json
+    if request.method == 'POST':
+        file_data = changes['text_full_md']
+        file_data = file_data.encode()
+        file_data = base64.encodebytes(file_data)
+        file_data = file_data.decode()
+        put_dict_git['sha'] = sha
+        put_dict_git['content'] = file_data
+        url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?access_token=%s' % (
+                git_name, git_repository_blog, id_file, args)
+        res = requests.put(url, json=put_dict_git)
+    elif request.method == 'PUT':
+        file_data = changes['text_full_md']
+        file_name = changes['filename']
+        file_data = file_data.encode()
+        file_data = base64.encodebytes(file_data)
+        file_data = file_data.decode()
+        put_dict_git['content'] = file_data
+        url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?access_token=%s' %(
+                git_name, git_repository_blog, file_name, args)
+        res = requests.put(url, json=put_dict_git)
+    elif request.method == 'DELETE':
+        put_dict_git['sha'] = sha
+        url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?access_token=%s' % (
+                git_name, git_repository_blog, id_file, args)
+        res = requests.delete(url, json=put_dict_git)
+    else:
+        return 404
     return '', res.status_code
 
 
