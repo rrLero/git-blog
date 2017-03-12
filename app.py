@@ -87,7 +87,7 @@ def get_file(git_name, git_repository):
             val['sha'] = git_object['sha']
             val['id'] = git_object['name']
             val['date'] = get_date(git_object['name'])
-            val['tags'] = 'No tags'
+            val['tags'] = 'No tags,'
             val['author'] = 'No author'
             val['layout'] = 'No layout'
             val['text_full_strings'] = ''
