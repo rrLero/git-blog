@@ -60,6 +60,9 @@ def get_file(git_name, git_repository):
     list_git_files = []
     git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts/?client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2' % (git_name, git_repository))
     git_objects = git_objects.json()
+    f = open('testrate.txt', 'w')
+    f.write(str(git_objects))
+    f.close()
     if str(type(git_objects)) == "<class 'dict'>":
         session['logged_in'] = False
         return False
