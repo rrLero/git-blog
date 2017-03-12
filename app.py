@@ -343,6 +343,7 @@ def web_hook(git_name, git_repository_blog):
 
 # Функция для обработки изменений постов на ГитХабе
 @app.route('/<git_name>/<git_repository_blog>/api/put/<id_file>/<sha>', methods=['POST', 'PUT', 'DELETE'])
+@app.route('/<git_name>/<git_repository_blog>/api/put', methods=['POST', 'PUT', 'DELETE'])
 @cross_origin()
 def add_file(git_name, git_repository_blog, sha=None, id_file=None):
     put_dict_git = {
