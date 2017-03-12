@@ -394,9 +394,9 @@ def oauth(git_name, git_repository_blog):
     return jsonify(access_token)
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/blog_list', methods=['GET'])
+@app.route('/api/blog_list', methods=['GET'])
 @cross_origin()
-def blog_list(git_name, git_repository_blog):
+def blog_list():
     session_git = open_base()
     users = session_git.query(Users)
     blog_list_ = [{'name':(user.user_name).lower(), 'repo': (user.user_repo_name).lower()} for user in users]
