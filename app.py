@@ -267,7 +267,7 @@ def search(data, key, args):
     for i in data:
         key_value = i[key][:query_length].lower()
         if key_value == args.lower():
-            search_result.append({'title': i['title']})
+            search_result.append({'title': i['title'], 'id': i['id']})
     return jsonify(search_result)
 
 
@@ -405,7 +405,7 @@ def add_cors(resp):
     resp.headers['Access-Control-Allow-Credentials'] = 'true'
     resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS, GET, PUT, DELETE'
     resp.headers['Access-Control-Allow-Headers'] = request.headers.get(
-        'Access-Control-Request-Headers', 'Authorization' )
+        'Access-Control-Request-Headers', 'Authorization')
     # set low for debugging
     if app.debug:
         resp.headers['Access-Control-Max-Age'] = '1'
