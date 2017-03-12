@@ -63,6 +63,8 @@ def get_file(git_name, git_repository):
     f = open('testrate.txt', 'w')
     f.write(str(git_objects))
     f.close()
+    f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
+    f.close()
     if str(type(git_objects)) == "<class 'dict'>":
         session['logged_in'] = False
         return False
@@ -398,7 +400,7 @@ def oauth(git_name, git_repository_blog):
 def add_cors(resp):
     """ Ensure all responses have the CORS headers. This ensures any failures are also accessible
         by the client. """
-    resp.headers['Access-Control-Allow-Origin'] = request.headers.get('Origin','*')
+    resp.headers['Access-Control-Allow-Origin'] = request.headers.get('Origin', '*')
     resp.headers['Access-Control-Allow-Credentials'] = 'true'
     resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS, GET, PUT, DELETE'
     resp.headers['Access-Control-Allow-Headers'] = request.headers.get(
