@@ -60,10 +60,7 @@ def get_file(git_name, git_repository):
     list_git_files = []
     git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts?client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2' % (git_name, git_repository))
     git_objects = git_objects.json()
-    f = open('testrate.txt', 'w')
-    f.write(str(git_objects))
-    f.close()
-    f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
+    f = open('static/%s_%s.txt' % (git_name.lower(), git_repository.lower()), 'w')
     f.close()
     if str(type(git_objects)) == "<class 'dict'>":
         session['logged_in'] = False
@@ -109,7 +106,7 @@ def get_file(git_name, git_repository):
             val['text_full_strings'] = full_string[full_string.rfind('---')+3:]
             val['text_full_md'] = full_string
             list_git_files.append(val)
-    f = open('static/%s_%s.txt' % (git_name, git_repository), 'w')
+    f = open('static/%s_%s.txt' % (git_name.lower(), git_repository.lower()), 'w')
     f.write(json.dumps(list_git_files))
     f.close()
     return sorted(list_git_files, key=lambda d: d['date'], reverse=True)
@@ -141,7 +138,7 @@ def test_string(test):
 # Получение данных из файла, если такой есть
 def try_file(git_name, git_repository_blog):
     try:
-        f = open('static/%s_%s.txt' % (git_name, git_repository_blog))
+        f = open('static/%s_%s.txt' % (git_name.lower(), git_repository_blog.lower()))
         temp = f.readline()
     except:
         return False
@@ -298,7 +295,7 @@ def blog(git_name, git_repository_blog, tags=None, page=1):
 # берет конкретный пост и отображает его при нажатии на readmore
 @app.route('/<git_name>/<git_repository_blog>/<int:page>/post/<title>/')
 def post(git_name, git_repository_blog, title, page=1, tags=None):
-    f = open('static/%s_%s.txt' % (git_name, git_repository_blog))
+    f = open('static/%s_%s.txt' % (git_name.lower(), git_repository_blog.lower()))
     temp = f.readline()
     file = sorted(json.loads(temp), key=lambda d: d['date'], reverse=True)
     return render_template('post.html', file=file, title=title, git_repository_blog=git_repository_blog, git_name=git_name, page=page)
@@ -402,7 +399,7 @@ def oauth(git_name, git_repository_blog):
 def blog_list(git_name, git_repository_blog):
     session_git = open_base()
     users = session_git.query(Users)
-    blog_list_ = [{'name':user.user_name, 'repo': user.user_repo_name} for user in users]
+    blog_list_ = [{'name':(user.user_name).lower(), 'repo': (user.user_repo_name).lower()} for user in users]
     return jsonify(blog_list_)
 
 
