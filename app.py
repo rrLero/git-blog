@@ -63,7 +63,6 @@ def get_file(git_name, git_repository):
     f = open('static/%s_%s.txt' % (git_name.lower(), git_repository.lower()), 'w')
     f.close()
     if str(type(git_objects)) == "<class 'dict'>":
-        session['logged_in'] = False
         return False
     for git_object in git_objects:
         if git_object['type'] == 'file':
@@ -109,6 +108,18 @@ def get_file(git_name, git_repository):
     f = open('static/%s_%s.txt' % (git_name.lower(), git_repository.lower()), 'w')
     f.write(json.dumps(list_git_files))
     f.close()
+    session_git = open_base()
+    users = session_git.query(Users)
+    new_user = True
+    for user in users:
+        if user.user_name == git_name.lower() and user.user_repo_name == git_repository.lower():
+            session_git.close()
+            new_user = False
+    if new_user:
+        new_user = Users(user_name=git_name.lower(), user_repo_name=git_repository.lower())
+        session_git.add(new_user)
+        session_git.commit()
+        session_git.close()
     return sorted(list_git_files, key=lambda d: d['date'], reverse=True)
 
 
@@ -229,31 +240,8 @@ def login():
     if request.form['git_name'] and request.form['git_repository_blog']:
         git_name = request.form['git_name']
         git_repository_blog = request.form['git_repository_blog']
-        # Обновляем файл с данными
-        session_git = open_base()
-        users = session_git.query(Users)
-        for user in users:
-            if user.user_name == git_name and user.user_repo_name == git_repository_blog:
-                session['logged_in'] = True
-                session_git.close()
-                flash('Welcome to Big-Blog %s' %git_name)
-                session['logged_in'] = True
-                return redirect(url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog))
-
-        file = get_file(git_name, git_repository_blog)
-        if file:
-            session_git = open_base()
-            new_user = Users(user_name=git_name, user_repo_name=git_repository_blog)
-            session_git.add(new_user)
-            session_git.commit()
-            session_git.close()
-            session['logged_in'] = True
-            flash('You were registered')
-            session['logged_in'] = True
-            return redirect(url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog))
-        else:
-            flash('Your name or user name incorrect')
-            return redirect(url_for('homepage'))
+        flash('Welcome to Big-Blog %s' % git_name)
+        return redirect(url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog))
     else:
         return redirect(url_for('homepage'))
 
@@ -281,15 +269,21 @@ def blog(git_name, git_repository_blog, tags=None, page=1):
     # Если существует файл с данными то обращается к файлу если нет то берет с гита
     file = try_file(git_name, git_repository_blog)
     if file:
-        session['logged_in'] = True
         if tags:
             file = sorted_by_tags(file, tags)
         paginate = Pagination(3, page, len(file))
         return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file,
                                paginate=paginate, page=page, tags=tags)
     else:
-        session['logged_in'] = False
-        return redirect(url_for('homepage'))
+        file = get_file(git_name, git_repository_blog)
+        if file:
+            if tags:
+                file = sorted_by_tags(file, tags)
+            paginate = Pagination(3, page, len(file))
+            return render_template('blog.html', git_name=git_name, git_repository_blog=git_repository_blog, file=file,
+                                   paginate=paginate, page=page, tags=tags)
+        else:
+            return redirect(url_for('homepage'))
 
 
 # берет конкретный пост и отображает его при нажатии на readmore
