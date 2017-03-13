@@ -385,6 +385,33 @@ def blog_list():
     return jsonify(blog_list_)
 
 
+@app.route('/api/<git_name>', methods=['GET'])
+@cross_origin()
+def get_repo_list(git_name):
+    repos_posts_list = []
+    args = request.args.get('access_token')
+    url = 'https://api.github.com/users/%s/repos?access_token=%s' % (git_name, args)
+    repos = requests.get(url)
+    if repos.status_code != 200:
+        return jsonify(repos_posts_list)
+    else:
+        repos = repos.json()
+        for repo in repos:
+            url = requests.get('https://api.github.com/repos/%s/%s/contents/posts?access_token=%s' % (git_name, repo['name'], args))
+            if url.status_code == 200:
+                repos_posts_list.append(repo['name'])
+        return jsonify(repos_posts_list)
+
+
+@app.route('/api/repo_master/<git_name>/<git_repository_blog>/<test_user>', methods=['GET'])
+@cross_origin()
+def repo_master(git_name, git_repository_blog, test_user):
+    args = request.args.get('access_token')
+    headers = {'Accept': 'application/vnd.github.korra-preview'}
+    test = requests.get('https://api.github.com/repos/%s/%s/collaborators/%s/permission?access_token=%s' % (git_name, git_repository_blog, test_user, args), headers=headers)
+    return '', test.status_code
+
+
 @app.after_request
 def add_cors(resp):
     """ Ensure all responses have the CORS headers. This ensures any failures are also accessible
