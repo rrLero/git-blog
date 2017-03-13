@@ -54,11 +54,39 @@ def get_date(string_date):
         return 'No Date'
 
 
+def get_comments(git_name, git_repository, access_token=None):
+    if access_token:
+        auth_ = 'access_token=%s' %access_token
+    else:
+        auth_ = 'client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2'
+    comments = requests.get(
+            'https://api.github.com/repos/%s/%s/issues?%s' % (
+                git_name, git_repository, auth_))
+    comments_dict = {}
+    if comments.status_code == 200 and len(comments.json()) != 0:
+        for i in range(1, len(comments.json())+1):
+            comment = requests.get(
+                    'https://api.github.com/repos/%s/%s/issues/%d/comments?%s' % (
+                        git_name, git_repository, i, auth_))
+
+            all_com = []
+            for one_comment in comment.json():
+                com = {'user': one_comment['user']['login'], 'created_at': one_comment['created_at'], 'body': one_comment['body']}
+                all_com.append(com)
+            comments_dict[comments.json()[i-1]['title']] = all_com
+    return comments_dict
+
+
 # Функция получает имя пользователя и репозиторий. при помощи АПИ ГИТА функция переберает файлы и создает словарь из
 # постов
-def get_file(git_name, git_repository):
+def get_file(git_name, git_repository, access_token=None):
     list_git_files = []
-    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts?client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2' % (git_name, git_repository))
+    if access_token:
+        git_objects = requests.get(
+            'https://api.github.com/repos/%s/%s/contents/posts?access_token=%s' % (
+            git_name, git_repository, access_token))
+    else:
+        git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts?client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2' % (git_name, git_repository))
     git_objects = git_objects.json()
     f = open('static/%s_%s.txt' % (git_name.lower(), git_repository.lower()), 'w')
     f.close()
@@ -413,6 +441,20 @@ def repo_master(git_name, git_repository_blog, test_user):
         return jsonify({'access': True})
     else:
         return jsonify({'access': False})
+
+
+@app.route('/<git_name>/<git_repository_blog>/api/get_comments', methods=['GET'])
+@cross_origin()
+def get_dict_comments(git_name, git_repository_blog):
+    try:
+        args = request.args.get('access_token')
+    except:
+        args = None
+    if args:
+        list_coms = get_comments(git_name, git_repository_blog, args)
+    else:
+        list_coms = get_comments(git_name, git_repository_blog)
+    return jsonify(list_coms)
 
 
 
