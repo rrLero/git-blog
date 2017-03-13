@@ -409,7 +409,11 @@ def repo_master(git_name, git_repository_blog, test_user):
     args = request.args.get('access_token')
     headers = {'Accept': 'application/vnd.github.korra-preview'}
     test = requests.get('https://api.github.com/repos/%s/%s/collaborators/%s/permission?access_token=%s' % (git_name, git_repository_blog, test_user, args), headers=headers)
-    return '', test.status_code
+    if test.status_code == 200:
+        return jsonify({'access': 'True'})
+    else:
+        return jsonify({'access': 'False'})
+
 
 
 @app.after_request
