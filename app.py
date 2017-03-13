@@ -344,7 +344,7 @@ def add_file(git_name, git_repository_blog, sha=None, id_file=None):
         res = requests.put(url, json=put_dict_git)
     elif request.method == 'PUT':
         my_time = datetime.datetime.now()
-        name_new_file = my_time.strftime('%Y-%d-%m-%I-%M-%p-')
+        name_new_file = my_time.strftime('%Y-%m-%d-%I-%M-%p-')
         file_data = changes['text_full_md']
         file_name = name_new_file + changes['filename']
         file_data = file_data.encode()
