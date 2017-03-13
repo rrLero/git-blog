@@ -443,9 +443,9 @@ def repo_master(git_name, git_repository_blog, test_user):
         return jsonify({'access': False})
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/get_comments', methods=['GET'])
+@app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['GET'])
 @cross_origin()
-def get_dict_comments(git_name, git_repository_blog):
+def get_dict_comments(git_name, git_repository_blog, id_file):
     try:
         args = request.args.get('access_token')
     except:
@@ -454,7 +454,10 @@ def get_dict_comments(git_name, git_repository_blog):
         list_coms = get_comments(git_name, git_repository_blog, args)
     else:
         list_coms = get_comments(git_name, git_repository_blog)
-    return jsonify(list_coms)
+    if id_file in list_coms:
+        return jsonify(list_coms[id_file])
+    else:
+        return jsonify({'message': 'No comments to this post'})
 
 
 
