@@ -179,7 +179,17 @@ def sorted_by_tags(list, tag):
     return sorted(sorted_list, key=lambda d: d['date'], reverse=True)
 
 
+def search(data, key, args):
+    query_length = len(args)
+    search_result = []
+    for i in data:
+        key_value = i[key][:query_length].lower()
+        if key_value == args.lower():
+            search_result.append({'title': i['title'], 'id': i['id']})
+    return jsonify(search_result)
 # Получение данных для пагинации исходя из количество постов на странице, количества постов, и текущей страницы
+
+
 class Pagination:
     def __init__(self, per_page, page, count):
         self.per_page = per_page
@@ -226,17 +236,9 @@ def homepage():
     return render_template('base.html')
 
 
-@app.route('/logout')
-def logout():
-    session.pop('logged_in', None)
-    flash('You were logged out')
-    return redirect(url_for('homepage'))
-
-
 @app.route('/login', methods=['POST', 'OPTIONS'])
 def login():
     # Если пришли формы то запоминает их в переменные
-    session['logged_in'] = False
     if request.form['git_name'] and request.form['git_repository_blog']:
         git_name = request.form['git_name']
         git_repository_blog = request.form['git_repository_blog']
@@ -244,16 +246,6 @@ def login():
         return redirect(url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog))
     else:
         return redirect(url_for('homepage'))
-
-
-def search(data, key, args):
-    query_length = len(args)
-    search_result = []
-    for i in data:
-        key_value = i[key][:query_length].lower()
-        if key_value == args.lower():
-            search_result.append({'title': i['title'], 'id': i['id']})
-    return jsonify(search_result)
 
 
 # redirect on page not_found.html
@@ -319,12 +311,6 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None ):
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/update', methods=['GET', 'POST'])
-@cross_origin()
-def update(git_name, git_repository_blog):
-    get_file(git_name, git_repository_blog)
-    return redirect(url_for('blog', git_name=git_name, git_repository_blog=git_repository_blog, tags=None, page=1))
-
-
 @app.route('/<git_name>/<git_repository_blog>/api/web_hook', methods=['GET', 'POST'])
 @cross_origin()
 def web_hook(git_name, git_repository_blog):
@@ -357,8 +343,10 @@ def add_file(git_name, git_repository_blog, sha=None, id_file=None):
                 git_name, git_repository_blog, id_file, args)
         res = requests.put(url, json=put_dict_git)
     elif request.method == 'PUT':
+        my_time = datetime.datetime.now()
+        name_new_file = my_time.strftime('%Y-%d-%m-%I-%M-%p-')
         file_data = changes['text_full_md']
-        file_name = changes['filename']
+        file_name = name_new_file + changes['filename']
         file_data = file_data.encode()
         file_data = base64.encodebytes(file_data)
         file_data = file_data.decode()
