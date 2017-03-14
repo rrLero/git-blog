@@ -472,6 +472,36 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=Non
         return jsonify(list_coms)
 
 
+@app.route('/<git_name>/<git_repository_blog>/api/del_repo', methods=['DELETE', 'GET', 'POST'])
+@cross_origin()
+def del_repo(git_name, git_repository_blog):
+    put_dict_git = {
+      "message": "my commit message",
+      "author":     {
+                    "name": git_name,
+                    "email": "%s@emailemail.com" %git_repository_blog
+                    },
+                }
+    args = request.args.get('access_token')
+    data = requests.get('https://api.github.com/repos/%s/%s/contents/posts?access_token=%s' % (git_name, git_repository_blog, args))
+    if data.status_code == 200:
+        for dir_ in data.json():
+            put_dict_git['sha'] = dir_['sha']
+            url = 'https://api.github.com/repos/%s/%s/contents/%s?access_token=%s' % (
+            git_name, git_repository_blog, dir_['path'], args)
+            requests.delete(url, json=put_dict_git)
+        session_git = open_base()
+        users = session_git.query(Users)
+        for user in users:
+            if user.user_name == git_name.lower() and user.user_repo_name == git_repository_blog.lower():
+                session_git.delete(user)
+        session_git.commit()
+        session_git.close()
+        return '', 200
+    else:
+        return data.status_code
+
+
 @app.after_request
 def add_cors(resp):
     """ Ensure all responses have the CORS headers. This ensures any failures are also accessible
