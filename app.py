@@ -479,10 +479,11 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=Non
     elif request.method == 'POST':
         data_issues = requests.get('https://api.github.com/repos/%s/%s/issues?access_token=%s' % (
                 git_name, git_repository_blog, args))
+        data_body = request.json
         for issue in data_issues.json():
             if issue['title'] == id_file:
-                add_new = requests.post('http://api.github.com/repos/%s/%s/issues/%s/comments?access_token=%s'
-                              % (git_name, git_repository_blog, issue['number'], args), json=request.json['body'])
+                add_new = requests.post('https://api.github.com/repos/%s/%s/issues/%s/comments?access_token=%s'
+                              % (git_name, git_repository_blog, issue['number'], args), json=data_body)
                 return '', add_new.status_code
 
 
