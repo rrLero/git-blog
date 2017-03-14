@@ -473,9 +473,12 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=Non
             return jsonify(list_coms)
     elif request.method == 'DELETE':
         del_comment = requests.delete(
-            'https://api.github.com/repos/%s/%s/issues/comments/%s?%s' % (
+            'https://api.github.com/repos/%s/%s/issues/comments/%s?access_tolken=%s' % (
                 git_name, git_repository, id_file, args))
         return del_comment.status_code
+    # elif request.method == 'POST':
+    #     data_issues = requests.get('https://api.github.com/repos/%s/%s/issues?access_%s' % (
+    #             git_name, git_repository, args))
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/del_repo', methods=['DELETE', 'GET', 'POST'])
