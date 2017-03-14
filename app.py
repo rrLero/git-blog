@@ -72,7 +72,6 @@ def get_comments(git_name, git_repository, access_token=None):
             for one_comment in comment.json():
                 com = {'user': one_comment['user']['login'], 'created_at': one_comment['created_at'],
                        'body': one_comment['body'], 'avatar_url': one_comment['user']['avatar_url']}
-                print(1, com)
                 all_com.append(com)
             comments_dict[comments.json()[i]['title']] = all_com
     return comments_dict
