@@ -56,7 +56,7 @@ def get_date(string_date):
 
 def get_comments(git_name, git_repository, access_token=None):
     if access_token:
-        auth_ = 'access_token=%s' %access_token
+        auth_ = 'access_token=%s' % access_token
     else:
         auth_ = 'client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2'
     comments = requests.get(
@@ -64,30 +64,34 @@ def get_comments(git_name, git_repository, access_token=None):
                 git_name, git_repository, auth_))
     comments_dict = {}
     if comments.status_code == 200 and len(comments.json()) != 0:
-        for i in range(1, len(comments.json())+1):
+        for i in range(len(comments.json())):
             comment = requests.get(
-                    'https://api.github.com/repos/%s/%s/issues/%d/comments?%s' % (
-                        git_name, git_repository, i, auth_))
-
+                    'https://api.github.com/repos/%s/%s/issues/%s/comments?%s' % (
+                        git_name, git_repository, comments.json()[i]['number'], auth_))
             all_com = []
             for one_comment in comment.json():
                 com = {'user': one_comment['user']['login'], 'created_at': one_comment['created_at'],
                        'body': one_comment['body'], 'avatar_url': one_comment['user']['avatar_url']}
+                print(1, com)
                 all_com.append(com)
-            comments_dict[comments.json()[i-1]['title']] = all_com
+            comments_dict[comments.json()[i]['title']] = all_com
     return comments_dict
 
 
 # Функция получает имя пользователя и репозиторий. при помощи АПИ ГИТА функция переберает файлы и создает словарь из
 # постов
 def get_file(git_name, git_repository, access_token=None):
+    if access_token:
+        auth_ = 'access_token=%s' %access_token
+    else:
+        auth_ = 'client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2'
     list_git_files = []
     if access_token:
         git_objects = requests.get(
-            'https://api.github.com/repos/%s/%s/contents/posts?access_token=%s' % (
-            git_name, git_repository, access_token))
+            'https://api.github.com/repos/%s/%s/contents/posts?%s' % (
+            git_name, git_repository, auth_))
     else:
-        git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts?client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2' % (git_name, git_repository))
+        git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts?%s' % (git_name, git_repository, auth_))
     git_objects = git_objects.json()
     f = open('static/%s_%s.txt' % (git_name.lower(), git_repository.lower()), 'w')
     f.close()
@@ -96,7 +100,7 @@ def get_file(git_name, git_repository, access_token=None):
     for git_object in git_objects:
         if git_object['type'] == 'file':
             # url = git_object['download_url']
-            url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2' % (git_name, git_repository, git_object['name'])
+            url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?%s' % (git_name, git_repository, git_object['name'], auth_)
             val = {}
             resource = requests.get(url)
             resource = resource.json()
@@ -343,7 +347,11 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None ):
 @app.route('/<git_name>/<git_repository_blog>/api/web_hook', methods=['GET', 'POST'])
 @cross_origin()
 def web_hook(git_name, git_repository_blog):
-    get_file(git_name, git_repository_blog)
+    try:
+        args = request.args.get('access_token')
+    except:
+        args = None
+    get_file(git_name, git_repository_blog, args)
     return '', 200
 
 
@@ -445,21 +453,24 @@ def repo_master(git_name, git_repository_blog, test_user):
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['GET'])
+@app.route('/<git_name>/<git_repository_blog>/api/get_comments', methods=['GET'])
 @cross_origin()
-def get_dict_comments(git_name, git_repository_blog, id_file):
+def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=None):
     try:
         args = request.args.get('access_token')
     except:
-        args = None
+        args = token
     if args:
         list_coms = get_comments(git_name, git_repository_blog, args)
     else:
         list_coms = get_comments(git_name, git_repository_blog)
-    if id_file in list_coms:
-        return jsonify(list_coms[id_file])
+    if id_file:
+        if id_file in list_coms:
+            return jsonify(list_coms[id_file])
+        else:
+            return jsonify([])
     else:
-        return jsonify({'message': 'No comments to this post'})
-
+        return jsonify(list_coms)
 
 
 @app.after_request
