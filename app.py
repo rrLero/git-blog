@@ -451,7 +451,7 @@ def repo_master(git_name, git_repository_blog, test_user):
         return jsonify({'access': False})
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['GET', 'PUT'])
+@app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['GET', 'PUT', 'DELETE', 'POST'])
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments', methods=['GET'])
 @cross_origin()
 def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=None):
@@ -479,7 +479,7 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=Non
     elif request.method == 'POST':
         data_issues = requests.get('https://api.github.com/repos/%s/%s/issues?access_token=%s' % (
                 git_name, git_repository_blog, args))
-        for issue in data_issues:
+        for issue in data_issues.json():
             if issue['title'] == id_file:
                 add_new = requests.post('http://api.github.com/repos/%s/%s/issues/%s/comments?access_token=%s'
                               % (git_name, git_repository_blog, issue['number'], args), json=request.json['body'])
