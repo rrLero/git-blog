@@ -71,7 +71,7 @@ def get_comments(git_name, git_repository, access_token=None):
             all_com = []
             for one_comment in comment.json():
                 com = {'user': one_comment['user']['login'], 'created_at': one_comment['created_at'],
-                       'body': one_comment['body'], 'avatar_url': one_comment['user']['avatar_url']}
+                       'body': one_comment['body'], 'avatar_url': one_comment['user']['avatar_url'], 'id': one_comment['id']}
                 all_com.append(com)
             comments_dict[comments.json()[i]['title']] = all_com
     return comments_dict
@@ -451,7 +451,7 @@ def repo_master(git_name, git_repository_blog, test_user):
         return jsonify({'access': False})
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['GET'])
+@app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['GET', 'PUT'])
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments', methods=['GET'])
 @cross_origin()
 def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=None):
@@ -459,17 +459,23 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=Non
         args = request.args.get('access_token')
     except:
         args = token
-    if args:
-        list_coms = get_comments(git_name, git_repository_blog, args)
-    else:
-        list_coms = get_comments(git_name, git_repository_blog)
-    if id_file:
-        if id_file in list_coms:
-            return jsonify(list_coms[id_file])
+    if request.method == 'GET':
+        if args:
+            list_coms = get_comments(git_name, git_repository_blog, args)
         else:
-            return jsonify([])
-    else:
-        return jsonify(list_coms)
+            list_coms = get_comments(git_name, git_repository_blog)
+        if id_file:
+            if id_file in list_coms:
+                return jsonify(list_coms[id_file])
+            else:
+                return jsonify([])
+        else:
+            return jsonify(list_coms)
+    elif request.method == 'DELETE':
+        del_comment = requests.delete(
+            'https://api.github.com/repos/%s/%s/issues/comments/%s?%s' % (
+                git_name, git_repository, id_file, args))
+        return del_comment.status_code
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/del_repo', methods=['DELETE', 'GET', 'POST'])
