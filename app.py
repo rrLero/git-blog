@@ -475,7 +475,7 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=Non
         del_comment = requests.delete(
             'https://api.github.com/repos/%s/%s/issues/comments/%s?access_token=%s' % (
                 git_name, git_repository_blog, id_file, args))
-        return del_comment.status_code
+        return '', del_comment.status_code
     elif request.method == 'POST':
         data_issues = requests.get('https://api.github.com/repos/%s/%s/issues?access_token=%s' % (
                 git_name, git_repository_blog, args))
@@ -483,7 +483,7 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=Non
             if issue['title'] == id_file:
                 add_new = requests.post('http://api.github.com/repos/%s/%s/issues/%s/comments?access_token=%s'
                               % (git_name, git_repository_blog, issue['number'], args), json=request.json['body'])
-                return add_new.status_code
+                return '', add_new.status_code
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/del_repo', methods=['DELETE', 'GET', 'POST'])
