@@ -486,13 +486,12 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=Non
                     add_new = requests.post('https://api.github.com/repos/%s/%s/issues/%s/comments?access_token=%s'
                                   % (git_name, git_repository_blog, issue['number'], args), json=data_body)
                     return '', add_new.status_code
-        else:
-            text_issue = {'body': 'comments for post %s' % id_file, 'title': id_file}
-            add_new_issue = requests.post('https://api.github.com/repos/%s/%s/issues?access_token=%s'
+        text_issue = {'body': 'comments for post %s' % id_file, 'title': id_file}
+        add_new_issue = requests.post('https://api.github.com/repos/%s/%s/issues?access_token=%s'
                                     % (git_name, git_repository_blog, args), json=text_issue)
-            add_new = requests.post('https://api.github.com/repos/%s/%s/issues/%s/comments?access_token=%s'
+        add_new = requests.post('https://api.github.com/repos/%s/%s/issues/%s/comments?access_token=%s'
                                     % (git_name, git_repository_blog, add_new_issue.json()['number'], args), json=data_body)
-            return '', add_new.status_code
+        return '', add_new.status_code
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/del_repo', methods=['DELETE', 'GET', 'POST'])
