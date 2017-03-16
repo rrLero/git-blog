@@ -398,7 +398,7 @@ def add_file(git_name, git_repository_blog, sha=None, id_file=None):
         issues = requests.get('https://api.github.com/repos/%s/%s/issues?access_token=%s' % (
                 git_name, git_repository_blog, args))
         if len(issues.json()) != 0:
-            for issue in issues:
+            for issue in issues.json():
                 if issue['title'] == id_file:
                     requests.put('https://api.github.com/repos/%s/%s/issues/%s/lock?access_token=%s' % (
                     git_name, git_repository_blog, issue['number'], args))
@@ -527,7 +527,7 @@ def del_repo(git_name, git_repository_blog):
     issues = requests.get('https://api.github.com/repos/%s/%s/issues?access_token=%s' % (
         git_name, git_repository_blog, args))
     if len(issues.json()) != 0:
-        for issue in issues:
+        for issue in issues.json():
             requests.put('https://api.github.com/repos/%s/%s/issues/%s/lock?access_token=%s' % (
                 git_name, git_repository_blog, issue['number'], args))
     if data.status_code == 200:
