@@ -395,13 +395,6 @@ def add_file(git_name, git_repository_blog, sha=None, id_file=None):
         url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?access_token=%s' % (
                 git_name, git_repository_blog, id_file, args)
         res = requests.delete(url, json=put_dict_git)
-        issues = requests.get('https://api.github.com/repos/%s/%s/issues?access_token=%s' % (
-                git_name, git_repository_blog, args))
-        if len(issues.json()) != 0:
-            for issue in issues.json():
-                if issue['title'] == id_file:
-                    requests.put('https://api.github.com/repos/%s/%s/issues/%s/lock?access_token=%s' % (
-                    git_name, git_repository_blog, issue['number'], args))
     else:
         return '', 404
     return '', res.status_code
@@ -524,12 +517,6 @@ def del_repo(git_name, git_repository_blog):
                 }
     args = request.args.get('access_token')
     data = requests.get('https://api.github.com/repos/%s/%s/contents/posts?access_token=%s' % (git_name, git_repository_blog, args))
-    issues = requests.get('https://api.github.com/repos/%s/%s/issues?access_token=%s' % (
-        git_name, git_repository_blog, args))
-    if len(issues.json()) != 0:
-        for issue in issues.json():
-            requests.put('https://api.github.com/repos/%s/%s/issues/%s/lock?access_token=%s' % (
-                git_name, git_repository_blog, issue['number'], args))
     if data.status_code == 200:
         for dir_ in data.json():
             put_dict_git['sha'] = dir_['sha']
