@@ -505,6 +505,44 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=Non
             return jsonify({})
 
 
+@app.route('/<git_name>/<git_repository_blog>/api/lock_comments/<id_file>', methods=['GET', 'PUT', 'DELETE', 'POST'])
+def lock_comments(git_name, git_repository_blog, id_file=None, token=None):
+    try:
+        args = request.args.get('access_token')
+    except:
+        args = token
+    data_issues = requests.get('https://api.github.com/repos/%s/%s/issues?access_token=%s' % (
+        git_name, git_repository_blog, args))
+    if len(data_issues.json()) > 0:
+        for issue in data_issues.json():
+            if issue['title'] == id_file:
+                if request.method == 'PUT':
+                    lock_issue = requests.put('https://api.github.com/repos/%s/%s/issues/%s/lock?access_token=%s'
+                                            % (git_name, git_repository_blog, issue['number'], args))
+                    if lock_issue.status_code == 204:
+                        return jsonify({'status': 'locked'})
+                    else:
+                        return jsonify({'status': 'unlocked'})
+                elif request.method == 'DELETE':
+                    lock_issue = requests.delete('https://api.github.com/repos/%s/%s/issues/%s/lock?access_token=%s'
+                                            % (git_name, git_repository_blog, issue['number'], args))
+                    if lock_issue.status_code == 204:
+                        return jsonify({'status': 'unlocked'})
+    text_issue = {'body': 'comments for post %s' % id_file, 'title': id_file}
+    add_new_issue = requests.post('https://api.github.com/repos/%s/%s/issues?access_token=%s'
+                                      % (git_name, git_repository_blog, args), json=text_issue)
+    if add_new_issue.status_code == 201:
+        if request.method == 'PUT':
+            lock_issue = requests.put('https://api.github.com/repos/%s/%s/issues/%s/lock?access_token=%s'
+                              % (git_name, git_repository_blog, add_new_issue.json()['number'], args))
+            if lock_issue.status_code == 204:
+                return jsonify({'status': 'locked'})
+            else:
+                jsonify({'status': 'unlocked'})
+    else:
+        jsonify({'status': 'unlocked'})
+
+
 @app.route('/<git_name>/<git_repository_blog>/api/del_repo', methods=['DELETE', 'GET', 'POST'])
 @cross_origin()
 def del_repo(git_name, git_repository_blog):
