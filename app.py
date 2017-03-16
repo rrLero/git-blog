@@ -503,22 +503,15 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=Non
             return jsonify(get_id)
         else:
             return jsonify({})
-
-
-@app.route('/<git_name>/<git_repository_blog>/api/edit_comments/<id_file>', methods=['GET'])
-def edit_comments(git_name, git_repository_blog, id_file=None, token=None):
-    try:
-        args = request.args.get('access_token')
-    except:
-        args = token
-    data_body = request.json
-    edit_comment = requests.patch(
+    elif request.method == 'PUT':
+        data_body = request.json
+        edit_comment = requests.patch(
             'https://api.github.com/repos/%s/%s/issues/comments/%s?access_token=%s' % (
                 git_name, git_repository_blog, id_file, args), json=data_body)
-    return '', edit_comment.status_code
+        return '', edit_comment.status_code
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/lock_comments/<id_file>', methods=['GET', 'PUT', 'DELETE', 'POST'])
+@app.route('/<git_name>/<git_repository_blog>/api/lock_comments/<id_file>', methods=['GET', 'DELETE'])
 def lock_comments(git_name, git_repository_blog, id_file=None, token=None):
     try:
         args = request.args.get('access_token')
@@ -529,7 +522,7 @@ def lock_comments(git_name, git_repository_blog, id_file=None, token=None):
     if len(data_issues.json()) > 0:
         for issue in data_issues.json():
             if issue['title'] == id_file:
-                if request.method == 'PUT':
+                if request.method == 'GET':
                     lock_issue = requests.put('https://api.github.com/repos/%s/%s/issues/%s/lock?access_token=%s'
                                             % (git_name, git_repository_blog, issue['number'], args))
                     if lock_issue.status_code == 204:
