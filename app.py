@@ -503,6 +503,12 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=Non
             return jsonify(get_id)
         else:
             return jsonify({})
+    elif request.method == 'PUT':
+        data_body = request.json
+        edit_comment = requests.patch(
+            'https://api.github.com/repos/%s/%s/issues/comments/%s?access_token=%s' % (
+                git_name, git_repository_blog, id_file, args), json=data_body)
+        return '', edit_comment.status_code
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/lock_comments/<id_file>', methods=['GET', 'PUT', 'DELETE', 'POST'])
