@@ -503,12 +503,19 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=Non
             return jsonify(get_id)
         else:
             return jsonify({})
-    elif request.method == 'PUT':
-        data_body = request.json
-        edit_comment = requests.patch(
+
+
+@app.route('/<git_name>/<git_repository_blog>/api/edit_comments/<id_file>', methods=['GET'])
+def edit_comments(git_name, git_repository_blog, id_file=None, token=None):
+    try:
+        args = request.args.get('access_token')
+    except:
+        args = token
+    data_body = request.json
+    edit_comment = requests.patch(
             'https://api.github.com/repos/%s/%s/issues/comments/%s?access_token=%s' % (
                 git_name, git_repository_blog, id_file, args), json=data_body)
-        return '', edit_comment.status_code
+    return '', edit_comment.status_code
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/lock_comments/<id_file>', methods=['GET', 'PUT', 'DELETE', 'POST'])
@@ -526,14 +533,14 @@ def lock_comments(git_name, git_repository_blog, id_file=None, token=None):
                     lock_issue = requests.put('https://api.github.com/repos/%s/%s/issues/%s/lock?access_token=%s'
                                             % (git_name, git_repository_blog, issue['number'], args))
                     if lock_issue.status_code == 204:
-                        return jsonify({'status': 'locked'})
+                        return jsonify({'status': False})
                     else:
-                        return jsonify({'status': 'unlocked'})
+                        return jsonify({'status': True})
                 elif request.method == 'DELETE':
                     lock_issue = requests.delete('https://api.github.com/repos/%s/%s/issues/%s/lock?access_token=%s'
                                             % (git_name, git_repository_blog, issue['number'], args))
                     if lock_issue.status_code == 204:
-                        return jsonify({'status': 'unlocked'})
+                        return jsonify({'status': True})
     text_issue = {'body': 'comments for post %s' % id_file, 'title': id_file}
     add_new_issue = requests.post('https://api.github.com/repos/%s/%s/issues?access_token=%s'
                                       % (git_name, git_repository_blog, args), json=text_issue)
@@ -542,11 +549,11 @@ def lock_comments(git_name, git_repository_blog, id_file=None, token=None):
             lock_issue = requests.put('https://api.github.com/repos/%s/%s/issues/%s/lock?access_token=%s'
                               % (git_name, git_repository_blog, add_new_issue.json()['number'], args))
             if lock_issue.status_code == 204:
-                return jsonify({'status': 'locked'})
+                return jsonify({'status': False})
             else:
-                jsonify({'status': 'unlocked'})
+                jsonify({'status': True})
     else:
-        jsonify({'status': 'unlocked'})
+        jsonify({'status': True})
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/del_repo', methods=['DELETE', 'GET', 'POST'])
