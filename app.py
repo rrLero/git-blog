@@ -442,7 +442,10 @@ def get_repo_list(git_name):
 @app.route('/api/repo_master/<git_name>/<git_repository_blog>/<test_user>', methods=['GET'])
 @cross_origin()
 def repo_master(git_name, git_repository_blog, test_user):
-    args = request.args.get('access_token')
+    try:
+        args = request.args.get('access_token')
+    except:
+        return jsonify({'message': 'No access token in request, try again'})
     headers = {'Accept': 'application/vnd.github.korra-preview'}
     test = requests.get('https://api.github.com/repos/%s/%s/collaborators/%s/permission?access_token=%s' % (git_name, git_repository_blog, test_user, args), headers=headers)
     if test.status_code == 200:
@@ -552,11 +555,8 @@ def lock_comments(git_name, git_repository_blog, id_file=None):
 
 @app.route('/<git_name>/<git_repository_blog>/api/lock_status/<id_file>', methods=['GET'])
 def lock_status(git_name, git_repository_blog, id_file=None):
-    try:
-        args = request.args.get('access_token')
-    except:
-        return jsonify({'message': 'No access token in request, try again'})
-    data_issues = requests.get('https://api.github.com/repos/%s/%s/issues?access_token=%s' % (
+    args = 'client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2'
+    data_issues = requests.get('https://api.github.com/repos/%s/%s/issues?%s' % (
         git_name, git_repository_blog, args))
     if len(data_issues.json()) > 0:
         for issue in data_issues.json():
@@ -565,7 +565,6 @@ def lock_status(git_name, git_repository_blog, id_file=None):
                     return jsonify({'status': False})
                 else:
                     return jsonify({'status': True})
-
     else:
         return jsonify({'status': True})
     return jsonify({'status': True})
