@@ -549,6 +549,22 @@ def lock_comments(git_name, git_repository_blog, id_file=None, token=None):
         jsonify({'status': True})
 
 
+@app.route('/<git_name>/<git_repository_blog>/api/lock_status/<id_file>', methods=['GET'])
+def lock_status(git_name, git_repository_blog, id_file=None, token=None):
+    try:
+        args = request.args.get('access_token')
+    except:
+        args = token
+    data_issues = requests.get('https://api.github.com/repos/%s/%s/issues?access_token=%s' % (
+        git_name, git_repository_blog, args))
+    if len(data_issues.json()) > 0:
+        for issue in data_issues.json():
+            if issue['title'] == id_file:
+                return jsonify(issue['locked'])
+    else:
+        return jsonify({})
+
+
 @app.route('/<git_name>/<git_repository_blog>/api/del_repo', methods=['DELETE', 'GET', 'POST'])
 @cross_origin()
 def del_repo(git_name, git_repository_blog):
