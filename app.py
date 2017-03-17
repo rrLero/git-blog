@@ -564,6 +564,7 @@ def lock_status(git_name, git_repository_blog, id_file=None):
                 return jsonify(issue['locked'])
     else:
         return jsonify(True)
+    return jsonify(True)
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/del_repo', methods=['DELETE', 'GET', 'POST'])
