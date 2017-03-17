@@ -359,6 +359,10 @@ def web_hook(git_name, git_repository_blog):
 @app.route('/<git_name>/<git_repository_blog>/api/put', methods=['POST', 'PUT', 'DELETE'])
 @cross_origin()
 def add_file(git_name, git_repository_blog, sha=None, id_file=None):
+    try:
+        args = request.args.get('access_token')
+    except:
+        return jsonify({'message': 'No access token in request, try again'})
     put_dict_git = {
       "message": "my commit message",
       "author":     {
@@ -366,7 +370,6 @@ def add_file(git_name, git_repository_blog, sha=None, id_file=None):
                     "email": "%s@some_email.com" %git_repository_blog
                     },
                 }
-    args = request.args.get('access_token')
     changes = request.json
     if request.method == 'POST':
         file_data = changes['text_full_md']
@@ -403,7 +406,10 @@ def add_file(git_name, git_repository_blog, sha=None, id_file=None):
 @app.route('/<git_name>/<git_repository_blog>/api/oauth', methods=['GET', 'POST', 'PUT'])
 @cross_origin()
 def oauth(git_name, git_repository_blog):
-    args = request.args.get('code')
+    try:
+        args = request.args.get('code')
+    except:
+        return jsonify({'message': 'No access token in request, try again'})
     headers = {'Accept': 'application/json'}
     access_token = requests.post('https://github.com/login/oauth/access_token?client_id=48f5b894f42ae1f869d2'
                                         '&client_secret=e289a8e72533f127ba873f0dec05908e6846866b&code=%s&'
@@ -542,7 +548,7 @@ def lock_comments(git_name, git_repository_blog, id_file=None):
     add_new_issue = requests.post('https://api.github.com/repos/%s/%s/issues?access_token=%s'
                                       % (git_name, git_repository_blog, args), json=text_issue)
     if add_new_issue.status_code == 201:
-        if request.method == 'PUT':
+        if request.method == 'GET':
             lock_issue = requests.put('https://api.github.com/repos/%s/%s/issues/%s/lock?access_token=%s'
                               % (git_name, git_repository_blog, add_new_issue.json()['number'], args))
             if lock_issue.status_code == 204:
@@ -560,11 +566,14 @@ def lock_status(git_name, git_repository_blog, id_file=None):
         git_name, git_repository_blog, args))
     if len(data_issues.json()) > 0:
         for issue in data_issues.json():
-            if issue['title'] == id_file:
-                if issue['locked']:
-                    return jsonify({'status': False})
-                else:
-                    return jsonify({'status': True})
+            try:
+                if issue['title'] == id_file:
+                    if issue['locked']:
+                        return jsonify({'status': False})
+                    else:
+                        return jsonify({'status': True})
+            except:
+                return jsonify({'meesage': 'error'})
     else:
         return jsonify({'status': True})
     return jsonify({'status': True})
@@ -573,6 +582,10 @@ def lock_status(git_name, git_repository_blog, id_file=None):
 @app.route('/<git_name>/<git_repository_blog>/api/del_repo', methods=['DELETE', 'GET', 'POST'])
 @cross_origin()
 def del_repo(git_name, git_repository_blog):
+    try:
+        args = request.args.get('access_token')
+    except:
+        return jsonify({'message': 'No access token in request, try again'})
     put_dict_git = {
       "message": "my commit message",
       "author":     {
@@ -580,7 +593,6 @@ def del_repo(git_name, git_repository_blog):
                     "email": "%s@emailemail.com" %git_repository_blog
                     },
                 }
-    args = request.args.get('access_token')
     data = requests.get('https://api.github.com/repos/%s/%s/contents/posts?access_token=%s' % (git_name, git_repository_blog, args))
     if data.status_code == 200:
         for dir_ in data.json():
