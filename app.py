@@ -471,12 +471,12 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=Non
                 return jsonify([])
         else:
             return jsonify(list_coms)
-    elif request.method == 'DELETE':
+    elif request.method == 'DELETE' and args:
         del_comment = requests.delete(
             'https://api.github.com/repos/%s/%s/issues/comments/%s?access_token=%s' % (
                 git_name, git_repository_blog, id_file, args))
         return '', del_comment.status_code
-    elif request.method == 'POST':
+    elif request.method == 'POST' and args:
         data_issues = requests.get('https://api.github.com/repos/%s/%s/issues?access_token=%s' % (
                 git_name, git_repository_blog, args))
         data_body = request.json
@@ -503,20 +503,21 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None, token=Non
             return jsonify(get_id)
         else:
             return jsonify({})
-    elif request.method == 'PUT':
+    elif request.method == 'PUT' and args:
         data_body = request.json
         edit_comment = requests.patch(
             'https://api.github.com/repos/%s/%s/issues/comments/%s?access_token=%s' % (
                 git_name, git_repository_blog, id_file, args), json=data_body)
         return '', edit_comment.status_code
+    return jsonify({'message': 'No access token in request, try again'})
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/lock_comments/<id_file>', methods=['GET', 'DELETE'])
-def lock_comments(git_name, git_repository_blog, id_file=None, token=None):
+def lock_comments(git_name, git_repository_blog, id_file=None):
     try:
         args = request.args.get('access_token')
     except:
-        args = token
+        return jsonify({'message': 'No access token in request, try again'})
     data_issues = requests.get('https://api.github.com/repos/%s/%s/issues?access_token=%s' % (
         git_name, git_repository_blog, args))
     if len(data_issues.json()) > 0:
@@ -550,11 +551,11 @@ def lock_comments(git_name, git_repository_blog, id_file=None, token=None):
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/lock_status/<id_file>', methods=['GET'])
-def lock_status(git_name, git_repository_blog, id_file=None, token=None):
+def lock_status(git_name, git_repository_blog, id_file=None):
     try:
         args = request.args.get('access_token')
     except:
-        args = token
+        return jsonify({'message': 'No access token in request, try again'})
     data_issues = requests.get('https://api.github.com/repos/%s/%s/issues?access_token=%s' % (
         git_name, git_repository_blog, args))
     if len(data_issues.json()) > 0:
