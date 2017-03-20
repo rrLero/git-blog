@@ -324,8 +324,14 @@ def post(git_name, git_repository_blog, title, page=1, tags=None):
 @app.route('/<git_name>/<git_repository_blog>/api/get/id/<id>', methods=['GET'])
 @app.route('/<git_name>/<git_repository_blog>/api/get', methods=['GET'])
 @cross_origin()
-def get_get_blog(git_name, git_repository_blog, title=None, id=None ):
+def get_get_blog(git_name, git_repository_blog, title=None, id=None):
+    try:
+        args = request.args.get('access_token')
+    except:
+        args = None
     data = try_file(git_name, git_repository_blog)
+    if not data:
+        data = get_file(git_name, git_repository_blog, args)
     data_1 = copy.deepcopy(data)
     data_preview = []
     for j in data_1:
@@ -336,7 +342,6 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None ):
         one_post.append({'message': 'no such post'})
         return jsonify(one_post[0])
     elif id:
-        print(data)
         one_post = [post for post in data if post['id'] == id]
         one_post.append({'message': 'no such post'})
         return jsonify(one_post[0])
