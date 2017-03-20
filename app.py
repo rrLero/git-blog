@@ -321,10 +321,11 @@ def post(git_name, git_repository_blog, title, page=1, tags=None):
 
 # Апи отдает данные с гита
 @app.route('/<git_name>/<git_repository_blog>/api/get/<title>', methods=['GET'])
+@app.route('/<git_name>/<git_repository_blog>/api/get/tags/<tag>', methods=['GET'])
 @app.route('/<git_name>/<git_repository_blog>/api/get/id/<id>', methods=['GET'])
 @app.route('/<git_name>/<git_repository_blog>/api/get', methods=['GET'])
 @cross_origin()
-def get_get_blog(git_name, git_repository_blog, title=None, id=None):
+def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
     try:
         args = request.args.get('access_token')
     except:
@@ -339,6 +340,9 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None):
     for j in data_1:
         del j['text_full_strings']
         data_preview.append(j)
+    if tag:
+        tag_data = sorted_by_tags(data_preview, tag)
+        return jsonify(tag_data)
     if title:
         one_post = [post for post in data if post['title'] == title]
         one_post.append({'message': 'no such post'})
