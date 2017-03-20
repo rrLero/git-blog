@@ -124,18 +124,21 @@ def get_file(git_name, git_repository, access_token=None):
             val['author'] = 'No author'
             val['layout'] = 'No layout'
             val['text_full_strings'] = ''
-            val['text_full_md'] = ''
+            # val['text_full_md'] = ''
             counter = 0
+            str_counter = 0
             for i in range(len(data)):
                 if '---' == data[i]:
                     counter += 1
                 if counter == 2:
+                    str_counter += len(data[i])+1
                     break
                 key, string = test_string(data[i])
                 if key and string:
                     val[key] = string
-            val['text_full_strings'] = full_string[full_string.rfind('---')+3:]
-            val['text_full_md'] = full_string
+                str_counter += len(data[i])+1
+            val['text_full_strings'] = full_string[str_counter:]
+            # val['text_full_md'] = full_string
             list_git_files.append(val)
     f = open('static/%s_%s.txt' % (git_name.lower(), git_repository.lower()), 'w')
     f.write(json.dumps(list_git_files))
