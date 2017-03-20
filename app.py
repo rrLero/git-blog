@@ -332,6 +332,8 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None):
     data = try_file(git_name, git_repository_blog)
     if not data:
         data = get_file(git_name, git_repository_blog, args)
+        if not data:
+            return jsonify({'message': 'no such repos'})
     data_1 = copy.deepcopy(data)
     data_preview = []
     for j in data_1:
