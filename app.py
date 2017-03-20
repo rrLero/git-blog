@@ -5,6 +5,7 @@ import json
 import requests
 import math
 import os
+import copy
 import base64
 from flask import make_response, request, current_app
 from sqlalchemy import create_engine
@@ -85,12 +86,8 @@ def get_file(git_name, git_repository, access_token=None):
     else:
         auth_ = 'client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2'
     list_git_files = []
-    if access_token:
-        git_objects = requests.get(
-            'https://api.github.com/repos/%s/%s/contents/posts?%s' % (
-            git_name, git_repository, auth_))
-    else:
-        git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts?%s' % (git_name, git_repository, auth_))
+    git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts?%s' % (
+                                    git_name, git_repository, auth_))
     git_objects = git_objects.json()
     f = open('static/%s_%s.txt' % (git_name.lower(), git_repository.lower()), 'w')
     f.close()
@@ -329,8 +326,9 @@ def post(git_name, git_repository_blog, title, page=1, tags=None):
 @cross_origin()
 def get_get_blog(git_name, git_repository_blog, title=None, id=None ):
     data = try_file(git_name, git_repository_blog)
+    data_1 = copy.deepcopy(data)
     data_preview = []
-    for j in data:
+    for j in data_1:
         del j['text_full_strings']
         data_preview.append(j)
     if title:
@@ -338,6 +336,7 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None ):
         one_post.append({'message': 'no such post'})
         return jsonify(one_post[0])
     elif id:
+        print(data)
         one_post = [post for post in data if post['id'] == id]
         one_post.append({'message': 'no such post'})
         return jsonify(one_post[0])
