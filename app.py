@@ -122,7 +122,7 @@ def get_file(git_name, git_repository, access_token=None):
             val['date'] = get_date(git_object['name'])
             val['tags'] = 'No tags,'
             val['author'] = 'No author'
-            val['layout'] = 'No layout'
+            val['preview'] = 'No Preview'
             val['text_full_strings'] = ''
             # val['text_full_md'] = ''
             counter = 0
@@ -169,8 +169,8 @@ def test_string(test):
         else:
             tags = [test]
         return 'tags', tags
-    elif 'layout' in test and ':' in test:
-        return 'layout', test[test.find('layout:')+len('layout:'):].strip()
+    elif 'preview' in test and ':' in test:
+        return 'preview', test[test.find('preview:')+len('preview:'):].strip()
     elif 'date' in test and ':' in test:
         test = test[test.find('date:') + len('date:'):].strip()
         test = test.strip('"')
@@ -329,6 +329,10 @@ def post(git_name, git_repository_blog, title, page=1, tags=None):
 @cross_origin()
 def get_get_blog(git_name, git_repository_blog, title=None, id=None ):
     data = try_file(git_name, git_repository_blog)
+    data_preview = []
+    for j in data:
+        del j['text_full_strings']
+        data_preview.append(j)
     if title:
         one_post = [post for post in data if post['title'] == title]
         one_post.append({'message': 'no such post'})
@@ -342,7 +346,7 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None ):
         if args:
             return search(data, 'title', args)
         else:
-            return jsonify(data)
+            return jsonify(data_preview)
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/update', methods=['GET', 'POST'])
