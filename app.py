@@ -547,6 +547,8 @@ def lock_comments(git_name, git_repository_blog, id_file=None):
                                             % (git_name, git_repository_blog, issue['number'], args))
                     if lock_issue.status_code == 204:
                         return jsonify({'status': True})
+                    else:
+                        return jsonify({'message': 'error'})
     text_issue = {'body': 'comments for post %s' % id_file, 'title': id_file}
     add_new_issue = requests.post('https://api.github.com/repos/%s/%s/issues?access_token=%s'
                                       % (git_name, git_repository_blog, args), json=text_issue)
@@ -612,7 +614,7 @@ def del_repo(git_name, git_repository_blog):
         session_git.close()
         return '', 200
     else:
-        return data.status_code
+        return '', data.status_code
 
 
 @app.after_request
