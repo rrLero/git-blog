@@ -124,6 +124,7 @@ def get_file(git_name, git_repository, access_token=None):
             # val['text_full_md'] = ''
             counter = 0
             str_counter = 0
+            new_key = []
             for i in range(len(data)):
                 if '---' == data[i]:
                     counter += 1
@@ -133,6 +134,9 @@ def get_file(git_name, git_repository, access_token=None):
                 key, string = test_string(data[i])
                 if key and string:
                     val[key] = string
+                    new_key.append(key)
+                if not key and string and len(new_key) > 0:
+                    val[new_key[-1]] = val[new_key[-1]] + '\n' + string
                 str_counter += len(data[i])+1
             val['text_full_strings'] = full_string[str_counter:]
             # val['text_full_md'] = full_string
@@ -175,7 +179,7 @@ def test_string(test):
     elif 'author' in test and ':' in test:
         return 'author', test[test.find('author:')+len('author:'):].strip()
     else:
-        return None, None
+        return None, test
 
 
 # Получение данных из файла, если такой есть
