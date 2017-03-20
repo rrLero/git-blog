@@ -126,7 +126,6 @@ def get_file(git_name, git_repository, access_token=None):
             str_counter = 0
             new_key = []
             for i in range(len(data)):
-                print(data[i])
                 if '---' == data[i]:
                     counter += 1
                 if counter == 2:
@@ -137,13 +136,11 @@ def get_file(git_name, git_repository, access_token=None):
                     val[key] = string
                     new_key.append(key)
                 if not key and string and len(new_key) > 0:
-                    if 'layout' not in string:
+                    if 'layout' not in string and type(val[new_key[-1]]) != list:
                         val[new_key[-1]] = val[new_key[-1]] + '\n' + string
                 str_counter += len(data[i])+1
-
             val['text_full_strings'] = full_string[str_counter:]
             # val['text_full_md'] = full_string
-            print(val[new_key[-1]])
             list_git_files.append(val)
     f = open('static/%s_%s.txt' % (git_name.lower(), git_repository.lower()), 'w')
     f.write(json.dumps(list_git_files))
