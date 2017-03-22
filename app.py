@@ -636,6 +636,14 @@ def del_repo(git_name, git_repository_blog):
         return '', data.status_code
 
 
+@app.route('/api/pagination', methods=['GET', 'POST'])
+@cross_origin()
+def pagination():
+    page_args = request.json
+    paginate = Pagination(page_args['per_page'], page_args['page'], page_args['count'])
+    return jsonify({'has_next': paginate.has_next, 'has_prev': paginate.has_prev, 'first_post': paginate.first_post, 'last_post': paginate.last_post})
+
+
 @app.after_request
 def add_cors(resp):
     """ Ensure all responses have the CORS headers. This ensures any failures are also accessible
