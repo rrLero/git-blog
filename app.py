@@ -55,8 +55,11 @@ def get_date(string_date):
         return 'No Date'
 
 
-def lock_status_comment(git_name, git_repository_blog, id_file=None):
-    args = 'client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2'
+def lock_status_comment(git_name, git_repository_blog, id_file=None, access_token=None):
+    if access_token:
+        args = 'access_token=%s' % access_token
+    else:
+        args = 'client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2'
     data_issues = requests.get('https://api.github.com/repos/%s/%s/issues?%s' % (
         git_name, git_repository_blog, args))
     if len(data_issues.json()) > 0:
@@ -144,7 +147,7 @@ def get_file(git_name, git_repository, access_token=None):
             val['comments_for_post'] = 'No comments'
             # val['text_full_md'] = ''
             val['comments'] = 0
-            val['comments_status'] = lock_status_comment(git_name, git_repository, val['id'])
+            val['comments_status'] = lock_status_comment(git_name, git_repository, val['id'], access_token)
             if val['id'] in data_comments:
                 val['comments'] = len(data_comments[val['id']])
                 val['comments_for_post'] = data_comments[val['id']]
