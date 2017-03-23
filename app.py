@@ -93,6 +93,7 @@ def get_file(git_name, git_repository, access_token=None):
     f.close()
     if str(type(git_objects)) == "<class 'dict'>":
         return False
+    data_comments = get_comments(git_name, git_repository, access_token)
     for git_object in git_objects:
         if git_object['type'] == 'file':
             # url = git_object['download_url']
@@ -122,6 +123,9 @@ def get_file(git_name, git_repository, access_token=None):
             val['preview'] = 'No Preview'
             val['text_full_strings'] = ''
             # val['text_full_md'] = ''
+            val['comments'] = 0
+            if val['id'] in data_comments:
+                val['comments'] = len(data_comments[val['id']])
             counter = 0
             str_counter = 0
             new_key = []
