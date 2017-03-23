@@ -122,10 +122,12 @@ def get_file(git_name, git_repository, access_token=None):
             val['author'] = 'No author'
             val['preview'] = 'No Preview'
             val['text_full_strings'] = ''
+            val['comments_for_post'] = 'No comments'
             # val['text_full_md'] = ''
             val['comments'] = 0
             if val['id'] in data_comments:
                 val['comments'] = len(data_comments[val['id']])
+                val['comments_for_post'] = data_comments[val['id']]
             counter = 0
             str_counter = 0
             new_key = []
@@ -350,7 +352,11 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
     data_1 = copy.deepcopy(data)
     data_preview = []
     for j in data_1:
-        del j['text_full_strings']
+        try:
+            del j['text_full_strings']
+            del j['comments_for_post']
+        except:
+            pass
         data_preview.append(j)
     if tag:
         tag_data = sorted_by_tags(data_preview, tag)
