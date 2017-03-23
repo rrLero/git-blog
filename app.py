@@ -320,8 +320,11 @@ def blog(git_name, git_repository_blog, tags=None, page=1):
 def post(git_name, git_repository_blog, title, page=1, tags=None):
     f = open('static/%s_%s.txt' % (git_name.lower(), git_repository_blog.lower()))
     temp = f.readline()
-    file = sorted(json.loads(temp), key=lambda d: d['date'], reverse=True)
-    return render_template('post.html', file=file, title=title, git_repository_blog=git_repository_blog, git_name=git_name, page=page)
+    if temp:
+        file = sorted(json.loads(temp), key=lambda d: d['date'], reverse=True)
+        return render_template('post.html', file=file, title=title, git_repository_blog=git_repository_blog, git_name=git_name, page=page)
+    else:
+        return jsonify({'message': 'no such post'})
 
 
 # Апи отдает данные с гита
@@ -640,8 +643,11 @@ def del_repo(git_name, git_repository_blog):
 @cross_origin()
 def pagination():
     page_args = request.json
-    paginate = Pagination(page_args['per_page'], page_args['page'], page_args['count'])
-    return jsonify({'has_next': paginate.has_next, 'has_prev': paginate.has_prev, 'first_post': paginate.first_post, 'last_post': paginate.last_post})
+    try:
+        paginate = Pagination(page_args['per_page'], page_args['page'], page_args['count'])
+        return jsonify({'has_next': paginate.has_next, 'has_prev': paginate.has_prev, 'first_post': paginate.first_post, 'last_post': paginate.last_post})
+    except:
+        return jsonify({'message': 'no params required received'})
 
 
 @app.after_request
