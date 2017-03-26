@@ -246,7 +246,8 @@ def oauth(git_name, git_repository_blog):
 @app.route('/api/blog_list', methods=['GET'])
 @cross_origin()
 def blog_list():
-    session_git = Users.open_base()
+    users_list = Users('none', 'none')
+    session_git = users_list.open_base()
     users = session_git.query(Users)
     blog_list_ = [{'name':(user.user_name).lower(), 'repo': (user.user_repo_name).lower()} for user in users]
     return jsonify(blog_list_)
@@ -402,7 +403,8 @@ def del_repo(git_name, git_repository_blog):
             url = 'https://api.github.com/repos/%s/%s/contents/%s?access_token=%s' % (
             git_name, git_repository_blog, dir_['path'], args)
             requests.delete(url, json=put_dict_git)
-        session_git = Users.open_base()
+        users_list = Users(git_name, git_repository_blog)
+        session_git = users_list.open_base()
         users = session_git.query(Users)
         for user in users:
             if user.user_name == git_name.lower() and user.user_repo_name == git_repository_blog.lower():
