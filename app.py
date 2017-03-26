@@ -189,41 +189,15 @@ def add_file(git_name, git_repository_blog, sha=None, id_file=None):
     args = request.args.get('access_token')
     if not args:
         return jsonify({'access_token': args})
-    put_dict_git = {
-      "message": "my commit message",
-      "author":     {
-                    "name": git_name,
-                    "email": "%s@some_email.com" %git_repository_blog
-                    },
-                }
+    git_access = GitAccess(git_name, git_repository_blog, args)
     changes = request.json
     if request.method == 'POST':
-        file_data = changes['text_full_md']
-        file_data = file_data.encode()
-        file_data = base64.encodebytes(file_data)
-        file_data = file_data.decode()
-        put_dict_git['sha'] = sha
-        put_dict_git['content'] = file_data
-        url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?access_token=%s' % (
-                git_name, git_repository_blog, id_file, args)
-        res = requests.put(url, json=put_dict_git)
+        res = git_access.edit_post(changes, sha, id_file)
     elif request.method == 'PUT':
-        my_time = datetime.datetime.now()
-        name_new_file = my_time.strftime('%Y-%m-%d-%I-%M-%p-')
-        file_data = changes['text_full_md']
-        file_name = name_new_file + changes['filename']
-        file_data = file_data.encode()
-        file_data = base64.encodebytes(file_data)
-        file_data = file_data.decode()
-        put_dict_git['content'] = file_data
-        url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?access_token=%s' %(
-                git_name, git_repository_blog, file_name, args)
-        res = requests.put(url, json=put_dict_git)
+        res = git_access.new_post(changes)
     elif request.method == 'DELETE':
-        put_dict_git['sha'] = sha
-        url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?access_token=%s' % (
-                git_name, git_repository_blog, id_file, args)
-        res = requests.delete(url, json=put_dict_git)
+        path = 'posts/' + str(id_file)
+        res = git_access.del_one_post(sha, path)
     else:
         return '', 404
     return '', res.status_code
@@ -235,10 +209,8 @@ def oauth(git_name, git_repository_blog):
     args = request.args.get('access_token')
     if not args:
         return jsonify({'access_token': args})
-    headers = {'Accept': 'application/json'}
-    access_token = requests.post('https://github.com/login/oauth/access_token?client_id=48f5b894f42ae1f869d2'
-                                        '&client_secret=e289a8e72533f127ba873f0dec05908e6846866b&code=%s&'
-                                        '&redirect_uri=http://acid.zzz.com.ua/%s/%s/page/1' % (args, git_name, git_repository_blog), headers=headers)
+    git_access = GitAccess(git_name, git_repository_blog, args)
+    access_token = git_access.get_access_token(args)
     access_token = access_token.json()
     return jsonify(access_token)
 
@@ -253,32 +225,14 @@ def blog_list():
     return jsonify(blog_list_)
 
 
-@app.route('/api/<git_name>', methods=['GET'])
-@cross_origin()
-def get_repo_list(git_name):
-    repos_posts_list = []
-    args = request.args.get('access_token')
-    url = 'https://api.github.com/users/%s/repos?access_token=%s' % (git_name, args)
-    repos = requests.get(url)
-    if repos.status_code != 200:
-        return jsonify(repos_posts_list)
-    else:
-        repos = repos.json()
-        for repo in repos:
-            url = requests.get('https://api.github.com/repos/%s/%s/contents/posts?access_token=%s' % (git_name, repo['name'], args))
-            if url.status_code == 200:
-                repos_posts_list.append(repo['name'])
-        return jsonify(repos_posts_list)
-
-
 @app.route('/api/repo_master/<git_name>/<git_repository_blog>/<test_user>', methods=['GET'])
 @cross_origin()
 def repo_master(git_name, git_repository_blog, test_user):
     args = request.args.get('access_token')
     if not args:
         return jsonify({'access_token': args})
-    headers = {'Accept': 'application/vnd.github.korra-preview'}
-    test = requests.get('https://api.github.com/repos/%s/%s/collaborators/%s/permission?access_token=%s' % (git_name, git_repository_blog, test_user, args), headers=headers)
+    git_access = GitAccess(git_name, git_repository_blog, args)
+    test = git_access.test_user_rights(test_user)
     if test.status_code == 200:
         return jsonify({'access': True})
     else:
@@ -305,24 +259,21 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
         return '', del_comment.status_code
     elif request.method == 'POST' and args:
         data_issues = git_access.data_issue_json()
+        data_issues = data_issues.json()
         data_body = request.json
         if len(data_issues) > 0:
             for issue in data_issues:
                 if issue['title'] == id_file:
-                    add_new = requests.post('https://api.github.com/repos/%s/%s/issues/%s/comments?access_token=%s'
-                                  % (git_name, git_repository_blog, issue['number'], args), json=data_body)
+                    add_new = git_access.add_comment(issue['number'], data_body)
                     get_id = {}
                     if add_new.status_code == 201:
                         git_access = GitAccess(git_name, git_repository_blog, args)
                         get_id = git_access.get_comments()
                         get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
                     return jsonify(get_id)
-        text_issue = {'body': 'comments for post %s' % id_file, 'title': id_file}
-        add_new_issue = requests.post('https://api.github.com/repos/%s/%s/issues?access_token=%s'
-                                    % (git_name, git_repository_blog, args), json=text_issue)
+        add_new_issue = git_access.add_new_issue(id_file)
         if add_new_issue.status_code == 201:
-            add_new = requests.post('https://api.github.com/repos/%s/%s/issues/%s/comments?access_token=%s'
-                                    % (git_name, git_repository_blog, add_new_issue.json()['number'], args), json=data_body)
+            add_new = git_access.add_comment(add_new_issue.json()['number'], data_body)
             get_id = {}
             if add_new.status_code == 201:
                 git_access = GitAccess(git_name, git_repository_blog, args)
@@ -333,9 +284,7 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
             return jsonify({})
     elif request.method == 'PUT' and args:
         data_body = request.json
-        edit_comment = requests.patch(
-            'https://api.github.com/repos/%s/%s/issues/comments/%s?access_token=%s' % (
-                git_name, git_repository_blog, id_file, args), json=data_body)
+        edit_comment = git_access.edit_comment(id_file, data_body)
         return '', edit_comment.status_code
     return jsonify({'message': 'No access token in request, try again'})
 
@@ -347,6 +296,7 @@ def lock_comments(git_name, git_repository_blog, id_file=None):
         return jsonify({'access_token': args})
     git_access = GitAccess(git_name, git_repository_blog, args)
     data_issues = git_access.data_issue_json()
+    data_issues = data_issues.json()
     if len(data_issues) > 0:
         for issue in data_issues:
             if issue['title'] == id_file:
@@ -387,20 +337,11 @@ def del_repo(git_name, git_repository_blog):
     args = request.args.get('access_token')
     if not args:
         return jsonify({'access_token': args})
-    put_dict_git = {
-      "message": "my commit message",
-      "author":     {
-                    "name": git_name,
-                    "email": "%s@emailemail.com" %git_repository_blog
-                    },
-                }
-    data = requests.get('https://api.github.com/repos/%s/%s/contents/posts?access_token=%s' % (git_name, git_repository_blog, args))
+    git_access = GitAccess(git_name, git_repository_blog, args)
+    data = git_access.get_all_posts()
     if data.status_code == 200:
         for dir_ in data.json():
-            put_dict_git['sha'] = dir_['sha']
-            url = 'https://api.github.com/repos/%s/%s/contents/%s?access_token=%s' % (
-                                    git_name, git_repository_blog, dir_['path'], args)
-            requests.delete(url, json=put_dict_git)
+            git_access.del_one_post(dir_['sha'], dir_['path'])
         users_list = Users(git_name, git_repository_blog)
         session_git = users_list.open_base()
         users = session_git.query(Users)

@@ -64,11 +64,8 @@ class GitGetAllPosts(GitAccess):
         data_comments = self.get_comments()
         for git_object in git_objects:
             if git_object['type'] == 'file':
-                url = 'https://api.github.com/repos/%s/%s/contents/posts/%s?%s' % (
-                        self.git_name, self.git_repository_blog, git_object['name'], self.auth_)
                 val = {}
-                resource = requests.get(url)
-                resource = resource.json()
+                resource = self.get_one_post(git_object['name']).json()
                 data = resource['content']
                 data = base64.b64decode(data)
                 data = data.decode('utf-8')
