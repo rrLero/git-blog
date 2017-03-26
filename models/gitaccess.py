@@ -46,10 +46,10 @@ class GitAccess:
         return comments_dict
 
     def del_comment(self, id_file):
-        del_comment = requests.delete(
+        del_comment_ = requests.delete(
             'https://api.github.com/repos/%s/%s/issues/comments/%s?access_token=%s' % (
                 self.git_name, self.git_repository_blog, id_file, self.auth_))
-        return del_comment
+        return del_comment_
 
     def data_issue_json(self):
         return self.data_issues.json()
