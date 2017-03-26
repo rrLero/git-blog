@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, request, session, flash, redirect, url_for, jsonify, abort
-import datetime
 import json
-import requests
 import os
 import copy
-import base64
+
 from flask import make_response, request, current_app
 from models.users import Users
 from models.pagination import Pagination

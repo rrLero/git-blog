@@ -1,5 +1,6 @@
 import requests
 import datetime
+import base64
 
 
 class GitAccess:
