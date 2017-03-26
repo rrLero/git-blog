@@ -303,7 +303,7 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
     elif request.method == 'DELETE' and args:
         return git_access.del_comment(id_file)
     elif request.method == 'POST' and args:
-        data_issues = git_access.data_issue_json
+        data_issues = git_access.data_issue_json()
         data_body = request.json
         if len(data_issues) > 0:
             for issue in data_issues:
@@ -343,7 +343,7 @@ def lock_comments(git_name, git_repository_blog, id_file=None):
     if not args:
         return jsonify({'access_token': args})
     git_access = GitAccess(git_name, git_repository_blog, args)
-    data_issues = git_access.data_issue_json
+    data_issues = git_access.data_issue_json()
     if len(data_issues) > 0:
         for issue in data_issues:
             if issue['title'] == id_file:
