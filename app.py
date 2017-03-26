@@ -301,7 +301,10 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
         else:
             return jsonify(list_coms)
     elif request.method == 'DELETE' and args:
-        return git_access.del_comment(id_file)
+        del_comment = requests.delete(
+            'https://api.github.com/repos/%s/%s/issues/comments/%s?access_token=%s' % (
+                git_name, git_repository_blog, id_file, args))
+        return '', del_comment.status_code
     elif request.method == 'POST' and args:
         data_issues = git_access.data_issue_json()
         data_body = request.json
