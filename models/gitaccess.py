@@ -47,7 +47,7 @@ class GitAccess:
 
     def del_comment(self, id_file):
         del_comment_ = requests.delete(
-            'https://api.github.com/repos/%s/%s/issues/comments/%s?access_token=%s' % (
+            'https://api.github.com/repos/%s/%s/issues/comments/%s?%s' % (
                 self.git_name, self.git_repository_blog, id_file, self.auth_))
         return del_comment_
 
