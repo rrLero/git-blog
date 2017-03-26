@@ -95,7 +95,7 @@ class GitAccess:
         return requests.get('https://api.github.com/repos/%s/%s/contents/posts?%s'
                                 % (self.git_name, self.git_repository_blog, self.auth_))
 
-    def del_ome_post(self, sha, path):
+    def del_one_post(self, sha, path):
         self.put_dict_git['sha'] = sha
         return requests.delete('https://api.github.com/repos/%s/%s/contents/%s?%s'
                                 % (self.git_name, self.git_repository_blog, path, self.auth_), json=self.put_dict_git)
