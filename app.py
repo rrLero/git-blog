@@ -351,26 +351,21 @@ def lock_comments(git_name, git_repository_blog, id_file=None):
         for issue in data_issues:
             if issue['title'] == id_file:
                 if request.method == 'GET':
-                    lock_issue = requests.put('https://api.github.com/repos/%s/%s/issues/%s/lock?access_token=%s'
-                                            % (git_name, git_repository_blog, issue['number'], args))
+                    lock_issue = git_access.lock_issue(issue['number'])
                     if lock_issue.status_code == 204:
                         return jsonify({'status': False})
                     else:
                         return jsonify({'status': True})
                 elif request.method == 'DELETE':
-                    lock_issue = requests.delete('https://api.github.com/repos/%s/%s/issues/%s/lock?access_token=%s'
-                                            % (git_name, git_repository_blog, issue['number'], args))
+                    lock_issue = git_access.unlock_issue(issue['number'])
                     if lock_issue.status_code == 204:
                         return jsonify({'status': True})
                     else:
                         return jsonify({'message': 'error'})
-    text_issue = {'body': 'comments for post %s' % id_file, 'title': id_file}
-    add_new_issue = requests.post('https://api.github.com/repos/%s/%s/issues?access_token=%s'
-                                      % (git_name, git_repository_blog, args), json=text_issue)
+    add_new_issue = git_access.add_new_issue(id_file)
     if add_new_issue.status_code == 201:
         if request.method == 'GET':
-            lock_issue = requests.put('https://api.github.com/repos/%s/%s/issues/%s/lock?access_token=%s'
-                              % (git_name, git_repository_blog, add_new_issue.json()['number'], args))
+            lock_issue = git_access.lock_issue(add_new_issue.json()['number'])
             if lock_issue.status_code == 204:
                 return jsonify({'status': False})
             else:
@@ -404,7 +399,7 @@ def del_repo(git_name, git_repository_blog):
         for dir_ in data.json():
             put_dict_git['sha'] = dir_['sha']
             url = 'https://api.github.com/repos/%s/%s/contents/%s?access_token=%s' % (
-            git_name, git_repository_blog, dir_['path'], args)
+                                    git_name, git_repository_blog, dir_['path'], args)
             requests.delete(url, json=put_dict_git)
         users_list = Users(git_name, git_repository_blog)
         session_git = users_list.open_base()

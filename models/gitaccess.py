@@ -53,3 +53,18 @@ class GitAccess:
 
     def data_issue_json(self):
         return self.data_issues.json()
+
+    def lock_issue(self, issue_id):
+        return requests.put('https://api.github.com/repos/%s/%s/issues/%s/lock?%s'
+                            % (self.git_name, self.git_repository_blog, issue_id, self.auth_))
+
+    def unlock_issue(self, issue_id):
+        return requests.delete('https://api.github.com/repos/%s/%s/issues/%s/lock?%s'
+                                            % (self.git_name, self.git_repository_blog, issue_id, self.auth_))
+
+    def add_new_issue(self, id_file):
+        text_issue = {'body': 'comments for post %s' % id_file, 'title': id_file}
+        return requests.post('https://api.github.com/repos/%s/%s/issues?%s'
+                                            % (self.git_name, self.git_repository_blog, self.auth_), json=text_issue)
+
+
