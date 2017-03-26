@@ -204,7 +204,7 @@ def add_file(git_name, git_repository_blog, sha=None, id_file=None):
 @app.route('/<git_name>/<git_repository_blog>/api/oauth', methods=['GET', 'POST', 'PUT'])
 @cross_origin()
 def oauth(git_name, git_repository_blog):
-    args = request.args.get('access_token')
+    args = request.args.get('code')
     if not args:
         return jsonify({'access_token': args})
     git_access = GitAccess(git_name, git_repository_blog, args)
