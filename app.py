@@ -312,6 +312,7 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
                                   % (git_name, git_repository_blog, issue['number'], args), json=data_body)
                     get_id = {}
                     if add_new.status_code == 201:
+                        git_access = GitAccess(git_name, git_repository_blog, args)
                         get_id = git_access.get_comments()
                         get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
                     return jsonify(get_id)
