@@ -167,8 +167,9 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
         data_preview.append(j)
     if tag:
         tag_data = sorted_by_tags(data_preview, tag)
-        paginate = Pagination(per_page, page, len(tag_data))
-        return jsonify(tag_data[paginate.first_post:paginate.last_post+1])
+        count = len(tag_data)
+        paginate = Pagination(per_page, page, count)
+        return jsonify({'items': tag_data[paginate.first_post:paginate.last_post+1], 'total': count})
     if title:
         one_post = [post for post in data if post['title'] == title]
         one_post.append({'message': 'no such post'})
@@ -182,8 +183,9 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
         if args:
             return search(data, 'title', args)
         else:
-            paginate = Pagination(per_page, page, len(data_preview))
-            return jsonify(data_preview[paginate.first_post:paginate.last_post+1])
+            count = len(data_preview)
+            paginate = Pagination(per_page, page, count)
+            return jsonify({'items': data_preview[paginate.first_post:paginate.last_post+1], 'total': count})
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/update', methods=['GET', 'POST'])
