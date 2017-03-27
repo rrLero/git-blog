@@ -135,6 +135,14 @@ def post(git_name, git_repository_blog, title, page=1, tags=None):
 @cross_origin()
 def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
     args = request.args.get('access_token')
+    per_page = request.args.get('per_page')
+    page = request.args.get('page')
+    if per_page and page:
+        per_page = int(per_page)
+        page = int(page)
+    else:
+        per_page = 100000
+        page = 1
     data = try_file(git_name, git_repository_blog)
     if not data:
         git_access = GitGetAllPosts(git_name, git_repository_blog, args)
@@ -159,7 +167,8 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
         data_preview.append(j)
     if tag:
         tag_data = sorted_by_tags(data_preview, tag)
-        return jsonify(tag_data)
+        paginate = Pagination(per_page, page, len(tag_data))
+        return jsonify(tag_data[paginate.first_post:paginate.last_post+1])
     if title:
         one_post = [post for post in data if post['title'] == title]
         one_post.append({'message': 'no such post'})
@@ -173,7 +182,8 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
         if args:
             return search(data, 'title', args)
         else:
-            return jsonify(data_preview)
+            paginate = Pagination(per_page, page, len(data_preview))
+            return jsonify(data_preview[paginate.first_post:paginate.last_post+1])
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/update', methods=['GET', 'POST'])
