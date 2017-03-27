@@ -133,3 +133,7 @@ class GitAccess:
                                      '&client_secret=e289a8e72533f127ba873f0dec05908e6846866b&code=%s&'
                                      '&redirect_uri=http://acid.zzz.com.ua/%s/%s/page/1'
                                 % (args, self.git_name, self.git_repository_blog), headers=headers)
+
+    def create_repo(self, name):
+        name_repo = {'name': name}
+        return requests.post('https://api.github.com/user/repos?%s' % self.auth_, json=name_repo)

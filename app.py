@@ -140,7 +140,14 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
         git_access = GitGetAllPosts(git_name, git_repository_blog, args)
         data = git_access.get_file()
         if not data:
-            return jsonify({'message': 'no such repos'})
+            create_repo = git_access.create_repo(git_repository_blog)
+            if create_repo.status_code == 201:
+                git_access.get_file()
+                return jsonify({'message': 'new repo created'})
+            elif create_repo.status_code == 422:
+                return jsonify({'message': 'repo is empty'})
+            else:
+                return jsonify({'message': 'unable create repo'})
     data_1 = copy.deepcopy(data)
     data_preview = []
     for j in data_1:
