@@ -356,12 +356,12 @@ def del_repo(git_name, git_repository_blog):
         return jsonify({'access_token': args})
     git_access = GitAccess(git_name, git_repository_blog, args)
     data = git_access.get_all_posts()
+    users_list = Users(git_name, git_repository_blog)
+    session_git = users_list.open_base()
+    users = session_git.query(Users)
     if data.status_code == 200:
         for dir_ in data.json():
             git_access.del_one_post(dir_['sha'], dir_['path'])
-        users_list = Users(git_name, git_repository_blog)
-        session_git = users_list.open_base()
-        users = session_git.query(Users)
         for user in users:
             if user.user_name == git_name.lower() and user.user_repo_name == git_repository_blog.lower():
                 session_git.delete(user)
@@ -370,8 +370,13 @@ def del_repo(git_name, git_repository_blog):
         git_access.del_branch()
         return '', 200
     else:
+        for user in users:
+            if user.user_name == git_name.lower() and user.user_repo_name == git_repository_blog.lower():
+                session_git.delete(user)
+        session_git.commit()
+        session_git.close()
         git_access.del_branch()
-        return '', data.status_code
+        return '', 200
 
 
 @app.route('/api/pagination', methods=['GET', 'POST'])
