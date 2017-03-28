@@ -149,6 +149,8 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
                 users_list.new_user()
                 return jsonify({'message': 'new repo created'})
             elif create_repo.status_code == 422:
+                users_list = Users(git_name, git_repository_blog)
+                users_list.new_user()
                 return jsonify({'message': 'repo is empty'})
             else:
                 return jsonify({'message': 'unable create repo'})
