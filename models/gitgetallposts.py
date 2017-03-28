@@ -52,10 +52,11 @@ def test_string(test):
 # Функция получает имя пользователя и репозиторий. при помощи АПИ ГИТА функция переберает файлы и создает словарь из
 # постов
 class GitGetAllPosts(GitAccess):
-    def get_file(self):
+    def get_posts_json(self, ref=False):
         list_git_files = []
-        git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts?%s' % (
-            self.git_name, self.git_repository_blog, self.auth_))
+        git_objects = self.get_all_posts(ref)
+        # git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts?%s' % (
+        #     self.git_name, self.git_repository_blog, self.auth_))
         git_objects = git_objects.json()
         f = open('static/%s_%s.txt' % (self.git_name.lower(), self.git_repository_blog.lower()), 'w')
         f.close()
@@ -65,7 +66,7 @@ class GitGetAllPosts(GitAccess):
         for git_object in git_objects:
             if git_object['type'] == 'file':
                 val = {}
-                resource = self.get_one_post(git_object['name']).json()
+                resource = self.get_one_post(git_object['name'], ref).json()
                 data = resource['content']
                 data = base64.b64decode(data)
                 data = data.decode('utf-8')
@@ -112,6 +113,12 @@ class GitGetAllPosts(GitAccess):
                     str_counter += len(data[i]) + 1
                 val['text_full_strings'] = full_string[str_counter:]
                 list_git_files.append(val)
+        return list_git_files
+
+    def get_file(self, ref=False):
+        list_git_files = self.get_posts_json(ref)
+        if not list_git_files:
+            return False
         f = open('static/%s_%s.txt' % (self.git_name.lower(), self.git_repository_blog.lower()), 'w')
         f.write(json.dumps(list_git_files))
         f.close()

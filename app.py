@@ -137,12 +137,6 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
     args = request.args.get('access_token')
     per_page = request.args.get('per_page')
     page = request.args.get('page')
-    if per_page and page:
-        per_page = int(per_page)
-        page = int(page)
-    else:
-        per_page = 100000
-        page = 1
     data = try_file(git_name, git_repository_blog)
     if not data:
         git_access = GitGetAllPosts(git_name, git_repository_blog, args)
@@ -212,6 +206,10 @@ def add_file(git_name, git_repository_blog, sha=None, id_file=None):
         res = git_access.edit_post(changes, sha, id_file)
     elif request.method == 'PUT':
         res = git_access.new_post(changes)
+        if res.status_code == 404 and res.json()['message'] == 'Branch post_branch not found':
+            sha = (git_access.get_one_branch('master')).json()['object']['sha']
+            git_access.create_branch(sha)
+            res = git_access.new_post(changes)
     elif request.method == 'DELETE':
         path = 'posts/' + str(id_file)
         res = git_access.del_one_post(sha, path)
@@ -381,6 +379,34 @@ def pagination():
         return jsonify({'has_next': paginate.has_next, 'has_prev': paginate.has_prev, 'first_post': paginate.first_post, 'last_post': paginate.last_post})
     except:
         return jsonify({'message': 'no params required received'})
+
+
+@app.route('/<git_name>/<git_repository_blog>/api/get_branch_posts', methods=['DELETE', 'GET', 'POST'])
+@cross_origin()
+def get_branch_posts(git_name, git_repository_blog):
+    args = request.args.get('access_token')
+    per_page = request.args.get('per_page')
+    page = request.args.get('page')
+    if not args:
+        return jsonify({'access_token': args})
+    git_access = GitGetAllPosts(git_name, git_repository_blog, args)
+    branch_posts = git_access.get_posts_json('post_branch')
+    list_branch_post = []
+    if branch_posts:
+        posts = try_file(git_name, git_repository_blog)
+        if not posts:
+            posts = git_access.get_posts_json()
+            if not posts:
+                posts = []
+        for branch_post in branch_posts:
+            if branch_post not in posts:
+                list_branch_post.append(branch_post)
+        branch_posts = sorted(list_branch_post, key=lambda d: d['date'], reverse=True)
+        count = len(branch_posts)
+        paginate = Pagination(per_page, page, count)
+        return jsonify({'items': branch_posts[paginate.first_post:paginate.last_post + 1], 'total': count})
+    else:
+        return jsonify({"items": [], "total": 0})
 
 
 @app.after_request

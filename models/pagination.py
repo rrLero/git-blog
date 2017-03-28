@@ -3,6 +3,12 @@ import math
 
 class Pagination:
     def __init__(self, per_page, page, count):
+        if per_page and page:
+            per_page = int(per_page)
+            page = int(page)
+        else:
+            per_page = 100000
+            page = 1
         self.per_page = per_page
         self.page = page
         self.count = count
