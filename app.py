@@ -367,10 +367,10 @@ def del_repo(git_name, git_repository_blog):
                 session_git.delete(user)
         session_git.commit()
         session_git.close()
-        git_access.del_deep_repo()
+        # git_access.del_deep_repo()
         return '', 200
     else:
-        git_access.del_deep_repo()
+        # git_access.del_deep_repo()
         return '', data.status_code
 
 
