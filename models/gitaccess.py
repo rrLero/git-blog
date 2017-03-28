@@ -161,3 +161,9 @@ class GitAccess:
     def del_deep_repo(self):
         return requests.delete('https://api.github.com/repos/%s/%s?%s'
                                % (self.git_name, self.git_repository_blog, self.auth_))
+
+    def del_branch(self):
+        # requests.delete('https://api.github.com/repos/%s/%s/git/refs/heads/master?%s'
+        #                 % (self.git_name, self.git_repository_blog, self.auth_))
+        return requests.delete('https://api.github.com/repos/%s/%s/git/refs/heads/post_branch?%s'
+                               % (self.git_name, self.git_repository_blog, self.auth_))
