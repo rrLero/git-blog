@@ -157,3 +157,7 @@ class GitAccess:
         params = {"ref": "refs/heads/post_branch", "sha": sha}
         return requests.post('https://api.github.com/repos/%s/%s/git/refs?%s'
                                 % (self.git_name, self.git_repository_blog, self.auth_), json=params)
+
+    def del_deep_repo(self):
+        return requests.delete('https://api.github.com/repos/%s/%s?%s'
+                               % (self.git_name, self.git_repository_blog, self.auth_))
