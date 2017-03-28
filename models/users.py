@@ -26,3 +26,18 @@ class Users(Base):
         DBSession = sessionmaker(bind=engine)
         session_git = DBSession()
         return session_git
+
+    def new_user(self):
+        session_git = self.open_base()
+        users = session_git.query(Users)
+        new_user = True
+        for user in users:
+            if user.user_name == self.user_name.lower() and user.user_repo_name == self.user_repo_name.lower():
+                session_git.close()
+                new_user = False
+        if new_user:
+            new_user = Users(user_name=self.user_name.lower(), user_repo_name=self.user_repo_name.lower())
+            session_git.add(new_user)
+            session_git.commit()
+            session_git.close()
+        return new_user
