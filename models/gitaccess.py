@@ -87,11 +87,17 @@ class GitAccess:
         return requests.get('https://api.github.com/repos/%s/%s/issues/%s/comments?%s'
                                 % (self.git_name, self.git_repository_blog, number, self.auth_))
 
-    def get_one_post(self, file_name):
+    def get_one_post(self, file_name, ref=None):
+        if ref:
+            return requests.get('https://api.github.com/repos/%s/%s/contents/posts/%s?%s&ref=post_branch'
+                                % (self.git_name, self.git_repository_blog, file_name, self.auth_))
         return requests.get('https://api.github.com/repos/%s/%s/contents/posts/%s?%s'
                                 % (self.git_name, self.git_repository_blog, file_name, self.auth_))
 
-    def get_all_posts(self):
+    def get_all_posts(self, ref=False):
+        if ref:
+            return requests.get('https://api.github.com/repos/%s/%s/contents/posts?%s&ref=post_branch'
+                                % (self.git_name, self.git_repository_blog, self.auth_))
         return requests.get('https://api.github.com/repos/%s/%s/contents/posts?%s'
                                 % (self.git_name, self.git_repository_blog, self.auth_))
 
@@ -119,6 +125,7 @@ class GitAccess:
         file_data = base64.encodebytes(file_data)
         file_data = file_data.decode()
         self.put_dict_git['content'] = file_data
+        self.put_dict_git['branch'] = 'post_branch'
         return requests.put('https://api.github.com/repos/%s/%s/contents/posts/%s?%s'
                                 %(self.git_name, self.git_repository_blog, file_name, self.auth_), json=self.put_dict_git)
 
@@ -135,5 +142,18 @@ class GitAccess:
                                 % (args, self.git_name, self.git_repository_blog), headers=headers)
 
     def create_repo(self, name):
-        name_repo = {'name': name}
+        name_repo = {'name': name, 'auto_init': True}
         return requests.post('https://api.github.com/user/repos?%s' % self.auth_, json=name_repo)
+
+    def get_list_branches(self):
+        return requests.get('https://api.github.com/repos/%s/%s/git/refs?%s'
+                                % (self.git_name, self.git_repository_blog, self.auth_))
+
+    def get_one_branch(self, name):
+        return requests.get('https://api.github.com/repos/%s/%s/git/refs/heads/%s?%s'
+                                % (self.git_name, self.git_repository_blog, name, self.auth_))
+
+    def create_branch(self, sha):
+        params = {"ref": "refs/heads/post_branch", "sha": sha}
+        return requests.post('https://api.github.com/repos/%s/%s/git/refs?%s'
+                                % (self.git_name, self.git_repository_blog, self.auth_), json=params)
