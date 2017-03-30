@@ -392,7 +392,7 @@ def pagination():
         return jsonify({'message': 'no params required received'})
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/get_branch_posts', methods=['DELETE', 'GET', 'POST'])
+@app.route('/<git_name>/<git_repository_blog>/api/get_branch_posts', methods=['DELETE', 'GET', 'POST', 'PUT'])
 @cross_origin()
 def get_branch_posts(git_name, git_repository_blog):
     args = request.args.get('access_token')
