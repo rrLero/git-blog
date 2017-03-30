@@ -135,6 +135,15 @@ class GitAccess:
             if id_file:
                 file_name = id_file
                 self.put_dict_git['content'] = changes
+            else:
+                my_time = datetime.datetime.now()
+                name_new_file = my_time.strftime('%Y-%m-%d-%I-%M-%p-')
+                file_data = changes['text_full_md']
+                file_name = name_new_file + changes['filename']
+                file_data = file_data.encode()
+                file_data = base64.encodebytes(file_data)
+                file_data = file_data.decode()
+                self.put_dict_git['content'] = file_data
         return requests.put('https://api.github.com/repos/%s/%s/contents/posts/%s?%s'
                                 %(self.git_name, self.git_repository_blog, file_name, self.auth_), json=self.put_dict_git)
 

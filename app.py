@@ -464,6 +464,18 @@ def remove_post_to_master(git_name, git_repository_blog, id_file):
                 return jsonify(one_post)
 
 
+@app.route('/<git_name>/<git_repository_blog>/api/put/master', methods=['PUT'])
+def push_master(git_name, git_repository_blog, id_file):
+    args = request.args.get('access_token')
+    if not args:
+        return jsonify({'access_token': args})
+    git_access = GitAccess(git_name, git_repository_blog, args)
+    changes = request.json
+    ref = False
+    res = git_access.new_post(changes, ref)
+    return '', res.status_code
+
+
 @app.after_request
 def add_cors(resp):
     """ Ensure all responses have the CORS headers. This ensures any failures are also accessible
