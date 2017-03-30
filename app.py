@@ -420,7 +420,7 @@ def get_branch_posts(git_name, git_repository_blog):
         return jsonify({"items": [], "total": 0})
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/branch/remove/<id_file>', methods=['GET'])
+@app.route('/<git_name>/<git_repository_blog>/api/branch/remove/<id_file>', methods=['GET', 'DELETE'])
 @cross_origin()
 def remove_post_to_master(git_name, git_repository_blog, id_file):
     args = request.args.get('access_token')
@@ -428,9 +428,11 @@ def remove_post_to_master(git_name, git_repository_blog, id_file):
         return jsonify({'access_token': args})
     git_access = GitAccess(git_name, git_repository_blog, args)
     ref = True
-    status = 404
     data = git_access.get_one_post(id_file, ref)
-    if data.status_code == 200:
+    status = 404
+    if data.status_code != 200:
+        return '', data.status_code
+    if request.method == 'GET':
         status = data.status_code
         content = data.json()['content']
         sha = data.json()['sha']
@@ -441,7 +443,15 @@ def remove_post_to_master(git_name, git_repository_blog, id_file):
             ref = True
             del_post = git_access.del_one_post(sha, path, ref)
             status = del_post.status_code
-    return '', status
+        return '', status
+    elif request.method == 'DELETE':
+        if data.status_code == 200:
+            sha = data.json()['sha']
+            path = data.json()['path']
+            ref = True
+            del_post = git_access.del_one_post(sha, path, ref)
+            status = del_post.status_code
+        return '', status
 
 
 @app.after_request
