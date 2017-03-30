@@ -101,7 +101,9 @@ class GitAccess:
         return requests.get('https://api.github.com/repos/%s/%s/contents/posts?%s'
                                 % (self.git_name, self.git_repository_blog, self.auth_))
 
-    def del_one_post(self, sha, path):
+    def del_one_post(self, sha, path, ref=False):
+        if ref:
+            self.put_dict_git['branch'] = 'post_branch'
         self.put_dict_git['sha'] = sha
         return requests.delete('https://api.github.com/repos/%s/%s/contents/%s?%s'
                                 % (self.git_name, self.git_repository_blog, path, self.auth_), json=self.put_dict_git)
@@ -116,16 +118,21 @@ class GitAccess:
         return requests.put('https://api.github.com/repos/%s/%s/contents/posts/%s?%s'
                                 % (self.git_name, self.git_repository_blog, id_file, self.auth_), json=self.put_dict_git)
 
-    def new_post(self, changes):
-        my_time = datetime.datetime.now()
-        name_new_file = my_time.strftime('%Y-%m-%d-%I-%M-%p-')
-        file_data = changes['text_full_md']
-        file_name = name_new_file + changes['filename']
-        file_data = file_data.encode()
-        file_data = base64.encodebytes(file_data)
-        file_data = file_data.decode()
-        self.put_dict_git['content'] = file_data
-        self.put_dict_git['branch'] = 'post_branch'
+    def new_post(self, changes, ref=True, id_file=None):
+        if ref:
+            my_time = datetime.datetime.now()
+            name_new_file = my_time.strftime('%Y-%m-%d-%I-%M-%p-')
+            file_data = changes['text_full_md']
+            file_name = name_new_file + changes['filename']
+            file_data = file_data.encode()
+            file_data = base64.encodebytes(file_data)
+            file_data = file_data.decode()
+            self.put_dict_git['content'] = file_data
+            self.put_dict_git['branch'] = 'post_branch'
+        else:
+            if id_file:
+                file_name = id_file
+                self.put_dict_git['content'] = changes
         return requests.put('https://api.github.com/repos/%s/%s/contents/posts/%s?%s'
                                 %(self.git_name, self.git_repository_blog, file_name, self.auth_), json=self.put_dict_git)
 

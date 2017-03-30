@@ -420,6 +420,30 @@ def get_branch_posts(git_name, git_repository_blog):
         return jsonify({"items": [], "total": 0})
 
 
+@app.route('/<git_name>/<git_repository_blog>/api/branch/remove/<id_file>', methods=['GET'])
+@cross_origin()
+def remove_post_to_master(git_name, git_repository_blog, id_file):
+    args = request.args.get('access_token')
+    if not args:
+        return jsonify({'access_token': args})
+    git_access = GitAccess(git_name, git_repository_blog, args)
+    ref = True
+    status = 404
+    data = git_access.get_one_post(id_file, ref)
+    if data.status_code == 200:
+        status = data.status_code
+        content = data.json()['content']
+        sha = data.json()['sha']
+        path = data.json()['path']
+        ref = False
+        new_post = git_access.new_post(content, ref, id_file)
+        if new_post.status_code == 201:
+            ref = True
+            del_post = git_access.del_one_post(sha, path, ref)
+            status = del_post.status_code
+    return '', status
+
+
 @app.after_request
 def add_cors(resp):
     """ Ensure all responses have the CORS headers. This ensures any failures are also accessible
