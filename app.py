@@ -392,7 +392,7 @@ def pagination():
         return jsonify({'message': 'no params required received'})
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/get_branch_posts', methods=['DELETE', 'GET', 'POST', 'PUT'])
+@app.route('/<git_name>/<git_repository_blog>/api/get_branch_posts', methods=['GET'])
 @cross_origin()
 def get_branch_posts(git_name, git_repository_blog):
     args = request.args.get('access_token')
@@ -420,7 +420,7 @@ def get_branch_posts(git_name, git_repository_blog):
         return jsonify({"items": [], "total": 0})
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/branch/remove/<id_file>', methods=['GET', 'DELETE'])
+@app.route('/<git_name>/<git_repository_blog>/api/branch/remove/<id_file>', methods=['DELETE', 'GET', 'POST', 'PUT'])
 @cross_origin()
 def remove_post_to_master(git_name, git_repository_blog, id_file):
     args = request.args.get('access_token')
