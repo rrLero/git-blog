@@ -465,7 +465,7 @@ def remove_post_to_master(git_name, git_repository_blog, id_file):
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/put/master', methods=['PUT'])
-def push_master(git_name, git_repository_blog, id_file):
+def push_master(git_name, git_repository_blog):
     args = request.args.get('access_token')
     if not args:
         return jsonify({'access_token': args})
