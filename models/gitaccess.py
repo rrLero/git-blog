@@ -108,7 +108,9 @@ class GitAccess:
         return requests.delete('https://api.github.com/repos/%s/%s/contents/%s?%s'
                                 % (self.git_name, self.git_repository_blog, path, self.auth_), json=self.put_dict_git)
 
-    def edit_post(self, changes, sha, id_file):
+    def edit_post(self, changes, sha, id_file, ref=False):
+        if ref:
+            self.put_dict_git['branch'] = 'post_branch'
         file_data = changes['text_full_md']
         file_data = file_data.encode()
         file_data = base64.encodebytes(file_data)

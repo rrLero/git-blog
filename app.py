@@ -426,17 +426,17 @@ def remove_post_to_master(git_name, git_repository_blog, id_file):
     args = request.args.get('access_token')
     if not args:
         return jsonify({'access_token': args})
-    git_access = GitAccess(git_name, git_repository_blog, args)
+    git_access = GitGetAllPosts(git_name, git_repository_blog, args)
     ref = True
     data = git_access.get_one_post(id_file, ref)
     status = 404
     if data.status_code != 200:
         return '', data.status_code
-    if request.method == 'GET':
+    sha = data.json()['sha']
+    path = data.json()['path']
+    if request.method == 'PUT':
         status = data.status_code
         content = data.json()['content']
-        sha = data.json()['sha']
-        path = data.json()['path']
         ref = False
         new_post = git_access.new_post(content, ref, id_file)
         if new_post.status_code == 201:
@@ -446,12 +446,22 @@ def remove_post_to_master(git_name, git_repository_blog, id_file):
         return '', status
     elif request.method == 'DELETE':
         if data.status_code == 200:
-            sha = data.json()['sha']
-            path = data.json()['path']
             ref = True
             del_post = git_access.del_one_post(sha, path, ref)
             status = del_post.status_code
         return '', status
+    elif request.method == 'POST':
+        changes = request.json
+        ref = True
+        edit = git_access.edit_post(changes, sha, id_file, ref)
+        status = edit.status_code
+        return '', status
+    elif request.method == 'GET':
+        ref = True
+        all_post_data = git_access.get_posts_json(ref)
+        for one_post in all_post_data:
+            if id_file == one_post['id']:
+                return jsonify(one_post)
 
 
 @app.after_request
