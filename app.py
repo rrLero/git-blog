@@ -22,17 +22,29 @@ app.config.update(dict(
 
 
 # Получение данных из файла, если такой есть
-def try_file(git_name, git_repository_blog):
-    try:
-        f = open('static/%s_%s.txt' % (git_name.lower(), git_repository_blog.lower()))
-        temp = f.readline()
-    except:
-        return False
-    if temp:
-        file = sorted(json.loads(temp), key=lambda d: d['date'], reverse=True)
-        return file
-    else:
-        return False
+def try_file(git_name, git_repository_blog, ref=False):
+    if not ref:
+        try:
+            f = open('static/%s_%s.txt' % (git_name.lower(), git_repository_blog.lower()))
+            temp = f.readline()
+        except:
+            return False
+        if temp:
+            file = sorted(json.loads(temp), key=lambda d: d['date'], reverse=True)
+            return file
+        else:
+            return False
+    elif ref:
+        try:
+            f = open('static/%s_%s_branch.txt' % (git_name.lower(), git_repository_blog.lower()))
+            temp = f.readline()
+        except:
+            return False
+        if temp:
+            file = sorted(json.loads(temp), key=lambda d: d['date'], reverse=True)
+            return file
+        else:
+            return False
 
 
 # Функция для получения списка тем из постов
@@ -191,8 +203,12 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
 @cross_origin()
 def web_hook(git_name, git_repository_blog):
     args = request.args.get('access_token')
+    ref = request.args.get('ref')
     git_access = GitGetAllPosts(git_name, git_repository_blog, args)
-    git_access.get_file()
+    if ref:
+        git_access.get_file(ref)
+    else:
+        git_access.get_file()
     return '', 200
 
 
@@ -401,7 +417,10 @@ def get_branch_posts(git_name, git_repository_blog):
     if not args:
         return jsonify({'access_token': args})
     git_access = GitGetAllPosts(git_name, git_repository_blog, args)
-    branch_posts = git_access.get_posts_json('post_branch')
+    ref = True
+    branch_posts = try_file(git_name, git_repository_blog, ref)
+    if not branch_posts:
+        branch_posts = git_access.get_posts_json('post_branch')
     list_branch_post = []
     if branch_posts:
         posts = try_file(git_name, git_repository_blog)
@@ -458,7 +477,9 @@ def remove_post_to_master(git_name, git_repository_blog, id_file):
         return '', status
     elif request.method == 'GET':
         ref = True
-        all_post_data = git_access.get_posts_json(ref)
+        all_post_data = try_file(git_name, git_repository_blog, ref)
+        if not all_post_data:
+            all_post_data = git_access.get_file(ref)
         for one_post in all_post_data:
             if id_file == one_post['id']:
                 return jsonify(one_post)

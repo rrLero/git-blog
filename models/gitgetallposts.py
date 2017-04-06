@@ -119,9 +119,14 @@ class GitGetAllPosts(GitAccess):
         list_git_files = self.get_posts_json(ref)
         if not list_git_files:
             return False
-        f = open('static/%s_%s.txt' % (self.git_name.lower(), self.git_repository_blog.lower()), 'w')
-        f.write(json.dumps(list_git_files))
-        f.close()
+        if ref:
+            f = open('static/%s_%s_branch.txt' % (self.git_name.lower(), self.git_repository_blog.lower()), 'w')
+            f.write(json.dumps(list_git_files))
+            f.close()
+        elif not ref:
+            f = open('static/%s_%s.txt' % (self.git_name.lower(), self.git_repository_blog.lower()), 'w')
+            f.write(json.dumps(list_git_files))
+            f.close()
         session_git = Users.open_base(self)
         users = session_git.query(Users)
         new_user = True
