@@ -207,9 +207,8 @@ def web_hook(git_name, git_repository_blog):
     git_access = GitGetAllPosts(git_name, git_repository_blog, args)
     if ref:
         git_access.get_file(ref)
-    else:
-        ref = False
-        git_access.get_file(ref)
+        return '', 200
+    git_access.get_file()
     return '', 200
 
 
