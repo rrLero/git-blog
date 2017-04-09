@@ -3,7 +3,6 @@ import datetime
 from models.users import Users
 import base64
 import json
-import requests
 
 
 # функция получает строку и в ней находит(если есть) дату, пока в двух вариантах %y-%m-%d %H:%M и %y-%m-%d
@@ -55,8 +54,6 @@ class GitGetAllPosts(GitAccess):
     def get_posts_json(self, ref=False):
         list_git_files = []
         git_objects = self.get_all_posts(ref)
-        # git_objects = requests.get('https://api.github.com/repos/%s/%s/contents/posts?%s' % (
-        #     self.git_name, self.git_repository_blog, self.auth_))
         git_objects = git_objects.json()
         f = open('static/%s_%s.txt' % (self.git_name.lower(), self.git_repository_blog.lower()), 'w')
         f.close()

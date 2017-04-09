@@ -238,6 +238,7 @@ def add_file(git_name, git_repository_blog, sha=None, id_file=None):
     return '', res.status_code
 
 
+# Функция для получения токена
 @app.route('/<git_name>/<git_repository_blog>/api/oauth', methods=['GET', 'POST', 'PUT'])
 @cross_origin()
 def oauth(git_name, git_repository_blog):
@@ -250,6 +251,7 @@ def oauth(git_name, git_repository_blog):
     return jsonify(access_token)
 
 
+# Функция для получения списка блогов юзера
 @app.route('/api/blog_list', methods=['GET'])
 @cross_origin()
 def blog_list():
@@ -260,6 +262,7 @@ def blog_list():
     return jsonify(blog_list_)
 
 
+# Проверка на коллаборатора
 @app.route('/api/repo_master/<git_name>/<git_repository_blog>/<test_user>', methods=['GET'])
 @cross_origin()
 def repo_master(git_name, git_repository_blog, test_user):
@@ -274,6 +277,7 @@ def repo_master(git_name, git_repository_blog, test_user):
         return jsonify({'access': False})
 
 
+# Получение комментариев
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['GET', 'PUT', 'DELETE', 'POST'])
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments', methods=['GET'])
 @cross_origin()

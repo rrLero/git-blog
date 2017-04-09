@@ -3,6 +3,14 @@ import datetime
 import base64
 
 
+def encode_64(text):
+    file_data = text
+    file_data = file_data.encode()
+    file_data = base64.encodebytes(file_data)
+    file_data = file_data.decode()
+    return file_data
+
+
 class GitAccess:
     def __init__(self, git_name, git_repository_blog, access_token=None):
         self.git_name = git_name
@@ -18,7 +26,10 @@ class GitAccess:
         if self.access_token:
             self.auth_ = 'access_token=%s' % self.access_token
         else:
-            self.auth_ = 'client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2'
+            f = open('static/client_id.txt')
+            client_id = f.readline()
+            self.auth_ = client_id
+            f.close()
 
     def lock_status_comment(self, id_file=None):
         data_issue = self.data_issue_json()
@@ -111,10 +122,7 @@ class GitAccess:
     def edit_post(self, changes, sha, id_file, ref=False):
         if ref:
             self.put_dict_git['branch'] = 'post_branch'
-        file_data = changes['text_full_md']
-        file_data = file_data.encode()
-        file_data = base64.encodebytes(file_data)
-        file_data = file_data.decode()
+        file_data = encode_64(changes['text_full_md'])
         self.put_dict_git['sha'] = sha
         self.put_dict_git['content'] = file_data
         return requests.put('https://api.github.com/repos/%s/%s/contents/posts/%s?%s'
@@ -124,11 +132,8 @@ class GitAccess:
         if ref:
             my_time = datetime.datetime.now()
             name_new_file = my_time.strftime('%Y-%m-%d-%I-%M-%p-')
-            file_data = changes['text_full_md']
             file_name = name_new_file + changes['filename']
-            file_data = file_data.encode()
-            file_data = base64.encodebytes(file_data)
-            file_data = file_data.decode()
+            file_data = encode_64(changes['text_full_md'])
             self.put_dict_git['content'] = file_data
             self.put_dict_git['branch'] = 'post_branch'
         else:
@@ -138,11 +143,8 @@ class GitAccess:
             else:
                 my_time = datetime.datetime.now()
                 name_new_file = my_time.strftime('%Y-%m-%d-%I-%M-%p-')
-                file_data = changes['text_full_md']
                 file_name = name_new_file + changes['filename']
-                file_data = file_data.encode()
-                file_data = base64.encodebytes(file_data)
-                file_data = file_data.decode()
+                file_data = encode_64(changes['text_full_md'])
                 self.put_dict_git['content'] = file_data
         return requests.put('https://api.github.com/repos/%s/%s/contents/posts/%s?%s'
                                 %(self.git_name, self.git_repository_blog, file_name, self.auth_), json=self.put_dict_git)
