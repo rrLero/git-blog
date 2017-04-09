@@ -26,10 +26,10 @@ class GitAccess:
         if self.access_token:
             self.auth_ = 'access_token=%s' % self.access_token
         else:
-            f = open('static/client_id.txt')
-            client_id = f.readline()
-            self.auth_ = client_id
-            f.close()
+            # f = open('static/client_id.txt')
+            # client_id = f.readline()
+            self.auth_ = 'client_id=fcdfab5425d0d398e2e0&client_secret=355b83ee2e195275e33a4d2e113a085f6eaea0a2'
+            # f.close()
 
     def lock_status_comment(self, id_file=None):
         data_issue = self.data_issue_json()
