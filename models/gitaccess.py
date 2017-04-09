@@ -156,10 +156,12 @@ class GitAccess:
 
     def get_access_token(self, args):
         headers = {'Accept': 'application/json'}
-        return requests.post('https://github.com/login/oauth/access_token?client_id=48f5b894f42ae1f869d2'
-                                     '&client_secret=e289a8e72533f127ba873f0dec05908e6846866b&code=%s&'
-                                     '&redirect_uri=http://acid.zzz.com.ua/%s/%s/page/1'
-                                % (args, self.git_name, self.git_repository_blog), headers=headers)
+        f = open('static/client_id2.txt')
+        client_id2 = f.readline()
+        f.close()
+        return requests.post('https://github.com/login/oauth/access_token?%s&code=%s'
+                             '&redirect_uri=http://acid.zzz.com.ua/%s/%s/page/1'
+                                % (client_id2, args, self.git_name, self.git_repository_blog), headers=headers)
 
     def create_repo(self, name):
         name_repo = {'name': name, 'auto_init': True}
