@@ -208,7 +208,8 @@ def web_hook(git_name, git_repository_blog):
     if ref:
         git_access.get_file(ref)
     else:
-        git_access.get_file()
+        ref = False
+        git_access.get_file(ref)
     return '', 200
 
 
