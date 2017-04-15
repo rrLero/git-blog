@@ -277,6 +277,20 @@ def repo_master(git_name, git_repository_blog, test_user):
         return jsonify({'access': False})
 
 
+# Получение комментариев из файла
+@app.route('/<git_name>/<git_repository_blog>/api/get_comments_file', methods=['GET'])
+@cross_origin()
+def get_comments_from_file(git_name, git_repository_blog):
+    args = request.args.get('access_token')
+    f = open('static/comments_%s_%s.json')
+    if f:
+        comments = f.readline()
+        file = json.loads(comments)
+        return file
+    else:
+        return jsonify({'message': 'No comments in file'})
+
+
 # Получение комментариев
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['GET', 'PUT', 'DELETE', 'POST'])
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments', methods=['GET'])
@@ -321,7 +335,7 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
                 git_access = GitAccess(git_name, git_repository_blog, args)
                 get_id = git_access.get_comments()
                 get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
-                file_comments = open('comments_%s_%s.json' % (git_name, git_repository_blog), 'a')
+                file_comments = open('static/comments_%s_%s.json' % (git_name, git_repository_blog), 'a')
                 file_comments.write(json.dumps(get_id))
                 file_comments.close()
             return jsonify(get_id)
