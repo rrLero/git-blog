@@ -322,7 +322,7 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
         data_issues = data_issues.json()
         data_body = request.json
         file_comments = open('static/comments_%s_%s.json' % (git_name, git_repository_blog), 'a')
-        file_comments.write(json.dumps({'title': id_file, 'body': data_body}) + '\n')
+        file_comments.write(json.dumps({'title': id_file, data_body}) + '\n')
         file_comments.close()
         if len(data_issues) > 0:
             for issue in data_issues:
