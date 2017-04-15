@@ -288,14 +288,39 @@ def get_comments_from_file(git_name, git_repository_blog):
             f = open('static/comments_%s_%s.json' % (git_name, git_repository_blog))
         except:
             return jsonify({'message': "No comment's file"})
-        json_data = [json.loads(line)[0] for line in f.readlines()]
+        json_data = [json.loads(line) for line in f.readlines()]
         if json_data:
             return jsonify(json_data)
         else:
             return jsonify({'message': 'No comments in file'})
-    # if request.method == 'POST':
-    #     confirmed_comments = request.json
-    #     for confirmed_comment in confirmed_comments:
+    elif request.method == 'POST':
+        confirmed_comments = request.json
+        for confirmed_comment in confirmed_comments:
+            data_issues = git_access.data_issue_json()
+            data_issues = data_issues.json()
+            data_body = {'body': confirmed_comment['body']}
+            id_file = confirmed_comment['title']
+            if len(data_issues) > 0:
+                for issue in data_issues:
+                    if issue['title'] == id_file:
+                        add_new = git_access.add_comment(issue['number'], data_body)
+                        get_id = {}
+                        if add_new.status_code == 201:
+                            git_access = GitAccess(git_name, git_repository_blog, args)
+                            get_id = git_access.get_comments()
+                            get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
+                        return jsonify(get_id)
+            add_new_issue = git_access.add_new_issue(id_file)
+            if add_new_issue.status_code == 201:
+                add_new = git_access.add_comment(add_new_issue.json()['number'], data_body)
+                get_id = {}
+                if add_new.status_code == 201:
+                    git_access = GitAccess(git_name, git_repository_blog, args)
+                    get_id = git_access.get_comments()
+                    get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
+                return jsonify(get_id)
+            else:
+                return jsonify({})
 
 
 # Получение комментариев
