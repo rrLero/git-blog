@@ -282,7 +282,7 @@ def repo_master(git_name, git_repository_blog, test_user):
 @cross_origin()
 def get_comments_from_file(git_name, git_repository_blog):
     args = request.args.get('access_token')
-    f = open('static/comments_%s_%s.json')
+    f = open('static/comments_%s_%s.json' % (git_name, git_repository_blog))
     if f:
         comments = f.readline()
         file = json.loads(comments)
