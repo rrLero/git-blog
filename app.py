@@ -282,11 +282,11 @@ def repo_master(git_name, git_repository_blog, test_user):
 @cross_origin()
 def get_comments_from_file(git_name, git_repository_blog):
     args = request.args.get('access_token')
-    f = open('static/comments_%s_%s.json' % (git_name, git_repository_blog))
-    if f:
-        comments = f.readline()
-        file = json.loads(comments)
-        return file
+    # f = open('static/comments_%s_%s.json' % (git_name, git_repository_blog))
+    with open('static/comments_%s_%s.json' % (git_name, git_repository_blog)) as comment_file:
+        json_data = [json.loads(line) for line in comment_file]
+    if json_data:
+        return json_data
     else:
         return jsonify({'message': 'No comments in file'})
 
@@ -324,7 +324,7 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
                         get_id = git_access.get_comments()
                         get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
                         file_comments = open('comments_%s_%s.json' % (git_name, git_repository_blog), 'a')
-                        file_comments.write(json.dumps(get_id))
+                        file_comments.write(json.dumps(get_id) + '\n')
                         file_comments.close()
                     return jsonify(get_id)
         add_new_issue = git_access.add_new_issue(id_file)
@@ -336,7 +336,7 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
                 get_id = git_access.get_comments()
                 get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
                 file_comments = open('static/comments_%s_%s.json' % (git_name, git_repository_blog), 'a')
-                file_comments.write(json.dumps(get_id))
+                file_comments.write(json.dumps(get_id) + '\n')
                 file_comments.close()
             return jsonify(get_id)
         else:
