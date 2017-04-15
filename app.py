@@ -309,6 +309,9 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
                         git_access = GitAccess(git_name, git_repository_blog, args)
                         get_id = git_access.get_comments()
                         get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
+                        file_comments = open('comments_%s_%s.json' % (git_name, git_repository_blog), 'a')
+                        file_comments.write(json.dumps(get_id))
+                        file_comments.close()
                     return jsonify(get_id)
         add_new_issue = git_access.add_new_issue(id_file)
         if add_new_issue.status_code == 201:
@@ -318,6 +321,9 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
                 git_access = GitAccess(git_name, git_repository_blog, args)
                 get_id = git_access.get_comments()
                 get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
+                file_comments = open('comments_%s_%s.json' % (git_name, git_repository_blog), 'a')
+                file_comments.write(json.dumps(get_id))
+                file_comments.close()
             return jsonify(get_id)
         else:
             return jsonify({})
