@@ -348,33 +348,34 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
         del_comment = git_access.del_comment(id_file)
         return '', del_comment.status_code
     elif request.method == 'POST' and args:
-        data_issues = git_access.data_issue_json()
-        data_issues = data_issues.json()
+        # data_issues = git_access.data_issue_json()
+        # data_issues = data_issues.json()
         data_body = request.json
         file_comments = open('static/comments_%s_%s.json' % (git_name, git_repository_blog), 'a')
         file_comments.write(json.dumps({'title': id_file, 'body': data_body['body']}) + '\n')
         file_comments.close()
-        if len(data_issues) > 0:
-            for issue in data_issues:
-                if issue['title'] == id_file:
-                    add_new = git_access.add_comment(issue['number'], data_body)
-                    get_id = {}
-                    if add_new.status_code == 201:
-                        git_access = GitAccess(git_name, git_repository_blog, args)
-                        get_id = git_access.get_comments()
-                        get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
-                    return jsonify(get_id)
-        add_new_issue = git_access.add_new_issue(id_file)
-        if add_new_issue.status_code == 201:
-            add_new = git_access.add_comment(add_new_issue.json()['number'], data_body)
-            get_id = {}
-            if add_new.status_code == 201:
-                git_access = GitAccess(git_name, git_repository_blog, args)
-                get_id = git_access.get_comments()
-                get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
-            return jsonify(get_id)
-        else:
-            return jsonify({})
+        # if len(data_issues) > 0:
+        #     for issue in data_issues:
+        #         if issue['title'] == id_file:
+        #             add_new = git_access.add_comment(issue['number'], data_body)
+        #             get_id = {}
+        #             if add_new.status_code == 201:
+        #                 git_access = GitAccess(git_name, git_repository_blog, args)
+        #                 get_id = git_access.get_comments()
+        #                 get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
+        #             return jsonify(get_id)
+        # add_new_issue = git_access.add_new_issue(id_file)
+        # if add_new_issue.status_code == 201:
+        #     add_new = git_access.add_comment(add_new_issue.json()['number'], data_body)
+        #     get_id = {}
+        #     if add_new.status_code == 201:
+        #         git_access = GitAccess(git_name, git_repository_blog, args)
+        #         get_id = git_access.get_comments()
+        #         get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
+        #     return jsonify(get_id)
+        # else:
+        #     return jsonify({})
+        return '', 200
     elif request.method == 'PUT' and args:
         data_body = request.json
         edit_comment = git_access.edit_comment(id_file, data_body)
