@@ -277,7 +277,7 @@ def repo_master(git_name, git_repository_blog, test_user):
 
 
 # Получение комментариев из файла
-@app.route('/<git_name>/<git_repository_blog>/api/get_comments_file', methods=['GET'])
+@app.route('/<git_name>/<git_repository_blog>/api/get_comments_file', methods=['GET', 'POST'])
 @cross_origin()
 def get_comments_from_file(git_name, git_repository_blog):
     if request.method == 'GET':
