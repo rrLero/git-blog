@@ -296,7 +296,6 @@ def get_comments_from_file(git_name, git_repository_blog):
         confirmed_comments = request.json
         added_comments = []
         for confirmed_comment in confirmed_comments:
-            print(confirmed_comment)
             data_issues = git_access.data_issue_json()
             data_issues = data_issues.json()
             data_body = {'body': confirmed_comment['body']}
@@ -305,7 +304,6 @@ def get_comments_from_file(git_name, git_repository_blog):
                 for issue in data_issues:
                     if issue['title'] == id_file:
                         add_new = git_access.add_comment(issue['number'], data_body)
-                        print(add_new.status_code)
                         get_id = {}
                         if add_new.status_code == 201:
                             git_access = GitAccess(git_name, git_repository_blog, args)
