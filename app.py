@@ -296,6 +296,7 @@ def get_comments_from_file(git_name, git_repository_blog):
         confirmed_comments = request.json
         added_comments = []
         for confirmed_comment in confirmed_comments:
+            print(confirmed_comment)
             data_issues = git_access.data_issue_json()
             data_issues = data_issues.json()
             data_body = {'body': confirmed_comment['body']}
@@ -304,13 +305,15 @@ def get_comments_from_file(git_name, git_repository_blog):
                 for issue in data_issues:
                     if issue['title'] == id_file:
                         add_new = git_access.add_comment(issue['number'], data_body)
+                        print(add_new.status_code)
                         get_id = {}
                         if add_new.status_code == 201:
                             git_access = GitAccess(git_name, git_repository_blog, args)
                             get_id = git_access.get_comments()
                             get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
                             added_comments.append(get_id)
-                        continue
+                            break
+                continue
             add_new_issue = git_access.add_new_issue(id_file)
             if add_new_issue.status_code == 201:
                 add_new = git_access.add_comment(add_new_issue.json()['number'], data_body)
@@ -320,12 +323,13 @@ def get_comments_from_file(git_name, git_repository_blog):
                     get_id = git_access.get_comments()
                     get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
                     added_comments.append(get_id)
-                continue
+                    continue
             else:
                 continue
-        path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static/comments_%s_%s.json' % (git_name, git_repository_blog))
-        os.remove(path)
         return jsonify(added_comments)
+        # path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static/comments_%s_%s.json' % (git_name, git_repository_blog))
+        # os.remove(path)
+        # return jsonify(added_comments)
 
 
 # Получение комментариев
