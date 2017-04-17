@@ -324,8 +324,11 @@ def get_comments_from_file(git_name, git_repository_blog):
                     continue
             else:
                 continue
-        path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static/comments_%s_%s.json' % (git_name, git_repository_blog))
-        os.remove(path)
+        try:
+            path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static/comments_%s_%s.json' % (git_name, git_repository_blog))
+            os.remove(path)
+        except:
+            pass
         return jsonify(added_comments)
 
 
