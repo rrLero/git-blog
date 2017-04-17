@@ -6,5 +6,5 @@ class Textovka:
         self.english = {"message": "message", "commit": "my commit message",
                         "author": "author", "name": "name", "email": "email"}
 
-    def get_text(self):
-        return self.english
+    def get_text(self, param):
+        return self.english[param]
