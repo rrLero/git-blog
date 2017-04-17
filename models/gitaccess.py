@@ -4,7 +4,7 @@ import base64
 from models.textovka import Textovka
 
 
-textovka = Textovka
+textovka = Textovka()
 
 
 def encode_64(text):
