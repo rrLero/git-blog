@@ -10,6 +10,7 @@ from models.gitaccess import GitAccess
 from models.gitgetallposts import GitGetAllPosts
 from flask_cors import CORS, cross_origin
 
+
 app = Flask(__name__)
 CORS(app)
 app.config.from_object(__name__)

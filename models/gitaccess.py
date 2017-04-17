@@ -1,6 +1,10 @@
 import requests
 import datetime
 import base64
+from models.textovka import Textovka
+
+
+textovka = Textovka
 
 
 def encode_64(text):
@@ -17,10 +21,10 @@ class GitAccess:
         self.git_repository_blog = git_repository_blog
         self.access_token = access_token
         self.put_dict_git = {
-            "message": "my commit message",
-            "author": {
-                "name": self.git_name,
-                "email": "%s@emailemail.com" % self.git_repository_blog
+            textovka.message: textovka.commit,
+            textovka.author: {
+                textovka.name: self.git_name,
+                textovka.email: "%s@emailemail.com" % self.git_repository_blog
             },
         }
         if self.access_token:
