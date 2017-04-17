@@ -21,10 +21,10 @@ class GitAccess:
         self.git_repository_blog = git_repository_blog
         self.access_token = access_token
         self.put_dict_git = {
-            textovka.message: textovka.commit,
-            textovka.author: {
-                textovka.name: self.git_name,
-                textovka.email: "%s@emailemail.com" % self.git_repository_blog
+            textovka.get_text()['message']: textovka.get_text()['commit'],
+            textovka.get_text()['author']: {
+                textovka.get_text()['name']: self.git_name,
+                textovka.get_text()['email']: "%s@emailemail.com" % self.git_repository_blog
             },
         }
         if self.access_token:
