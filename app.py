@@ -296,11 +296,13 @@ def get_comments_from_file(git_name, git_repository_blog):
         git_access = GitAccess(git_name, git_repository_blog, args)
         confirmed_comments = request.json
         added_comments = []
+        counter = []
         for confirmed_comment in confirmed_comments:
             data_issues = git_access.data_issue_json()
             data_issues = data_issues.json()
             data_body = {'body': confirmed_comment['body']}
             id_file = confirmed_comment['title']
+            counter.append(confirmed_comment['counter'])
             if len(data_issues) > 0:
                 for issue in data_issues:
                     if issue['title'] == id_file:
@@ -326,8 +328,11 @@ def get_comments_from_file(git_name, git_repository_blog):
             else:
                 continue
         try:
-            path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static/comments_%s_%s.json' % (git_name, git_repository_blog))
-            os.remove(path)
+            f = open('static/comments_%s_%s.json' % (git_name, git_repository_blog)).readlines()
+            for i in counter:
+                f.pop(i)
+            with open('static/comments_%s_%s.json' % (git_name, git_repository_blog), 'w') as F:
+                F.writelines(f)
         except:
             pass
         return jsonify(added_comments)
