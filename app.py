@@ -352,8 +352,6 @@ def get_comments_from_file(git_name, git_repository_blog):
         return jsonify({'message': '%s comments deleted' % counter})
 
 
-
-
 # Получение комментариев
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['GET', 'PUT', 'DELETE', 'POST'])
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments', methods=['GET'])
