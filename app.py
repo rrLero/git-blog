@@ -314,17 +314,6 @@ def get_comments_from_file(git_name, git_repository_blog):
                             added_comments.append(get_id)
                             break
                 continue
-            add_new_issue = git_access.add_new_issue(id_file)
-            if add_new_issue.status_code == 201:
-                add_new = git_access.add_comment(add_new_issue.json()['number'], data_body)
-                if add_new.status_code == 201:
-                    git_access = GitAccess(git_name, git_repository_blog, args)
-                    get_id = git_access.get_comments()
-                    get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
-                    added_comments.append(get_id)
-                    continue
-            else:
-                continue
         try:
             f = open('static/comments_%s_%s.json' % (git_name, git_repository_blog)).readlines()
             for i in sorted(counter, reverse=True):
