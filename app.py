@@ -278,7 +278,7 @@ def repo_master(git_name, git_repository_blog, test_user):
 
 
 # Получение комментариев из файла
-@app.route('/<git_name>/<git_repository_blog>/api/get_comments_file', methods=['GET', 'POST'])
+@app.route('/<git_name>/<git_repository_blog>/api/get_comments_file', methods=['GET', 'POST', 'DELETE'])
 @cross_origin()
 def get_comments_from_file(git_name, git_repository_blog):
     if request.method == 'GET':
@@ -336,6 +336,22 @@ def get_comments_from_file(git_name, git_repository_blog):
         except:
             pass
         return jsonify(added_comments)
+    elif request.method == 'DELETE':
+        confirmed_comments = request.json
+        counter = []
+        for confirmed_comment in confirmed_comments:
+            counter.append(confirmed_comment['counter'])
+        try:
+            f = open('static/comments_%s_%s.json' % (git_name, git_repository_blog)).readlines()
+            for i in counter:
+                f.pop(i)
+            with open('static/comments_%s_%s.json' % (git_name, git_repository_blog), 'w') as F:
+                F.writelines(f)
+        except:
+            pass
+        return jsonify({'message': '%s comments deleted' % counter})
+
+
 
 
 # Получение комментариев
