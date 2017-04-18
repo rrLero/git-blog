@@ -277,6 +277,18 @@ def repo_master(git_name, git_repository_blog, test_user):
         return jsonify({'access': False})
 
 
+def edit_file_comments(path, counter):
+    try:
+        f = open(path).readlines()
+        for i in sorted(counter, reverse=True):
+            f.pop(i)
+        with open(path, 'w') as F:
+            F.writelines(f)
+    except:
+        pass
+    return 'ok'
+
+
 # Получение комментариев из файла
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments_file', methods=['GET', 'POST', 'DELETE'])
 @cross_origin()
@@ -314,29 +326,22 @@ def get_comments_from_file(git_name, git_repository_blog):
                             added_comments.append(get_id)
                             break
                 continue
-        try:
-            f = open('static/comments_%s_%s.json' % (git_name, git_repository_blog)).readlines()
-            for i in sorted(counter, reverse=True):
-                f.pop(i)
-            with open('static/comments_%s_%s.json' % (git_name, git_repository_blog), 'w') as F:
-                F.writelines(f)
-        except:
-            pass
+        edit_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), counter)
         return jsonify(added_comments)
     elif request.method == 'DELETE':
         confirmed_comments = request.json
         counter = []
         for confirmed_comment in confirmed_comments:
             counter.append(confirmed_comment['counter'])
-        try:
-            f = open('static/comments_%s_%s.json' % (git_name, git_repository_blog)).readlines()
-            for i in sorted(counter, reverse=True):
-                f.pop(i)
-            with open('static/comments_%s_%s.json' % (git_name, git_repository_blog), 'w') as F:
-                F.writelines(f)
-        except:
-            pass
+        edit_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), counter)
         return jsonify({'message': '%s comments deleted' % counter})
+
+
+def get_file_comments(path, id_file, body):
+    file_comments = open(path, 'a')
+    file_comments.write(json.dumps({'title': id_file, 'body': body}) + '\n')
+    file_comments.close()
+    return '', 200
 
 
 # Получение комментариев
@@ -362,16 +367,13 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
         data_issues = git_access.data_issue_json()
         data_issues = data_issues.json()
         data_body = request.json
-        file_comments = open('static/comments_%s_%s.json' % (git_name, git_repository_blog), 'a')
-        file_comments.write(json.dumps({'title': id_file, 'body': data_body['body']}) + '\n')
-        file_comments.close()
         if len(data_issues) > 0:
             for issue in data_issues:
                 if issue['title'] == id_file:
-                    return '', 200
+                    return get_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), id_file, data_body['body'])
         add_new_issue = git_access.add_new_issue(id_file)
         if add_new_issue.status_code == 201:
-            return '', 200
+            return get_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), id_file, data_body['body'])
         else:
             return jsonify({})
     elif request.method == 'PUT' and args:
