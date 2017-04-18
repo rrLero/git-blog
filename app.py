@@ -329,7 +329,7 @@ def get_comments_from_file(git_name, git_repository_blog):
                 continue
         try:
             f = open('static/comments_%s_%s.json' % (git_name, git_repository_blog)).readlines()
-            for i in counter:
+            for i in sorted(counter, reverse=True):
                 f.pop(i)
             with open('static/comments_%s_%s.json' % (git_name, git_repository_blog), 'w') as F:
                 F.writelines(f)
@@ -341,9 +341,10 @@ def get_comments_from_file(git_name, git_repository_blog):
         counter = []
         for confirmed_comment in confirmed_comments:
             counter.append(confirmed_comment['counter'])
+        print(sorted(counter))
         try:
             f = open('static/comments_%s_%s.json' % (git_name, git_repository_blog)).readlines()
-            for i in counter:
+            for i in sorted(counter, reverse=True):
                 f.pop(i)
             with open('static/comments_%s_%s.json' % (git_name, git_repository_blog), 'w') as F:
                 F.writelines(f)
