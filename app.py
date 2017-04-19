@@ -297,12 +297,12 @@ def get_comments_from_file(git_name, git_repository_blog):
         try:
             f = open('static/comments_%s_%s.json' % (git_name, git_repository_blog))
         except:
-            return jsonify({'message': "No comment's file"})
+            return jsonify([])
         json_data = [json.loads(line) for line in f.readlines()]
         if json_data:
             return jsonify(json_data)
         else:
-            return jsonify({'message': 'No comments in file'})
+            return jsonify([])
     elif request.method == 'POST':
         args = request.args.get('access_token')
         git_access = GitAccess(git_name, git_repository_blog, args)
