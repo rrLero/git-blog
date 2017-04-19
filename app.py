@@ -190,12 +190,12 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
         one_post = [post for post in data if post['title'] == title]
         if not one_post:
             return abort(404)
-        return jsonify(one_post)
+        return jsonify(one_post[0])
     elif id:
         one_post = [post for post in data if post['id'] == id]
         if not one_post:
             return abort(404)
-        return jsonify(one_post)
+        return jsonify(one_post[0])
     else:
         args = request.args.get('title', '')
         if args:
