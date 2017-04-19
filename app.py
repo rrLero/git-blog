@@ -313,7 +313,7 @@ def get_comments_from_file(git_name, git_repository_blog):
         data_issues = data_issues.json()
         for confirmed_comment in confirmed_comments:
             data_body = {'body': confirmed_comment['body']}
-            id_file = confirmed_comment['title']
+            id_file = confirmed_comment['post_id']
             counter.append(confirmed_comment['counter'])
             if len(data_issues) > 0:
                 for issue in data_issues:
@@ -337,9 +337,9 @@ def get_comments_from_file(git_name, git_repository_blog):
         return jsonify({'message': '%s comments deleted' % counter})
 
 
-def get_file_comments(path, id_file, body):
+def get_file_comments(path, id_file, body, title):
     file_comments = open(path, 'a')
-    file_comments.write(json.dumps({'title': id_file, 'body': body}) + '\n')
+    file_comments.write(json.dumps({'post_id': id_file, 'body': body, 'title': title}) + '\n')
     file_comments.close()
     return '', 200
 
@@ -367,13 +367,17 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
         data_issues = git_access.data_issue_json()
         data_issues = data_issues.json()
         data_body = request.json
+        all_posts = try_file(git_name, git_repository_blog)
+        one_post = [y for y in all_posts if y['id'] == id_file][0]
         if len(data_issues) > 0:
             for issue in data_issues:
                 if issue['title'] == id_file:
-                    return get_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), id_file, data_body['body'])
+                    return get_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), id_file,
+                                             data_body['body'], one_post['title'])
         add_new_issue = git_access.add_new_issue(id_file)
         if add_new_issue.status_code == 201:
-            return get_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), id_file, data_body['body'])
+            return get_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), id_file,
+                                     data_body['body'], one_post['title'])
         else:
             return jsonify({})
     elif request.method == 'PUT' and args:
