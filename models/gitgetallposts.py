@@ -48,6 +48,14 @@ def test_string(test):
         return None, test
 
 
+def get_file(path, data):
+    f = open(path, 'w')
+    if data:
+        f.write(json.dumps(data))
+    f.close()
+    return 'ok'
+
+
 # Функция получает имя пользователя и репозиторий. при помощи АПИ ГИТА функция переберает файлы и создает словарь из
 # постов
 class GitGetAllPosts(GitAccess):
@@ -115,15 +123,20 @@ class GitGetAllPosts(GitAccess):
     def get_file(self, ref=False):
         list_git_files = self.get_posts_json(ref)
         if not list_git_files:
+            list_git_files = False
+            if ref:
+                get_file('static/%s_%s_branch.txt' % (self.git_name.lower(), self.git_repository_blog.lower()),
+                         list_git_files)
+            elif not ref:
+                get_file('static/%s_%s.txt' % (self.git_name.lower(), self.git_repository_blog.lower()),
+                         list_git_files)
             return False
         if ref:
-            f = open('static/%s_%s_branch.txt' % (self.git_name.lower(), self.git_repository_blog.lower()), 'w')
-            f.write(json.dumps(list_git_files))
-            f.close()
+            get_file('static/%s_%s_branch.txt' % (self.git_name.lower(), self.git_repository_blog.lower()),
+                     list_git_files)
         elif not ref:
-            f = open('static/%s_%s.txt' % (self.git_name.lower(), self.git_repository_blog.lower()), 'w')
-            f.write(json.dumps(list_git_files))
-            f.close()
+            get_file('static/%s_%s.txt' % (self.git_name.lower(), self.git_repository_blog.lower()),
+                     list_git_files)
         session_git = Users.open_base(self)
         users = session_git.query(Users)
         new_user = True
