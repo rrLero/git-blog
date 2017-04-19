@@ -9,6 +9,7 @@ from models.pagination import Pagination
 from models.gitaccess import GitAccess
 from models.gitgetallposts import GitGetAllPosts
 from flask_cors import CORS, cross_origin
+from flask import abort
 
 
 app = Flask(__name__)
@@ -99,7 +100,12 @@ def login():
 # redirect on page not_found.html
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('not_found.html'), 404
+    return jsonify(error=404, text=str(e)), 404
+
+
+@app.route('/404')
+def error():
+    return abort(404)
 
 
 @app.route('/<git_name>/<git_repository_blog>/<int:page>/<tags>')
@@ -165,7 +171,7 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
                 users_list.new_user()
                 return jsonify({'message': 'repo is empty'})
             else:
-                return jsonify({'message': 'unable create repo'})
+                return abort(404)
     data_1 = copy.deepcopy(data)
     data_preview = []
     for j in data_1:
@@ -182,12 +188,14 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
         return jsonify({'items': tag_data[paginate.first_post:paginate.last_post+1], 'total': count})
     if title:
         one_post = [post for post in data if post['title'] == title]
-        one_post.append({'message': 'no such post'})
-        return jsonify(one_post[0])
+        if not one_post:
+            return abort(404)
+        return jsonify(one_post)
     elif id:
         one_post = [post for post in data if post['id'] == id]
-        one_post.append({'message': 'no such post'})
-        return jsonify(one_post[0])
+        if not one_post:
+            return abort(404)
+        return jsonify(one_post)
     else:
         args = request.args.get('title', '')
         if args:
