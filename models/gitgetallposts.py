@@ -49,11 +49,11 @@ def test_string(test):
 
 
 def get_file(path, data):
-    try:
-        f = open(path, 'r')
-        f.close()
-    except:
-        return 'ok'
+    # try:
+    #     f = open(path, 'r')
+    #     f.close()
+    # except:
+    #     return 'ok'
     f = open(path, 'w')
     if data:
         f.write(json.dumps(data))
