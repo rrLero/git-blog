@@ -22,7 +22,7 @@ app.config.update(dict(
 ))
 
 
-# Получение данных из файла, если такой есть
+# Getting data from file if it exists
 def try_file(git_name, git_repository_blog, ref=False):
     if not ref:
         try:
@@ -48,7 +48,7 @@ def try_file(git_name, git_repository_blog, ref=False):
             return False
 
 
-# Функция для получения списка тем из постов
+# Func to get list of tags
 def get_tags(file):
     tags = []
     for i in file:
@@ -58,7 +58,7 @@ def get_tags(file):
     return tags
 
 
-# Функция получает список постов и тег, а отдает список постов только с этим тегом отсортированные по дате
+# Func gets list of posts and tag, and returns the list of posts with this tag sorted by date
 def sorted_by_tags(list, tag):
     sorted_list = []
     for one_post in list:
@@ -75,16 +75,16 @@ def search(data, key, args):
         if key_value == args.lower():
             search_result.append({'title': i['title'], 'id': i['id']})
     return jsonify(search_result)
-# Получение данных для пагинации исходя из количество постов на странице, количества постов, и текущей страницы
 
 
-# начальная страница
+# start page my front
 @app.route('/index')
 @app.route('/')
 def homepage():
     return render_template('base.html')
 
 
+# my front
 @app.route('/login', methods=['POST', 'OPTIONS'])
 def login():
     # Если пришли формы то запоминает их в переменные
@@ -108,6 +108,7 @@ def error():
     return abort(404)
 
 
+# my front
 @app.route('/<git_name>/<git_repository_blog>/<int:page>/<tags>')
 @app.route('/<git_name>/<git_repository_blog>/<int:page>/')
 @app.route('/<git_name>/<git_repository_blog>/')
@@ -133,7 +134,7 @@ def blog(git_name, git_repository_blog, tags=None, page=1):
             return redirect(url_for('homepage'))
 
 
-# берет конкретный пост и отображает его при нажатии на readmore
+# my front readmore
 @app.route('/<git_name>/<git_repository_blog>/<int:page>/post/<title>/')
 def post(git_name, git_repository_blog, title, page=1, tags=None):
     f = open('static/%s_%s.txt' % (git_name.lower(), git_repository_blog.lower()))
@@ -145,7 +146,7 @@ def post(git_name, git_repository_blog, title, page=1, tags=None):
         return jsonify({'message': 'no such post'})
 
 
-# Апи отдает данные с гита
+# returns data from GitHub with different methods
 @app.route('/<git_name>/<git_repository_blog>/api/get/<title>', methods=['GET'])
 @app.route('/<git_name>/<git_repository_blog>/api/get/tags/<tag>', methods=['GET'])
 @app.route('/<git_name>/<git_repository_blog>/api/get/id/<id>', methods=['GET'])
@@ -208,6 +209,7 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
             return jsonify({'items': data_preview[paginate.first_post:paginate.last_post+1], 'total': count})
 
 
+# creation of mirror data from GitHub and saving it to file
 @app.route('/<git_name>/<git_repository_blog>/api/update', methods=['GET', 'POST'])
 @app.route('/<git_name>/<git_repository_blog>/api/web_hook', methods=['GET', 'POST'])
 @cross_origin()
@@ -222,7 +224,7 @@ def web_hook(git_name, git_repository_blog):
     return '', 200
 
 
-# Функция для обработки изменений постов на ГитХабе
+# Func to make changes in posts from GitHub
 @app.route('/<git_name>/<git_repository_blog>/api/put/<id_file>/<sha>', methods=['POST', 'PUT', 'DELETE'])
 @app.route('/<git_name>/<git_repository_blog>/api/put', methods=['POST', 'PUT', 'DELETE'])
 @cross_origin()
@@ -248,7 +250,7 @@ def add_file(git_name, git_repository_blog, sha=None, id_file=None):
     return '', res.status_code
 
 
-# Функция для получения токена
+# Func to receive token
 @app.route('/<git_name>/<git_repository_blog>/api/oauth', methods=['GET', 'POST', 'PUT'])
 @cross_origin()
 def oauth(git_name, git_repository_blog):
@@ -261,7 +263,7 @@ def oauth(git_name, git_repository_blog):
     return jsonify(access_token)
 
 
-# Функция для получения списка блогов юзера
+# Func to get list of user's blogs
 @app.route('/api/blog_list', methods=['GET'])
 @cross_origin()
 def blog_list():
@@ -272,7 +274,7 @@ def blog_list():
     return jsonify(blog_list_)
 
 
-# Проверка на коллаборатора
+# Test on collaborator's rights
 @app.route('/api/repo_master/<git_name>/<git_repository_blog>/<test_user>', methods=['GET'])
 @cross_origin()
 def repo_master(git_name, git_repository_blog, test_user):
@@ -287,6 +289,7 @@ def repo_master(git_name, git_repository_blog, test_user):
         return jsonify({'access': False})
 
 
+# deletes strings from file
 def edit_file_comments(path, counter):
     try:
         f = open(path).readlines()
@@ -299,7 +302,7 @@ def edit_file_comments(path, counter):
     return 'ok'
 
 
-# Получение комментариев из файла
+# getting comments from file
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments_file', methods=['GET', 'POST', 'DELETE'])
 @cross_origin()
 def get_comments_from_file(git_name, git_repository_blog):
@@ -347,6 +350,7 @@ def get_comments_from_file(git_name, git_repository_blog):
         return jsonify({'message': '%s comments deleted' % counter})
 
 
+# update file with comments
 def get_file_comments(path, id_file, body, title):
     file_comments = open(path, 'a')
     file_comments.write(json.dumps({'post_id': id_file, 'body': body, 'title': title}) + '\n')
@@ -354,7 +358,7 @@ def get_file_comments(path, id_file, body, title):
     return '', 200
 
 
-# Получение комментариев
+# getting comments
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['GET', 'PUT', 'DELETE', 'POST'])
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments', methods=['GET'])
 @cross_origin()
@@ -397,6 +401,7 @@ def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
     return jsonify({'message': 'No access token in request, try again'})
 
 
+# lock/unlock comments
 @app.route('/<git_name>/<git_repository_blog>/api/lock_comments/<id_file>', methods=['GET', 'DELETE'])
 def lock_comments(git_name, git_repository_blog, id_file=None):
     args = request.args.get('access_token')
@@ -432,6 +437,7 @@ def lock_comments(git_name, git_repository_blog, id_file=None):
         jsonify({'status': True})
 
 
+# lock status of comments
 @app.route('/<git_name>/<git_repository_blog>/api/lock_status/<id_file>', methods=['GET'])
 def lock_status(git_name, git_repository_blog, id_file=None):
     args = request.args.get('access_token')
@@ -439,6 +445,7 @@ def lock_status(git_name, git_repository_blog, id_file=None):
     return jsonify({'status': git_access.lock_status_comment(id_file)})
 
 
+# delete files from repo
 @app.route('/<git_name>/<git_repository_blog>/api/del_repo', methods=['DELETE', 'GET', 'POST'])
 @cross_origin()
 def del_repo(git_name, git_repository_blog):
@@ -470,6 +477,7 @@ def del_repo(git_name, git_repository_blog):
         return '', 200
 
 
+# pagination
 @app.route('/api/pagination', methods=['GET', 'POST'])
 @cross_origin()
 def pagination():
@@ -481,6 +489,7 @@ def pagination():
         return jsonify({'message': 'no params required received'})
 
 
+# get files from branch 'post_branch'
 @app.route('/<git_name>/<git_repository_blog>/api/get_branch_posts', methods=['GET'])
 @cross_origin()
 def get_branch_posts(git_name, git_repository_blog):
@@ -512,6 +521,7 @@ def get_branch_posts(git_name, git_repository_blog):
         return jsonify({"items": [], "total": 0})
 
 
+# different methods to make changes in posts in the branch 'post_branch'
 @app.route('/<git_name>/<git_repository_blog>/api/branch/remove/<id_file>', methods=['DELETE', 'GET', 'POST', 'PUT'])
 @cross_origin()
 def remove_post_to_master(git_name, git_repository_blog, id_file):
@@ -558,6 +568,7 @@ def remove_post_to_master(git_name, git_repository_blog, id_file):
                 return jsonify(one_post)
 
 
+# push post to master branch
 @app.route('/<git_name>/<git_repository_blog>/api/put/master', methods=['PUT'])
 def push_master(git_name, git_repository_blog):
     args = request.args.get('access_token')
