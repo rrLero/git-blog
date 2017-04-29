@@ -1,75 +1,79 @@
-В данный момент бэкенд размещен на http://gitblog.pythonanywhere.com - это есть началом всех запросов и дальше я прописывать не буду.
+In this moment backend situated on http://gitblog.pythonanywhere.com - thisis the begining of all requests to api.
 
-git_name - имя Юзера ГитХаба
+git_name - name of GitHub User
 
-git_repository_blog - имя репозитория этого юзера
+git_repository_blog - name of the repo of this user
 
-id_file - уникальное имя файла/поста присваивается нашем приложением
+id_file - unique name of file/post which creates by our programm 
 
-id_comment - уникальный id комментария, получаем из апи ГитХаба, через наше приложение
+id_comment - unique id comment, getting from GitHub Api by our programm
 
-access_token - специальный ключ получаемый через авторизацию на нашем приложении
+access_token - special key token by authorazation  on our platform
 
-Базовые запросы
-1. Запрос на получение списка постов
+# Basic Requests
+**1. Request to recieve posts**
 
-/<gitname>/<gitrepositoryblog>/api/get, метод=GET- выведет json со словарем постов, лучше отправлять авторизированно через токен в аргументах, но выведет и без токена**.
-2. Запрос на получение одного поста
+> *`/<gitname>/<gitrepositoryblog>/api/get`, method=GET- will output json with dict of posts, better send request with token in arguments but will outpost anyway**.*
 
-/<git_name>/<git_repository_blog>/api/get/id/<id> метод=GET, где id - это индивидуальный номер поста, получаем из запроса №1. выведет json с данными об этом посте, или {'message': 'no such post'} если id не совпадет
+**2. Request to receive one post**
 
-также можно получить данные поста по имени файла на гитхабе включая расширение или же title из первого запросе, обратиться в этом случае надо /<git_name>/<git_repository_blog>/api/get/<title> метод=GET
-3. Запрос на обновление блога(считывает все данные с репозитория)
+> *`/<git_name>/<git_repository_blog>/api/get/id/<id>` method=GET, where id - individual number of post, getting from request №1. will output json with data from this post, or {'message': 'no such post'} if id not the same*
+> 
+> *also posiible to get data of post by the name of GitHub file with ext or title from first request, request in such caseа `/<git_name>/<git_repository_blog>/api/get/<title>` метод=GET*
 
-/<git_name>/<git_repository_blog>/api/update или web_hook метод=GET. До обновления все данные берутся из файла хранящегося локально, который был считан первый раз при открытии блога. рекомендуется обновлять при каждом изменении сделанном в блоге, ну и обящательно настроить вебхук на гитхабе
-4. Запрос на получение списка всех юзеров кто пользуется платформой
+**3. Request to update blog (reads all data from repo)**
 
-/api/blog_listметод=GET. отдает json всех кто пользуется платформой в виде Имя и Реп
-5. Запрос на авторизацию через ГитХаб
+> *`/<git_name>/<git_repository_blog>/api/update или web_hook` method=GET. Before update all data is getting from file saved localy, which was read first time when blog was opened. I recomend to update all time when any changes were made in blog, and make settings on webhook on github*
 
-*/<git_name>/<git_repository_blog>/api/oauth?code=codeметод=GET. в запросе обязательно в аргументах надо указать код полученный от ГитХаба при авторизации. Отдает access_token пользователя ГитХаба
-6. Запрос на проверку прав пользователя к данному репозиторию(является ли этот юзер коллаборатором репа)
+**4. Request to get all users who use platform**
 
-*/api/repo_master/<git_name>/<git_repository_blog>/<test_user>?access_token=access_tokenметод=GET. в запросе обязательно в аргументах надо указать token от ГитХаба иначе работать не будет. Отдает {'access': True} или {'access': False}
-7. Запрос на получение словаря всех комментариев ко всем постам конкретного блога Юзера
+> *`/api/blog_list`method=GET. will output json with all users in Name and Rep*
+ 
+**5. Request on authorizathion on GitHub**
 
-*/<git_name>/<git_repository_blog>/api/get_commentsметод=GET. лучше отправлять авторизированно через токен в аргументах, но выведет и без токена, на выходе отдастт json сословарем комментариев
-8. Запрос на получение комментариев к одному посту блога Юзера
+> *`/<git_name>/<git_repository_blog>/api/oauth?code=code`method=GET. in request required code in arguments received from GitHub in authorization. Will output access_token GitHub user
+ 
+**6.Request to try users rights to repo (is this user collaborator of repo) **
+> *`/api/repo_master/<git_name>/<git_repository_blog>/<test_user>?access_token=access_token`method=GET. in request access token required in arguments without token will not work. Will output {'access': True} or {'access': False}
+ 
+**7. Request to get dict of all comments to all posts in one specific user's blog**
+> *`/<git_name>/<git_repository_blog>/api/get_comments`method=GET. better send authorized request in arguments, but works anyway, will output json with comments dict 
+ 
+**8. Request to get comments to specific post of user's blog**
+> *`/<git_name>/<git_repository_blog>/api/get_comments/<id_file>`method=GET. better send authorized request in arguments, but works anyway, will output json with list of comments to this post, id_file - the same that the name of the file in folder /posts.
+ 
+**9. Request to delete one comment**
+> *`/<git_name>/<git_repository_blog>/api/get_comments/<id_comment>?access_token=access_token`method=DELETE in request access token required in arguments without token will not work. id_comment - gettinf from 8 request - delete comment by it id
 
-*/<git_name>/<git_repository_blog>/api/get_comments/<id_file>метод=GET. лучше отправлять авторизированно через токен в аргументах, но выведет и без токена, на выходе отдастт json со списком комментариев к этому посту, id_file - оно же имя файла в папке /posts.
-9. Запрос на удаление одного комментария
-
-*/<git_name>/<git_repository_blog>/api/get_comments/<id_comment>?access_token=access_tokenметод=DELETE запрос только аворизированный. id_comment - берется из 8 запроса - удаляет комментарий по его id
-10. Запрос на добавление одного комментария
-
-*/<git_name>/<git_repository_blog>/api/get_comments?access_token=access_tokenметод=POST запрос только аворизированный. Должен прийти json с {'body': 'text_of_new_comment'}, отдаст json с новым комментом (его содержание, его id, дата, автор)
-11. Запрос на редактирование конкретного комментария
-
-*/<git_name>/<git_repository_blog>/api/get_comments/<id_comment>?access_token=access_tokenметод=PUT запрос только аворизированный. Должен прийти json с {'body': 'new_text_of_old_comment'}, отдаст статус запроса (успешно или нет)
-12. Запрос на закрытие/открытие комментариев к конкретному посту
-
-*/<git_name>/<git_repository_blog>/api/lock_comments/<id_file>?access_token=access_tokenметод=GET/DELETE запрос только аворизированный. Открывает/закрывает возможность оставлять комментарии. id_file получаем изи запроса 2 - оно же имя файла в папке /posts.
-13. Запрос на получение статуса комментария (закрыт или открыт)
-
-*/<git_name>/<git_repository_blog>/api/lock_status/<id_comment> метод=GET запрос не аворизированный. Отдает {'status': False} или {'status': True}
-14. Запрос на удаление блога юзера
-
-*/<git_name>/<git_repository_blog>/api/del_repo?access_token=access_token метод=DELETE запрос только аворизированный. Удаляет все файлы из папки posts конкретного репозитория
-15. Запрос на получение списка постов отфильтрованного по тегам
-
-*/<git_name>/<git_repository_blog>/api/get/tags/<tag> метод=GET запрос может быть авторизированный или нет. Вернет такой же список постов как и в пункте 1, только сортированными по тегу.
-16. Запрос на получение списка постов в ветке post_branch
-
-*/<git_name>/<git_repository_blog>/api/get_branch_posts метод=GET запрос может быть авторизированный или нет. Вернет список постов находящиеся в ветке post_branch
-17. Запрос на получение одного поста по id_file в ветке post_branch
-
-*/<git_name>/<git_repository_blog>/api/branch/remove/<id_file> метод=GET запрос может быть авторизированный или нет. Вернет один пост по его id
-18. Запрос на удаление одного поста по id_file в ветке post_branch
-
-*/<git_name>/<git_repository_blog>/api/branch/remove/<id_file> метод=DELETE запрос авторизированный. Вернет статус о выполнении операции удаления файла в ветке
-19. Запрос на редактирование одного поста по id_file в ветке post_branch
-
-*/<git_name>/<git_repository_blog>/api/branch/remove/<id_file> метод=POST запрос авторизированный необходим json с данными содержащими 'text_full_md' где измененные данные поста. Вернет статус о выполнении операции редактирования файла в ветке
-20. Запрос на перенос одного поста по id_file в ветке post_branch в ветку master
-
-*/<git_name>/<git_repository_blog>/api/branch/remove/<id_file> метод=PUT запрос авторизированный. Вернет статус о выполнении операции переноса файла из ветки в мастер.
+**10. Request to add one comment**
+> *`/<git_name>/<git_repository_blog>/api/get_comments?access_token=access_token`method=POST only authorized.  need  outcome with  json  {'body': 'text_of_new_comment'}, will output json with new comment (hit data, it id, date, author)
+ 
+**11. Request to edit specific comment**
+> *`/<git_name>/<git_repository_blog>/api/get_comments/<id_comment>?access_token=access_token`method=PUT only authorized request. need to outcome json with {'body': 'new_text_of_old_comment'}, will output status of request (success or not)
+ 
+**12. Request to open/close comments to specific post**
+> *`/<git_name>/<git_repository_blog>/api/lock_comments/<id_file>?access_token=access_token`метод=GET/DELETE запрос только аворизированный. Открывает/закрывает возможность оставлять комментарии. id_file получаем изи запроса 2 - оно же имя файла в папке /posts.
+ 
+ **13. Request to get comment's status (opened/closed)**
+> *`/<git_name>/<git_repository_blog>/api/lock_status/<id_comment>` method=GET not authorized request. Will output {'status': False} or {'status':  True}
+ 
+ **14. Request to delete user's blog**
+> *`/<git_name>/<git_repository_blog>/api/del_repo?access_token=access_token` method=DELETE request only authorized  Deleting all files from folder posts specific repo
+ 
+ **15. Request to get list of posts sorted by tags**
+> *`/<git_name>/<git_repository_blog>/api/get/tags/<tag>` method=GET better send authorized request in arguments, but works anyway. Will pull out the same list like in first paragraph, but sorted by tag.
+ 
+ **16. Request to get list of posts in branch post_branch**
+> *`/<git_name>/<git_repository_blog>/api/get_branch_posts` method=GET  better send authorized request in arguments, but works anyway. Will will output list of posts from branch post_branch
+ 
+ **17. Request to get one post by id_file inside branch post_branch**
+> *`/<git_name>/<git_repository_blog>/api/branch/remove/<id_file>` method=GET better send authorized request in arguments, but works anyway.  Will output one post by it id
+ 
+ **18. Request to delete one post by id_file in branch post_branch**
+> *`/<git_name>/<git_repository_blog>/api/branch/remove/<id_file>` method=DELETE better send authorized request in arguments, but works anyway.  Will output status of request operation by deletin file in branch 
+ 
+ **19. Request to edit one post by id_file in branch post_branch**
+> *`/<git_name>/<git_repository_blog>/api/branch/remove/<id_file>` method=POST only authorized request also need  json with data consisting 'text_full_md' where changed post's data in. Will output status of operation by editing of file in branch 
+ 
+ **20. Request to move one post by id_file in branch post_branch to branch master**
+> *`/<git_name>/<git_repository_blog>/api/branch/remove/<id_file>` method=PUT only authorized request.  Will output status of request operation by moving file from branch to master.
