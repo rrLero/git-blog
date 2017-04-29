@@ -1,4 +1,4 @@
-#### FrontEnd
+# FrontEnd
 ### The short list of platform's capabilities:
 * creation / deleting blogs
 * creation / editing/ deleting posts (accessible two branches)
@@ -30,7 +30,7 @@ If you have reasons not to use interface of platform, then you need:
 In forked repo there is no opportunity to add comments. 
 You should use your own repo
 
-### BACKEND
+# BACKEND
 In this moment backend situated on http://gitblog.pythonanywhere.com - thisis the begining of all requests to api.
 
 git_name - name of GitHub User
