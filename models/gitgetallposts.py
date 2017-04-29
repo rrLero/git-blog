@@ -5,8 +5,8 @@ import base64
 import json
 
 
-# функция получает строку и в ней находит(если есть) дату, пока в двух вариантах %y-%m-%d %H:%M и %y-%m-%d
-# и приводит к стандартному виду
+# func getting string and finding date in there, in two options %y-%m-%d %H:%M и %y-%m-%d
+# and moving it to standart view
 def get_date(string_date):
     for i in range(len(string_date)):
         try:
@@ -25,7 +25,7 @@ def get_date(string_date):
         return 'No Date'
 
 
-# функция к которой обращается предидущая функция для получения заголовков отделенных ---   ---
+# func that the func before makes request to get heads separated ---   ---
 def test_string(test):
     if 'title:' in test and ':' in test:
         return 'title', test[test.find('title:')+len('title:'):].strip()
