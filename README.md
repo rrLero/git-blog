@@ -1,3 +1,36 @@
+#### FrontEnd
+### The short list of platform's capabilities:
+* creation / deleting blogs
+* creation / editing/ deleting posts (accessible two branches)
+* turn on / turn off comments
+* add / edit / delete comments
+
+#### Collective blog use
+#### To use blog more than one person you need:
+* in own repo enter settings `Settings`
+* choose ` Collaborators`
+* in the field enter name of user, whom you granted access
+* press the button`Add collaborator`
+
+### Possible problems
+#### Problems updating blog
+Propably you are working with blog out of platform.
+To work blog correctly all changes should be done by platform interface.
+If you have reasons not to use interface of platform, then you need:
+* set up webhook:
+  * in your repo enter settings
+  * choose menu add Webhooks
+  * in field Payload url insert http://gitblog.pythonanywhere.com/git_username/git_repo_name/api/web_hook, where git_username  is the name of your account GitHub, and git_repo_name is repo name
+  * in content type choose application/json
+  * Just the push event and Active should be marked
+  * final stage - Add Webhook
+* or update blog by button Update
+
+#### impossible to add comments
+In forked repo there is no opportunity to add comments. 
+You should use your own repo
+
+### BACKEND
 In this moment backend situated on http://gitblog.pythonanywhere.com - thisis the begining of all requests to api.
 
 git_name - name of GitHub User
