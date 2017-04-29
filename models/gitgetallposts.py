@@ -49,6 +49,11 @@ def test_string(test):
 
 
 def get_file(path, data):
+    try:
+        f = open(path, 'r')
+        f.close()
+    except:
+        return 'ok'
     f = open(path, 'w')
     if data:
         f.write(json.dumps(data))
@@ -63,15 +68,14 @@ class GitGetAllPosts(GitAccess):
         list_git_files = []
         git_objects = self.get_all_posts(ref)
         git_objects = git_objects.json()
-        f = open('static/%s_%s.txt' % (self.git_name.lower(), self.git_repository_blog.lower()), 'w')
-        f.close()
         if str(type(git_objects)) == "<class 'dict'>":
             try_on = self.try_on_empty()
-            if str(type(try_on)) == "<class 'dict'>":
+            if str(type(try_on.json())) == "<class 'dict'>":
                 return False
             else:
                 return [{'date': False}]
-            return False
+        f = open('static/%s_%s.txt' % (self.git_name.lower(), self.git_repository_blog.lower()), 'w')
+        f.close()
         data_comments = self.get_comments()
         for git_object in git_objects:
             if git_object['type'] == 'file':
