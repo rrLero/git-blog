@@ -62,8 +62,7 @@ def get_file(path, data):
     return 'ok'
 
 
-# Функция получает имя пользователя и репозиторий. при помощи АПИ ГИТА функция переберает файлы и создает словарь из
-# постов
+# func gets name of user and repo. With GitHub's API func sorts out files and creates dict of posts
 class GitGetAllPosts(GitAccess):
     def get_posts_json(self, ref=False):
         list_git_files = []

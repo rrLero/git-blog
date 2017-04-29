@@ -17,7 +17,7 @@ class Users(Base):
         self.user_name = user_name
         self.user_repo_name = user_repo_name
 
-    # функция открывает базу данных для последующей работы с ней
+    # opens data base to work with it
     def open_base(self):
         Base = declarative_base()
         engine = create_engine('sqlite:///git-blog.sqlite')
