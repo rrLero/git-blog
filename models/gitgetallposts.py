@@ -66,6 +66,11 @@ class GitGetAllPosts(GitAccess):
         f = open('static/%s_%s.txt' % (self.git_name.lower(), self.git_repository_blog.lower()), 'w')
         f.close()
         if str(type(git_objects)) == "<class 'dict'>":
+            try_on = self.try_on_empty()
+            if str(type(try_on)) == "<class 'dict'>":
+                return False
+            else:
+                return [{'date': False}]
             return False
         data_comments = self.get_comments()
         for git_object in git_objects:
@@ -149,4 +154,7 @@ class GitGetAllPosts(GitAccess):
             session_git.add(new_user)
             session_git.commit()
             session_git.close()
-        return sorted(list_git_files, key=lambda d: d['date'], reverse=True)
+        posts = sorted(list_git_files, key=lambda d: d['date'], reverse=True)
+        if not posts[0]['date']:
+            return [{'date': False}]
+        return posts

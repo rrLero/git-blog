@@ -193,3 +193,7 @@ class GitAccess:
         #                 % (self.git_name, self.git_repository_blog, self.auth_))
         return requests.delete('https://api.github.com/repos/%s/%s/git/refs/heads/post_branch?%s'
                                % (self.git_name, self.git_repository_blog, self.auth_))
+
+    def try_on_empty(self):
+        return requests.get('https://api.github.com/repos/%s/%s/contents?%s'
+                                % (self.git_name, self.git_repository_blog, self.auth_))

@@ -203,6 +203,8 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
         else:
             count = len(data_preview)
             paginate = Pagination(per_page, page, count)
+            if not data_preview[0]['date']:
+                return jsonify({'message': False})
             return jsonify({'items': data_preview[paginate.first_post:paginate.last_post+1], 'total': count})
 
 
