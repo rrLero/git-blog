@@ -49,12 +49,18 @@ def test_string(test):
 
 
 def get_file(path, data):
-    # try:
-    #     f = open(path, 'r')
-    #     f.close()
-    # except:
-    #     return 'ok'
+    try:
+        f = open(path, 'r')
+        f.close()
+    except:
+        return 'ok'
     f = open(path, 'w')
+    try:
+        if not data[0]['date']:
+            f.close()
+            return 'ok'
+    except:
+        pass
     if data:
         f.write(json.dumps(data))
     f.close()
