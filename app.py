@@ -432,7 +432,7 @@ def get_dict_all_comments(git_name, git_repository_blog):
     return jsonify(list_coms)
 
 
-# lock/unlock comments
+# lock/unlock comments helping func-1
 def add_new_issues(git_access, id_file):
     add_new = git_access.add_new_issue(id_file)
     if add_new.status_code == 201:
@@ -445,6 +445,7 @@ def add_new_issues(git_access, id_file):
         return {'status': True}
 
 
+# lock/unlock comments helping func-2
 def len_data_issues(data_issues, id_file):
     if len(data_issues) > 0:
         for issue in data_issues:
@@ -453,6 +454,7 @@ def len_data_issues(data_issues, id_file):
     return False
 
 
+# lock comments
 @app.route('/<git_name>/<git_repository_blog>/api/lock_comments/<id_file>', methods=['GET'])
 def unlock_comments(git_name, git_repository_blog, id_file=None):
     args = request.args.get('access_token')
@@ -472,6 +474,7 @@ def unlock_comments(git_name, git_repository_blog, id_file=None):
             return jsonify({'status': True})
 
 
+# unlock comments
 @app.route('/<git_name>/<git_repository_blog>/api/lock_comments/<id_file>', methods=['DELETE'])
 def lock_comments(git_name, git_repository_blog, id_file=None):
     args = request.args.get('access_token')
@@ -578,9 +581,28 @@ def get_branch_posts(git_name, git_repository_blog):
 
 
 # different methods to make changes in posts in the branch 'post_branch'
-@app.route('/<git_name>/<git_repository_blog>/api/branch/remove/<id_file>', methods=['DELETE', 'GET', 'POST', 'PUT'])
+@app.route('/<git_name>/<git_repository_blog>/api/branch/remove/<id_file>', methods=['GET'])
 @cross_origin()
-def remove_post_to_master(git_name, git_repository_blog, id_file):
+def get_one_branch_post(git_name, git_repository_blog, id_file):
+    args = request.args.get('access_token')
+    if not args:
+        return jsonify({'access_token': args})
+    git_access = GitGetAllPosts(git_name, git_repository_blog, args)
+    ref = True
+    data = git_access.get_one_post(id_file, ref)
+    if data.status_code != 200:
+        return '', data.status_code
+    all_post_data = try_file(git_name, git_repository_blog, ref)
+    if not all_post_data:
+        all_post_data = git_access.get_file(ref)
+    for one_post in all_post_data:
+        if id_file == one_post['id']:
+            return jsonify(one_post)
+
+
+@app.route('/<git_name>/<git_repository_blog>/api/branch/remove/<id_file>', methods=['DELETE'])
+@cross_origin()
+def delete_one_branch_post(git_name, git_repository_blog, id_file):
     args = request.args.get('access_token')
     if not args:
         return jsonify({'access_token': args})
@@ -592,36 +614,52 @@ def remove_post_to_master(git_name, git_repository_blog, id_file):
         return '', data.status_code
     sha = data.json()['sha']
     path = data.json()['path']
-    if request.method == 'PUT':
-        status = data.status_code
-        content = data.json()['content']
-        ref = False
-        new_post = git_access.new_post(content, ref, id_file)
-        if new_post.status_code == 201:
-            ref = True
-            del_post = git_access.del_one_post(sha, path, ref)
-            status = del_post.status_code
-        return '', status
-    elif request.method == 'DELETE':
-        if data.status_code == 200:
-            ref = True
-            del_post = git_access.del_one_post(sha, path, ref)
-            status = del_post.status_code
-        return '', status
-    elif request.method == 'POST':
-        changes = request.json
+    if data.status_code == 200:
+        del_post = git_access.del_one_post(sha, path, ref)
+        status = del_post.status_code
+    return '', status
+
+
+@app.route('/<git_name>/<git_repository_blog>/api/branch/remove/<id_file>', methods=['POST'])
+@cross_origin()
+def edit_one_branch_post(git_name, git_repository_blog, id_file):
+    args = request.args.get('access_token')
+    if not args:
+        return jsonify({'access_token': args})
+    git_access = GitGetAllPosts(git_name, git_repository_blog, args)
+    ref = True
+    data = git_access.get_one_post(id_file, ref)
+    if data.status_code != 200:
+        return '', data.status_code
+    sha = data.json()['sha']
+    changes = request.json
+    edit = git_access.edit_post(changes, sha, id_file, ref)
+    status = edit.status_code
+    return '', status
+
+
+@app.route('/<git_name>/<git_repository_blog>/api/branch/remove/<id_file>', methods=['PUT'])
+@cross_origin()
+def move_one_branch_post(git_name, git_repository_blog, id_file):
+    args = request.args.get('access_token')
+    if not args:
+        return jsonify({'access_token': args})
+    git_access = GitGetAllPosts(git_name, git_repository_blog, args)
+    ref = True
+    data = git_access.get_one_post(id_file, ref)
+    if data.status_code != 200:
+        return '', data.status_code
+    sha = data.json()['sha']
+    path = data.json()['path']
+    status = data.status_code
+    content = data.json()['content']
+    ref = False
+    new_post = git_access.new_post(content, ref, id_file)
+    if new_post.status_code == 201:
         ref = True
-        edit = git_access.edit_post(changes, sha, id_file, ref)
-        status = edit.status_code
-        return '', status
-    elif request.method == 'GET':
-        ref = True
-        all_post_data = try_file(git_name, git_repository_blog, ref)
-        if not all_post_data:
-            all_post_data = git_access.get_file(ref)
-        for one_post in all_post_data:
-            if id_file == one_post['id']:
-                return jsonify(one_post)
+        del_post = git_access.del_one_post(sha, path, ref)
+        status = del_post.status_code
+    return '', status
 
 
 # push post to master branch
