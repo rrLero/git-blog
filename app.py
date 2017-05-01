@@ -408,7 +408,7 @@ def edit_one_comment(git_name, git_repository_blog, id_file=None):
 
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['GET'])
 @cross_origin()
-def get_one_comment(git_name, git_repository_blog, id_file=None):
+def get_one_comment(git_name, git_repository_blog, id_file):
     args = request.args.get('access_token')
     if not args:
         return jsonify({'access_token': args})
@@ -423,7 +423,7 @@ def get_one_comment(git_name, git_repository_blog, id_file=None):
 # getting all comments
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments', methods=['GET'])
 @cross_origin()
-def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
+def get_dict_all_comments(git_name, git_repository_blog):
     args = request.args.get('access_token')
     if not args:
         return jsonify({'access_token': args})
