@@ -358,47 +358,74 @@ def get_file_comments(path, id_file, body, title):
     return '', 200
 
 
-# getting comments
-@app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['GET', 'PUT', 'DELETE', 'POST'])
-@app.route('/<git_name>/<git_repository_blog>/api/get_comments', methods=['GET'])
+@app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['DELETE'])
 @cross_origin()
-def get_dict_all_comments(git_name, git_repository_blog, id_file=None):
+def del_one_comment(git_name, git_repository_blog, id_file=None):
+    args = request.args.get('access_token')
+    if not args:
+        return jsonify({'access_token': args})
+    git_access = GitAccess(git_name, git_repository_blog, args)
+    del_comment = git_access.del_comment(id_file)
+    return '', del_comment.status_code
+
+
+@app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['POST'])
+@cross_origin()
+def add_one_comment(git_name, git_repository_blog, id_file=None):
+    args = request.args.get('access_token')
+    if not args:
+        return jsonify({'access_token': args})
+    git_access = GitAccess(git_name, git_repository_blog, args)
+    data_issues = git_access.data_issue_json()
+    data_issues = data_issues.json()
+    data_body = request.json
+    all_posts = try_file(git_name, git_repository_blog)
+    one_post = [y for y in all_posts if y['id'] == id_file][0]
+    if len(data_issues) > 0:
+        for issue in data_issues:
+            if issue['title'] == id_file:
+                return get_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), id_file,
+                                         data_body['body'], one_post['title'])
+    add_new_issue = git_access.add_new_issue(id_file)
+    if add_new_issue.status_code == 201:
+        return get_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), id_file,
+                                 data_body['body'], one_post['title'])
+    else:
+        return jsonify({})
+
+
+@app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['PUT'])
+@cross_origin()
+def edit_one_comment(git_name, git_repository_blog, id_file=None):
+    args = request.args.get('access_token')
+    if not args:
+        return jsonify({'access_token': args})
+    git_access = GitAccess(git_name, git_repository_blog, args)
+    data_body = request.json
+    edit_comment = git_access.edit_comment(id_file, data_body)
+    return '', edit_comment.status_code
+
+
+@app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['GET'])
+@cross_origin()
+def get_one_comment(git_name, git_repository_blog, id_file):
     args = request.args.get('access_token')
     git_access = GitAccess(git_name, git_repository_blog, args)
-    if request.method == 'GET':
-        list_coms = git_access.get_comments()
-        if id_file:
-            if id_file in list_coms:
-                return jsonify(list_coms[id_file])
-            else:
-                return jsonify([])
-        else:
-            return jsonify(list_coms)
-    elif request.method == 'DELETE' and args:
-        del_comment = git_access.del_comment(id_file)
-        return '', del_comment.status_code
-    elif request.method == 'POST' and args:
-        data_issues = git_access.data_issue_json()
-        data_issues = data_issues.json()
-        data_body = request.json
-        all_posts = try_file(git_name, git_repository_blog)
-        one_post = [y for y in all_posts if y['id'] == id_file][0]
-        if len(data_issues) > 0:
-            for issue in data_issues:
-                if issue['title'] == id_file:
-                    return get_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), id_file,
-                                             data_body['body'], one_post['title'])
-        add_new_issue = git_access.add_new_issue(id_file)
-        if add_new_issue.status_code == 201:
-            return get_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), id_file,
-                                     data_body['body'], one_post['title'])
-        else:
-            return jsonify({})
-    elif request.method == 'PUT' and args:
-        data_body = request.json
-        edit_comment = git_access.edit_comment(id_file, data_body)
-        return '', edit_comment.status_code
-    return jsonify({'message': 'No access token in request, try again'})
+    list_coms = git_access.get_comments()
+    if id_file in list_coms:
+        return jsonify(list_coms[id_file])
+    else:
+        return jsonify([])
+
+
+# getting all comments
+@app.route('/<git_name>/<git_repository_blog>/api/get_comments', methods=['GET'])
+@cross_origin()
+def get_dict_all_comments(git_name, git_repository_blog):
+    args = request.args.get('access_token')
+    git_access = GitAccess(git_name, git_repository_blog, args)
+    list_coms = git_access.get_comments()
+    return jsonify(list_coms)
 
 
 # lock/unlock comments
