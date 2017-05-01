@@ -358,6 +358,7 @@ def get_file_comments(path, id_file, body, title):
     return '', 200
 
 
+# delete one comment
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['DELETE'])
 @cross_origin()
 def del_one_comment(git_name, git_repository_blog, id_file=None):
@@ -369,6 +370,7 @@ def del_one_comment(git_name, git_repository_blog, id_file=None):
     return '', del_comment.status_code
 
 
+# add one comment
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['POST'])
 @cross_origin()
 def add_one_comment(git_name, git_repository_blog, id_file=None):
@@ -394,6 +396,7 @@ def add_one_comment(git_name, git_repository_blog, id_file=None):
         return jsonify({})
 
 
+# edit one comment
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['PUT'])
 @cross_origin()
 def edit_one_comment(git_name, git_repository_blog, id_file=None):
@@ -406,6 +409,7 @@ def edit_one_comment(git_name, git_repository_blog, id_file=None):
     return '', edit_comment.status_code
 
 
+# get one comment by id_file
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments/<id_file>', methods=['GET'])
 @cross_origin()
 def get_one_comment(git_name, git_repository_blog, id_file):
@@ -429,7 +433,46 @@ def get_dict_all_comments(git_name, git_repository_blog):
 
 
 # lock/unlock comments
-@app.route('/<git_name>/<git_repository_blog>/api/lock_comments/<id_file>', methods=['GET', 'DELETE'])
+def add_new_issues(git_access, id_file):
+    add_new = git_access.add_new_issue(id_file)
+    if add_new.status_code == 201:
+        lock_issue = git_access.lock_issue(add_new.json()['number'])
+        if lock_issue.status_code == 204:
+            return {'status': False}
+        else:
+            return {'status': True}
+    else:
+        return {'status': True}
+
+
+def len_data_issues(data_issues, id_file):
+    if len(data_issues) > 0:
+        for issue in data_issues:
+            if issue['title'] == id_file:
+                return issue['number']
+    return False
+
+
+@app.route('/<git_name>/<git_repository_blog>/api/lock_comments/<id_file>', methods=['GET'])
+def unlock_comments(git_name, git_repository_blog, id_file=None):
+    args = request.args.get('access_token')
+    if not args:
+        return jsonify({'access_token': args})
+    git_access = GitAccess(git_name, git_repository_blog, args)
+    data_issues = git_access.data_issue_json()
+    data_issues = data_issues.json()
+    len_data_issue = len_data_issues(data_issues, id_file)
+    if not len_data_issue:
+        return jsonify(add_new_issues(git_access, id_file))
+    else:
+        lock_issue = git_access.lock_issue(len_data_issues(data_issues, id_file))
+        if lock_issue.status_code == 204:
+            return jsonify({'status': False})
+        else:
+            return jsonify({'status': True})
+
+
+@app.route('/<git_name>/<git_repository_blog>/api/lock_comments/<id_file>', methods=['DELETE'])
 def lock_comments(git_name, git_repository_blog, id_file=None):
     args = request.args.get('access_token')
     if not args:
@@ -437,31 +480,17 @@ def lock_comments(git_name, git_repository_blog, id_file=None):
     git_access = GitAccess(git_name, git_repository_blog, args)
     data_issues = git_access.data_issue_json()
     data_issues = data_issues.json()
-    if len(data_issues) > 0:
-        for issue in data_issues:
-            if issue['title'] == id_file:
-                if request.method == 'GET':
-                    lock_issue = git_access.lock_issue(issue['number'])
-                    if lock_issue.status_code == 204:
-                        return jsonify({'status': False})
-                    else:
-                        return jsonify({'status': True})
-                elif request.method == 'DELETE':
-                    lock_issue = git_access.unlock_issue(issue['number'])
-                    if lock_issue.status_code == 204:
-                        return jsonify({'status': True})
-                    else:
-                        return jsonify({'message': 'error'})
-    add_new_issue = git_access.add_new_issue(id_file)
-    if add_new_issue.status_code == 201:
-        if request.method == 'GET':
-            lock_issue = git_access.lock_issue(add_new_issue.json()['number'])
-            if lock_issue.status_code == 204:
-                return jsonify({'status': False})
-            else:
-                jsonify({'status': True})
+    len_data_issue = len_data_issues(data_issues, id_file)
+    if not len_data_issue:
+        add_new_issue = git_access.add_new_issue(id_file)
+        if add_new_issue.status_code != 201:
+            return jsonify({'status': True})
     else:
-        jsonify({'status': True})
+        lock_issue = git_access.unlock_issue(len_data_issues(data_issues, id_file))
+        if lock_issue.status_code == 204:
+            return jsonify({'status': True})
+        else:
+            return jsonify({'message': 'error'})
 
 
 # lock status of comments
