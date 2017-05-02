@@ -276,7 +276,7 @@ def web_hook(git_name, git_repository_blog):
 @app.route('/<git_name>/<git_repository_blog>/api/put/<id_file>/<sha>', methods=['POST'])
 @app.route('/<git_name>/<git_repository_blog>/api/put', methods=['POST'])
 @cross_origin()
-def edit_file(git_name, git_repository_blog):
+def edit_file(git_name, git_repository_blog, id_file, sha):
     args = request.args.get('access_token')
     if not args:
         return jsonify({'access_token': args})
@@ -307,7 +307,7 @@ def new_file(git_name, git_repository_blog, id_file=None, sha=None):
 @app.route('/<git_name>/<git_repository_blog>/api/put/<id_file>/<sha>', methods=['DELETE'])
 @app.route('/<git_name>/<git_repository_blog>/api/put', methods=['DELETE'])
 @cross_origin()
-def delete_file(git_name, git_repository_blog):
+def delete_file(git_name, git_repository_blog, id_file, sha):
     args = request.args.get('access_token')
     if not args:
         return jsonify({'access_token': args})
