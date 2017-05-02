@@ -147,32 +147,24 @@ def post(git_name, git_repository_blog, title, page=1, tags=None):
 
 
 # returns data from GitHub with different methods
-@app.route('/<git_name>/<git_repository_blog>/api/get/<title>', methods=['GET'])
-@app.route('/<git_name>/<git_repository_blog>/api/get/tags/<tag>', methods=['GET'])
-@app.route('/<git_name>/<git_repository_blog>/api/get/id/<id>', methods=['GET'])
-@app.route('/<git_name>/<git_repository_blog>/api/get', methods=['GET'])
-@cross_origin()
-def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
-    args = request.args.get('access_token')
-    per_page = request.args.get('per_page')
-    page = request.args.get('page')
-    data = try_file(git_name, git_repository_blog)
-    if not data:
-        git_access = GitGetAllPosts(git_name, git_repository_blog, args)
-        data = git_access.get_file()
-        if not data:
-            create_repo = git_access.create_repo(git_repository_blog)
-            if create_repo.status_code == 201:
-                git_access.get_file()
-                users_list = Users(git_name, git_repository_blog)
-                users_list.new_user()
-                return jsonify({'message': 'new repo created'})
-            elif create_repo.status_code == 422:
-                users_list = Users(git_name, git_repository_blog)
-                users_list.new_user()
-                return jsonify({'message': 'repo is empty'})
-            else:
-                return abort(404)
+# helping func which try to create repo on github and returns status of operation
+def help_take_data_git(git_access):
+    create_repo = git_access.create_repo(git_repository_blog)
+    if create_repo.status_code == 201:
+        git_access.get_file()
+        users_list = Users(git_name, git_repository_blog)
+        users_list.new_user()
+        return jsonify({'message': 'new repo created'})
+    elif create_repo.status_code == 422:
+        users_list = Users(git_name, git_repository_blog)
+        users_list.new_user()
+        return jsonify({'message': 'repo is empty'})
+    else:
+        return abort(404)
+
+
+# makes preview list from full list of blogs
+def help_take_data_git_2(data):
     data_1 = copy.deepcopy(data)
     data_preview = []
     for j in data_1:
@@ -182,31 +174,86 @@ def get_get_blog(git_name, git_repository_blog, title=None, id=None, tag=None):
         except:
             pass
         data_preview.append(j)
-    if tag:
-        tag_data = sorted_by_tags(data_preview, tag)
-        count = len(tag_data)
-        paginate = Pagination(per_page, page, count)
-        return jsonify({'items': tag_data[paginate.first_post:paginate.last_post+1], 'total': count})
-    if title:
-        one_post = [post for post in data if post['title'] == title]
-        if not one_post:
-            return abort(404)
-        return jsonify(one_post[0])
-    elif id:
-        one_post = [post for post in data if post['id'] == id]
-        if not one_post:
-            return abort(404)
-        return jsonify(one_post[0])
+    return data_preview
+
+
+# returns one post by title
+@app.route('/<git_name>/<git_repository_blog>/api/get/<title>', methods=['GET'])
+@cross_origin()
+def get_data_blog_title(git_name, git_repository_blog, title=None):
+    args = request.args.get('access_token')
+    data = try_file(git_name, git_repository_blog)
+    if not data:
+        git_access = GitGetAllPosts(git_name, git_repository_blog, args)
+        data = git_access.get_file()
+        if not data:
+            return help_take_data_git(git_access)
+    one_post = [post for post in data if post['title'] == title]
+    if not one_post:
+        return abort(404)
+    return jsonify(one_post[0])
+
+
+# returns list of posts sorted by tags
+@app.route('/<git_name>/<git_repository_blog>/api/get/tags/<tag>', methods=['GET'])
+@cross_origin()
+def get_data_blog_tag(git_name, git_repository_blog, tag=None):
+    args = request.args.get('access_token')
+    per_page = request.args.get('per_page')
+    page = request.args.get('page')
+    data = try_file(git_name, git_repository_blog)
+    if not data:
+        git_access = GitGetAllPosts(git_name, git_repository_blog, args)
+        data = git_access.get_file()
+        if not data:
+            return help_take_data_git(git_access)
+    data_preview = help_take_data_git_2(data)
+    tag_data = sorted_by_tags(data_preview, tag)
+    count = len(tag_data)
+    paginate = Pagination(per_page, page, count)
+    return jsonify({'items': tag_data[paginate.first_post:paginate.last_post+1], 'total': count})
+
+
+# returns one post by id
+@app.route('/<git_name>/<git_repository_blog>/api/get/id/<id>', methods=['GET'])
+@cross_origin()
+def get_get_blog_by_id(git_name, git_repository_blog, id=None):
+    args = request.args.get('access_token')
+    data = try_file(git_name, git_repository_blog)
+    if not data:
+        git_access = GitGetAllPosts(git_name, git_repository_blog, args)
+        data = git_access.get_file()
+        if not data:
+            return help_take_data_git(git_access)
+    one_post = [post for post in data if post['id'] == id]
+    if not one_post:
+        return abort(404)
+    return jsonify(one_post[0])
+
+
+# returns preview list of posts
+@app.route('/<git_name>/<git_repository_blog>/api/get', methods=['GET'])
+@cross_origin()
+def get_get_blog(git_name, git_repository_blog):
+    args = request.args.get('access_token')
+    per_page = request.args.get('per_page')
+    page = request.args.get('page')
+    data = try_file(git_name, git_repository_blog)
+    if not data:
+        git_access = GitGetAllPosts(git_name, git_repository_blog, args)
+        data = git_access.get_file()
+        if not data:
+            return help_take_data_git(git_access)
+    data_preview = help_take_data_git_2(data)
+    args = request.args.get('title', '')
+    if args:
+        return search(data, 'title', args)
     else:
-        args = request.args.get('title', '')
-        if args:
-            return search(data, 'title', args)
-        else:
-            count = len(data_preview)
-            paginate = Pagination(per_page, page, count)
-            if not data_preview[0]['date']:
-                return jsonify({'message': False})
-            return jsonify({'items': data_preview[paginate.first_post:paginate.last_post+1], 'total': count})
+        count = len(data_preview)
+        paginate = Pagination(per_page, page, count)
+        if not data_preview[0]['date']:
+            return jsonify({'message': False})
+        return jsonify({'items': data_preview[paginate.first_post:paginate.last_post+1], 'total': count})
 
 
 # creation of mirror data from GitHub and saving it to file
