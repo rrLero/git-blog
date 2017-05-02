@@ -10,6 +10,8 @@ from models.gitaccess import GitAccess
 from models.gitgetallposts import GitGetAllPosts
 from flask_cors import CORS, cross_origin
 from flask import abort
+import sqlite3 as lite
+import sys
 
 
 app = Flask(__name__)
@@ -595,7 +597,9 @@ def del_repo(git_name, git_repository_blog):
             git_access.del_one_post(dir_['sha'], dir_['path'])
         for user in users:
             if user.user_name == git_name.lower() and user.user_repo_name == git_repository_blog.lower():
+                users_list.del_table('%s__%s' % (git_name.lower(), git_repository_blog.lower()))
                 session_git.delete(user)
+
         session_git.commit()
         session_git.close()
         git_access.del_branch()
@@ -603,7 +607,9 @@ def del_repo(git_name, git_repository_blog):
     else:
         for user in users:
             if user.user_name == git_name.lower() and user.user_repo_name == git_repository_blog.lower():
+                users_list.del_table('%s__%s' % (git_name.lower(), git_repository_blog.lower()))
                 session_git.delete(user)
+
         session_git.commit()
         session_git.close()
         git_access.del_branch()
@@ -747,6 +753,26 @@ def push_master(git_name, git_repository_blog):
     ref = False
     res = git_access.new_post(changes, ref)
     return '', res.status_code
+
+
+# add subscribe
+@app.route('/<git_name>/<git_repository_blog>/api/add_subscribe', methods=['POST'])
+def add_subscribe(git_name, git_repository_blog):
+    subscribe = request.json
+    con = lite.connect('git-blog.sqlite')
+    cur = con.cursor()
+    try:
+        cur.execute("CREATE TABLE %s__%s (Id INT unique)" % (git_name.lower(), git_repository_blog.lower()))
+    except:
+        pass
+    try:
+        cur.executemany("INSERT INTO %s__%s VALUES(?)" % (git_name.lower(), git_repository_blog.lower()), subscribe)
+    except:
+        pass
+    cur.close()
+    con.commit()
+    con.close()
+    return '', 200
 
 
 @app.after_request

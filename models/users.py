@@ -2,6 +2,10 @@ from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from sqlalchemy import MetaData
+from sqlalchemy import Table
+
 
 Base = declarative_base()
 
@@ -41,3 +45,12 @@ class Users(Base):
             session_git.commit()
             session_git.close()
         return new_user
+
+    def del_table(self, table_name):
+        engine = create_engine('sqlite:///git-blog.sqlite')
+        m = MetaData()
+        table = Table('%s' % table_name, m,
+                      Column('id', Integer),
+                      )
+        table.drop(engine)
+        return 'ok'
