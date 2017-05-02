@@ -744,6 +744,7 @@ def move_one_branch_post(git_name, git_repository_blog, id_file):
 
 # push post to master branch
 @app.route('/<git_name>/<git_repository_blog>/api/put/master', methods=['PUT'])
+@cross_origin()
 def push_master(git_name, git_repository_blog):
     args = request.args.get('access_token')
     if not args:
@@ -757,6 +758,7 @@ def push_master(git_name, git_repository_blog):
 
 # add subscribe
 @app.route('/<git_name>/<git_repository_blog>/api/add_subscribe', methods=['POST'])
+@cross_origin()
 def add_subscribe(git_name, git_repository_blog):
     subscribe = request.json
     con = lite.connect('git-blog.sqlite')
@@ -776,6 +778,7 @@ def add_subscribe(git_name, git_repository_blog):
 
 
 @app.route('/<git_name>/<git_repository_blog>/api/add_subscribe', methods=['GET'])
+@cross_origin()
 def get_id_blog(git_name, git_repository_blog):
     users_list = Users(git_name, git_repository_blog)
     session_git = users_list.open_base()
@@ -784,6 +787,24 @@ def get_id_blog(git_name, git_repository_blog):
         if user.user_name == git_name.lower() and user.user_repo_name == git_repository_blog.lower():
             return jsonify({'%s__%s' % (git_name, git_repository_blog): user.id})
     return jsonify({})
+
+
+@app.route('/<git_name>/<git_repository_blog>/api/get_subscribe', methods=['GET'])
+@cross_origin()
+def get_sub_blogs(git_name, git_repository_blog):
+    con = lite.connect('git-blog.sqlite')
+    cur = con.cursor()
+    results = []
+    try:
+        for row in cur.execute('select id from %s__%s' % (git_name.lower(), git_repository_blog.lower())):
+            results.append(row[0])
+        # cur.execute("select * from %s__%s;" % (git_name.lower(), git_repository_blog.lower()))
+        # results = cur.fetchall()
+    except:
+        pass
+    cur.close()
+    con.close()
+    return jsonify(results)
 
 
 @app.after_request
