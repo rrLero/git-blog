@@ -775,6 +775,17 @@ def add_subscribe(git_name, git_repository_blog):
     return '', 200
 
 
+@app.route('/<git_name>/<git_repository_blog>/api/add_subscribe', methods=['GET'])
+def get_id_blog(git_name, git_repository_blog):
+    users_list = Users(git_name, git_repository_blog)
+    session_git = users_list.open_base()
+    users = session_git.query(Users)
+    for user in users:
+        if user.user_name == git_name.lower() and user.user_repo_name == git_repository_blog.lower():
+            return jsonify({'%s__%s' % (git_name, git_repository_blog): user.id})
+    return jsonify({})
+
+
 @app.after_request
 def add_cors(resp):
     """ Ensure all responses have the CORS headers. This ensures any failures are also accessible
