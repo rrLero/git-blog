@@ -257,8 +257,8 @@ def get_get_blog(git_name, git_repository_blog):
 
 
 # creation of mirror data from GitHub and saving it to file
-@app.route('/<git_name>/<git_repository_blog>/api/update', methods=['GET', 'POST'])
-@app.route('/<git_name>/<git_repository_blog>/api/web_hook', methods=['GET', 'POST'])
+@app.route('/<git_name>/<git_repository_blog>/api/update', methods=['GET'])
+@app.route('/<git_name>/<git_repository_blog>/api/web_hook', methods=['GET'])
 @cross_origin()
 def web_hook(git_name, git_repository_blog):
     args = request.args.get('access_token')
@@ -272,28 +272,46 @@ def web_hook(git_name, git_repository_blog):
 
 
 # Func to make changes in posts from GitHub
-@app.route('/<git_name>/<git_repository_blog>/api/put/<id_file>/<sha>', methods=['POST', 'PUT', 'DELETE'])
-@app.route('/<git_name>/<git_repository_blog>/api/put', methods=['POST', 'PUT', 'DELETE'])
+# edit file on github
+@app.route('/<git_name>/<git_repository_blog>/api/put/<id_file>/<sha>', methods=['POST'])
 @cross_origin()
-def add_file(git_name, git_repository_blog, sha=None, id_file=None):
+def edit_file(git_name, git_repository_blog, sha=None, id_file=None):
     args = request.args.get('access_token')
     if not args:
         return jsonify({'access_token': args})
     git_access = GitAccess(git_name, git_repository_blog, args)
     changes = request.json
-    if request.method == 'POST':
-        res = git_access.edit_post(changes, sha, id_file)
-    elif request.method == 'PUT':
+    res = git_access.edit_post(changes, sha, id_file)
+    return '', res.status_code
+
+
+# creates file on git_hub in branch
+@app.route('/<git_name>/<git_repository_blog>/api/put', methods=['PUT'])
+@cross_origin()
+def new_file(git_name, git_repository_blog):
+    args = request.args.get('access_token')
+    if not args:
+        return jsonify({'access_token': args})
+    git_access = GitAccess(git_name, git_repository_blog, args)
+    changes = request.json
+    res = git_access.new_post(changes)
+    if res.status_code == 404 and res.json()['message'] == 'Branch post_branch not found':
+        sha = (git_access.get_one_branch('master')).json()['object']['sha']
+        git_access.create_branch(sha)
         res = git_access.new_post(changes)
-        if res.status_code == 404 and res.json()['message'] == 'Branch post_branch not found':
-            sha = (git_access.get_one_branch('master')).json()['object']['sha']
-            git_access.create_branch(sha)
-            res = git_access.new_post(changes)
-    elif request.method == 'DELETE':
-        path = 'posts/' + str(id_file)
-        res = git_access.del_one_post(sha, path)
-    else:
-        return '', 404
+    return '', res.status_code
+
+
+# delete file on github in branch
+@app.route('/<git_name>/<git_repository_blog>/api/put/<id_file>/<sha>', methods=['DELETE'])
+@cross_origin()
+def delete_file(git_name, git_repository_blog, sha=None, id_file=None):
+    args = request.args.get('access_token')
+    if not args:
+        return jsonify({'access_token': args})
+    git_access = GitAccess(git_name, git_repository_blog, args)
+    path = 'posts/' + str(id_file)
+    res = git_access.del_one_post(sha, path)
     return '', res.status_code
 
 
