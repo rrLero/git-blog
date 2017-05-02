@@ -285,7 +285,7 @@ def edit_file(git_name, git_repository_blog, sha=None, id_file=None):
     return '', res.status_code
 
 
-# creates file on git_hub in branch
+# creates file on git_hub
 @app.route('/<git_name>/<git_repository_blog>/api/put', methods=['PUT'])
 @cross_origin()
 def new_file(git_name, git_repository_blog):
@@ -302,7 +302,7 @@ def new_file(git_name, git_repository_blog):
     return '', res.status_code
 
 
-# delete file on github in branch
+# delete file on github
 @app.route('/<git_name>/<git_repository_blog>/api/put/<id_file>/<sha>', methods=['DELETE'])
 @cross_origin()
 def delete_file(git_name, git_repository_blog, sha=None, id_file=None):
