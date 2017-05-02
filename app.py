@@ -288,7 +288,7 @@ def edit_file(git_name, git_repository_blog):
 
 # creates file on git_hub
 @app.route('/<git_name>/<git_repository_blog>/api/put/<id_file>/<sha>', methods=['PUT', 'POST', 'DELETE'])
-@app.route('/<git_name>/<git_repository_blog>/api/put', methods=['PUT'])
+@app.route('/<git_name>/<git_repository_blog>/api/put', methods=['PUT', 'POST', 'DELETE'])
 @cross_origin()
 def new_file(git_name, git_repository_blog):
     args = request.args.get('access_token')
