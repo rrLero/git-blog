@@ -318,7 +318,7 @@ def delete_file(git_name, git_repository_blog, id_file, sha):
 
 
 # Func to receive token
-@app.route('/<git_name>/<git_repository_blog>/api/oauth', methods=['GET', 'POST', 'PUT'])
+@app.route('/<git_name>/<git_repository_blog>/api/oauth', methods=['GET'])
 @cross_origin()
 def oauth(git_name, git_repository_blog):
     args = request.args.get('code')
@@ -370,51 +370,58 @@ def edit_file_comments(path, counter):
 
 
 # getting comments from file
-@app.route('/<git_name>/<git_repository_blog>/api/get_comments_file', methods=['GET', 'POST', 'DELETE'])
+@app.route('/<git_name>/<git_repository_blog>/api/get_comments_file', methods=['GET'])
 @cross_origin()
 def get_comments_from_file(git_name, git_repository_blog):
-    if request.method == 'GET':
-        try:
-            f = open('static/comments_%s_%s.json' % (git_name, git_repository_blog))
-        except:
-            return jsonify([])
-        json_data = [json.loads(line) for line in f.readlines()]
-        if json_data:
-            return jsonify(json_data)
-        else:
-            return jsonify([])
-    elif request.method == 'POST':
-        args = request.args.get('access_token')
-        git_access = GitAccess(git_name, git_repository_blog, args)
-        confirmed_comments = request.json
-        added_comments = []
-        counter = []
-        data_issues = git_access.data_issue_json()
-        data_issues = data_issues.json()
-        for confirmed_comment in confirmed_comments:
-            data_body = {'body': confirmed_comment['body']}
-            id_file = confirmed_comment['post_id']
-            counter.append(confirmed_comment['counter'])
-            if len(data_issues) > 0:
-                for issue in data_issues:
-                    if issue['title'] == id_file:
-                        add_new = git_access.add_comment(issue['number'], data_body)
-                        if add_new.status_code == 201:
-                            git_access = GitAccess(git_name, git_repository_blog, args)
-                            get_id = git_access.get_comments()
-                            get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
-                            added_comments.append(get_id)
-                            break
-                continue
-        edit_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), counter)
-        return jsonify(added_comments)
-    elif request.method == 'DELETE':
-        confirmed_comments = request.json
-        counter = []
-        for confirmed_comment in confirmed_comments:
-            counter.append(confirmed_comment['counter'])
-        edit_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), counter)
-        return jsonify({'message': '%s comments deleted' % counter})
+    try:
+        f = open('static/comments_%s_%s.json' % (git_name, git_repository_blog))
+    except:
+        return jsonify([])
+    json_data = [json.loads(line) for line in f.readlines()]
+    if json_data:
+        return jsonify(json_data)
+    else:
+        return jsonify([])
+
+
+@app.route('/<git_name>/<git_repository_blog>/api/get_comments_file', methods=['POST'])
+@cross_origin()
+def save_comments_to_file(git_name, git_repository_blog):
+    args = request.args.get('access_token')
+    git_access = GitAccess(git_name, git_repository_blog, args)
+    confirmed_comments = request.json
+    added_comments = []
+    counter = []
+    data_issues = git_access.data_issue_json()
+    data_issues = data_issues.json()
+    for confirmed_comment in confirmed_comments:
+        data_body = {'body': confirmed_comment['body']}
+        id_file = confirmed_comment['post_id']
+        counter.append(confirmed_comment['counter'])
+        if len(data_issues) > 0:
+            for issue in data_issues:
+                if issue['title'] == id_file:
+                    add_new = git_access.add_comment(issue['number'], data_body)
+                    if add_new.status_code == 201:
+                        git_access = GitAccess(git_name, git_repository_blog, args)
+                        get_id = git_access.get_comments()
+                        get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
+                        added_comments.append(get_id)
+                        break
+            continue
+    edit_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), counter)
+    return jsonify(added_comments)
+
+
+@app.route('/<git_name>/<git_repository_blog>/api/get_comments_file', methods=['DELETE'])
+@cross_origin()
+def delete_comments_from_file(git_name, git_repository_blog):
+    confirmed_comments = request.json
+    counter = []
+    for confirmed_comment in confirmed_comments:
+        counter.append(confirmed_comment['counter'])
+    edit_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), counter)
+    return jsonify({'message': '%s comments deleted' % counter})
 
 
 # update file with comments
