@@ -597,9 +597,7 @@ def del_repo(git_name, git_repository_blog):
             git_access.del_one_post(dir_['sha'], dir_['path'])
         for user in users:
             if user.user_name == git_name.lower() and user.user_repo_name == git_repository_blog.lower():
-                users_list.del_table('%s__%s' % (git_name.lower(), git_repository_blog.lower()))
                 session_git.delete(user)
-
         session_git.commit()
         session_git.close()
         git_access.del_branch()
@@ -607,9 +605,7 @@ def del_repo(git_name, git_repository_blog):
     else:
         for user in users:
             if user.user_name == git_name.lower() and user.user_repo_name == git_repository_blog.lower():
-                users_list.del_table('%s__%s' % (git_name.lower(), git_repository_blog.lower()))
                 session_git.delete(user)
-
         session_git.commit()
         session_git.close()
         git_access.del_branch()
@@ -757,19 +753,19 @@ def push_master(git_name, git_repository_blog):
 
 
 # add subscribe
-@app.route('/<git_name>/<git_repository_blog>/api/add_subscribe', methods=['POST'])
+@app.route('/<git_name>/api/add_subscribe', methods=['POST'])
 @cross_origin()
-def add_subscribe(git_name, git_repository_blog):
+def add_subscribe(git_name):
     subscribe = request.json
     con = lite.connect('git-blog.sqlite')
     cur = con.cursor()
     try:
-        cur.execute("CREATE TABLE %s__%s (Id INT unique)" % (git_name.lower(), git_repository_blog.lower()))
+        cur.execute("CREATE TABLE %s (Id INT unique)" % git_name.lower())
     except:
         pass
     for subscrib in subscribe:
         try:
-            cur.executemany("INSERT INTO %s__%s VALUES(?)" % (git_name.lower(), git_repository_blog.lower()), subscrib)
+            cur.executemany("INSERT INTO %s VALUES(?)" % git_name.lower(), subscrib)
         except:
             pass
     cur.close()
@@ -790,15 +786,15 @@ def get_id_blog(git_name, git_repository_blog):
     return jsonify({})
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/add_subscribe', methods=['DELETE'])
+@app.route('/<git_name>/api/add_subscribe', methods=['DELETE'])
 @cross_origin()
-def delete_id_blog(git_name, git_repository_blog):
+def delete_id_blog(git_name):
     con = lite.connect('git-blog.sqlite')
     cur = con.cursor()
     deletions = request.json
     for deletion in deletions:
         try:
-            cur.execute('delete from %s__%s where id = ?;' % (git_name.lower(), git_repository_blog.lower()), deletion)
+            cur.execute('delete from %s where id = ?;' % git_name.lower(), deletion)
         except:
             pass
     cur.close()
@@ -807,14 +803,14 @@ def delete_id_blog(git_name, git_repository_blog):
     return jsonify({'message': 'done'})
 
 
-@app.route('/<git_name>/<git_repository_blog>/api/get_subscribe', methods=['GET'])
+@app.route('/<git_name>/api/get_subscribe', methods=['GET'])
 @cross_origin()
-def get_sub_blogs(git_name, git_repository_blog):
+def get_sub_blogs(git_name):
     con = lite.connect('git-blog.sqlite')
     cur = con.cursor()
     results = []
     try:
-        for row in cur.execute('select id from %s__%s' % (git_name.lower(), git_repository_blog.lower())):
+        for row in cur.execute('select id from %s' % git_name.lower()):
             results.append(row[0])
         # cur.execute("select * from %s__%s;" % (git_name.lower(), git_repository_blog.lower()))
         # results = cur.fetchall()
