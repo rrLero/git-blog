@@ -339,7 +339,7 @@ def blog_list():
     users_list = Users('none', 'none')
     session_git = users_list.open_base()
     users = session_git.query(Users)
-    blog_list_ = [{'name':(user.user_name).lower(), 'repo': (user.user_repo_name).lower()} for user in users]
+    blog_list_ = [{'name':(user.user_name).lower(), 'repo': (user.user_repo_name).lower(), 'id': user.id} for user in users]
     return jsonify(blog_list_)
 
 
