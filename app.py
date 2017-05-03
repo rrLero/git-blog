@@ -150,7 +150,7 @@ def post(git_name, git_repository_blog, title, page=1, tags=None):
 
 # returns data from GitHub with different methods
 # helping func which try to create repo on github and returns status of operation
-def help_take_data_git(git_access):
+def help_take_data_git(git_access, git_name, git_repository_blog):
     create_repo = git_access.create_repo(git_repository_blog)
     if create_repo.status_code == 201:
         git_access.get_file()
@@ -189,7 +189,7 @@ def get_data_blog_title(git_name, git_repository_blog, title=None):
         git_access = GitGetAllPosts(git_name, git_repository_blog, args)
         data = git_access.get_file()
         if not data:
-            return help_take_data_git(git_access)
+            return help_take_data_git(git_access, git_name, git_repository_blog)
     one_post = [post for post in data if post['title'] == title]
     if not one_post:
         return abort(404)
@@ -208,7 +208,7 @@ def get_data_blog_tag(git_name, git_repository_blog, tag=None):
         git_access = GitGetAllPosts(git_name, git_repository_blog, args)
         data = git_access.get_file()
         if not data:
-            return help_take_data_git(git_access)
+            return help_take_data_git(git_access, git_name, git_repository_blog)
     data_preview = help_take_data_git_2(data)
     tag_data = sorted_by_tags(data_preview, tag)
     count = len(tag_data)
@@ -226,7 +226,7 @@ def get_get_blog_by_id(git_name, git_repository_blog, id=None):
         git_access = GitGetAllPosts(git_name, git_repository_blog, args)
         data = git_access.get_file()
         if not data:
-            return help_take_data_git(git_access)
+            return help_take_data_git(git_access, git_name, git_repository_blog)
     one_post = [post for post in data if post['id'] == id]
     if not one_post:
         return abort(404)
@@ -245,7 +245,7 @@ def get_get_blog(git_name, git_repository_blog):
         git_access = GitGetAllPosts(git_name, git_repository_blog, args)
         data = git_access.get_file()
         if not data:
-            return help_take_data_git(git_access)
+            return help_take_data_git(git_access, git_name, git_repository_blog)
     data_preview = help_take_data_git_2(data)
     args = request.args.get('title', '')
     if args:
