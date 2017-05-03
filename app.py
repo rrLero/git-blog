@@ -765,7 +765,7 @@ def add_subscribe(git_name):
         pass
     for subscrib in subscribe:
         try:
-            cur.executemany("INSERT INTO %s VALUES(?)" % git_name.lower(), (str(subscrib)))
+            cur.execute("INSERT INTO %s values(%s)" % (git_name.lower(), subscrib))
         except:
             pass
     cur.close()
@@ -794,7 +794,7 @@ def delete_id_blog(git_name):
     deletions = request.json
     for deletion in deletions:
         try:
-            cur.execute('delete from %s where id = ?;' % git_name.lower(), (str(deletion)))
+            cur.execute('delete from %s where id = %s;' % (git_name.lower(), deletion))
         except:
             pass
     cur.close()
