@@ -208,7 +208,7 @@ def get_data_blog_tag(git_name, git_repository_blog, tag=None):
         git_access = GitGetAllPosts(git_name, git_repository_blog, args)
         data = git_access.get_file()
         if not data:
-            return help_take_data_git(git_access)
+            return help_take_data_git(git_access, git_name, git_repository_blog)
     data_preview = help_take_data_git_2(data)
     tag_data = sorted_by_tags(data_preview, tag)
     count = len(tag_data)
@@ -226,7 +226,7 @@ def get_get_blog_by_id(git_name, git_repository_blog, id=None):
         git_access = GitGetAllPosts(git_name, git_repository_blog, args)
         data = git_access.get_file()
         if not data:
-            return help_take_data_git(git_access)
+            return help_take_data_git(git_access, git_name, git_repository_blog)
     one_post = [post for post in data if post['id'] == id]
     if not one_post:
         return abort(404)
@@ -245,7 +245,7 @@ def get_get_blog(git_name, git_repository_blog):
         git_access = GitGetAllPosts(git_name, git_repository_blog, args)
         data = git_access.get_file()
         if not data:
-            return help_take_data_git(git_access)
+            return help_take_data_git(git_access, git_name, git_repository_blog)
     data_preview = help_take_data_git_2(data)
     args = request.args.get('title', '')
     if args:
