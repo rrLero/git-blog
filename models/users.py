@@ -49,7 +49,7 @@ class Users(Base):
 
     def del_table(self, table_name):
         m = MetaData()
-        table = Table('%s' % table_name, m,
+        table = Table('%s' % table_name.lower(), m,
                       Column('id', Integer),
                       )
         table.drop(self.engine)
@@ -57,7 +57,7 @@ class Users(Base):
 
     def create_table(self, table_name):
         m = MetaData()
-        table = Table('%s' % table_name, m,
+        table = Table('%s' % table_name.lower(), m,
                       Column('id', Integer, unique=True),
                       )
         table.create(self.engine)
@@ -65,7 +65,7 @@ class Users(Base):
 
     def insert_row(self, table_name, id_blog):
         m = MetaData()
-        table = Table('%s' % table_name, m,
+        table = Table('%s' % table_name.lower(), m,
                       Column('id', Integer, unique=True),
                       )
         ins = table.insert().values(id=id_blog)
@@ -76,7 +76,7 @@ class Users(Base):
     def delete_row(self, table_name, id_blog):
         conn = self.engine.connect()
         meta = MetaData(self.engine, reflect=True)
-        user_t = meta.tables[table_name]
+        user_t = meta.tables[table_name.lower()]
         sel_st = user_t.select()
         conn.execute(sel_st)
         del_st = user_t.delete().where(
@@ -89,7 +89,7 @@ class Users(Base):
     def get_row(self, table_name):
         m = MetaData()
         conn = self.engine.connect()
-        table = Table('%s' % table_name, m,
+        table = Table('%s' % table_name.lower(), m,
                       Column('id', Integer, unique=True),
                       )
         select_st = select([table]).where(
