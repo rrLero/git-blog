@@ -386,16 +386,6 @@ def edit_file_comments(path, counter):
     return 'ok'
 
 
-def open_file_comments(path):
-    try:
-        f = open(path).readlines()
-        json_data = [json.loads(line) for line in f]
-        com_id = [{'post_id': el['post_id'], 'id': el['id']} for el in json_data]
-        return com_id
-    except:
-        return False
-
-
 # getting comments from file
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments_file', methods=['GET'])
 @cross_origin()
@@ -535,22 +525,7 @@ def get_dict_all_comments(git_name, git_repository_blog):
     args = request.args.get('access_token')
     git_access = GitAccess(git_name, git_repository_blog, args)
     list_coms = git_access.get_comments()
-    list_of_test_coms = open_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog))
-    if not list_of_test_coms:
-        return jsonify(list_coms)
-    else:
-        for list_of_test_com in list_of_test_coms:
-            key = list_of_test_com['post_id']
-            val = list_of_test_com['id']
-            try:
-                list_coms[key]
-            except:
-                continue
-            for list_com in list_coms[key]:
-                if list_com['id'] == val:
-                    list_coms[key].remove(list_com)
-                    break
-        return jsonify(list_coms)
+    return jsonify(list_coms)
 
 
 # lock/unlock comments helping func-1

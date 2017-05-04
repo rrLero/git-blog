@@ -15,6 +15,38 @@ def encode_64(text):
     return file_data
 
 
+def open_file_comments(path):
+    try:
+        f = open(path).readlines()
+        json_data = [json.loads(line) for line in f]
+        com_id = [{'post_id': el['post_id'], 'id': el['id']} for el in json_data]
+        return com_id
+    except:
+        return False
+
+
+def filtered_comments(list_coms):
+    try:
+        list_of_test_coms = open_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog))
+    except:
+        return list_coms
+    if not list_of_test_coms:
+        return jsonify(coments_dict)
+    else:
+        for list_of_test_com in list_of_test_coms:
+            key = list_of_test_com['post_id']
+            val = list_of_test_com['id']
+            try:
+                coments_dict[key]
+            except:
+                continue
+            for list_com in list_coms[key]:
+                if list_com['id'] == val:
+                    list_coms[key].remove(list_com)
+                    break
+        return list_coms
+
+
 class GitAccess:
     def __init__(self, git_name, git_repository_blog, access_token=None):
         self.git_name = git_name
@@ -65,7 +97,7 @@ class GitAccess:
                            'id': one_comment['id']}
                     all_com.append(com)
                 comments_dict[comments.json()[i]['title']] = all_com
-        return comments_dict
+        return filtered_comments(comments_dict)
 
     def del_comment(self, id_file):
         del_comment_ = requests.delete(
