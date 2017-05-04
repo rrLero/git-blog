@@ -28,7 +28,7 @@ class Users(Base):
         Base = declarative_base()
         Base.metadata.create_all(self.engine)
         Base.metadata.bind = self.engine
-        DBSession = sessionmaker(bind=engine)
+        DBSession = sessionmaker(bind=self.engine)
         session_git = DBSession()
         return session_git
 
