@@ -808,10 +808,11 @@ def delete_id_blog(git_name):
     base = Users(git_name, 'some')
     deletions = request.json
     for deletion in deletions:
-        try:
-            base.delete_row(git_name, deletion)
-        except:
-            pass
+        base.delete_row(git_name, deletion)
+        # try:
+        #     base.delete_row(git_name, deletion)
+        # except:
+        #     continue
     return jsonify({'message': 'done'})
 
 

@@ -146,7 +146,8 @@ class GitGetAllPosts(GitAccess):
         elif not ref:
             get_file('static/%s_%s.txt' % (self.git_name.lower(), self.git_repository_blog.lower()),
                      list_git_files)
-        session_git = Users.open_base(self)
+        user_s = Users(self.git_name, self.git_repository_blog)
+        session_git = user_s.open_base()
         users = session_git.query(Users)
         new_user = True
         for user in users:
