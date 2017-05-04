@@ -34,17 +34,20 @@ def filtered_comments(list_coms, git_name, git_repository_blog):
     if not list_of_test_coms:
         return list_coms
     else:
-        for list_of_test_com in list_of_test_coms:
-            key = list_of_test_com['post_id']
-            val = list_of_test_com['id']
-            try:
-                list_coms[key]
-            except:
-                continue
-            for list_com in list_coms[key]:
-                if list_com['id'] == val:
-                    list_coms[key].remove(list_com)
-                    break
+        try:
+            for list_of_test_com in list_of_test_coms:
+                key = list_of_test_com['post_id']
+                val = list_of_test_com['id']
+                try:
+                    list_coms[key]
+                except:
+                    continue
+                for list_com in list_coms[key]:
+                    if list_com['id'] == val:
+                        list_coms[key].remove(list_com)
+                        break
+        except:
+            return list_coms
         return list_coms
 
 
