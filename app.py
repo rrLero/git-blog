@@ -358,6 +358,21 @@ def repo_master(git_name, git_repository_blog, test_user):
         return jsonify({'access': False})
 
 
+# deletes strings from file and del comments from GitHub
+def edit_file_comments_2(path, counter, git_access):
+    try:
+        f = open(path).readlines()
+        json_data = [json.loads(line) for line in f]
+        for i in sorted(counter, reverse=True):
+            f.pop(i)
+            git_access.del_comment(json_data[i]['id'])
+        with open(path, 'w') as F:
+            F.writelines(f)
+    except:
+        pass
+    return 'ok'
+
+
 # deletes strings from file
 def edit_file_comments(path, counter):
     try:
@@ -369,6 +384,16 @@ def edit_file_comments(path, counter):
     except:
         pass
     return 'ok'
+
+
+def open_file_comments(path):
+    try:
+        f = open(path).readlines()
+        json_data = [json.loads(line) for line in f]
+        com_id = [{'title': el['title'], 'id': el['id']} for el in json_data]
+        return com_id
+    except:
+        return False
 
 
 # getting comments from file
@@ -397,19 +422,15 @@ def save_comments_to_file(git_name, git_repository_blog):
     data_issues = git_access.data_issue_json()
     data_issues = data_issues.json()
     for confirmed_comment in confirmed_comments:
-        data_body = {'body': confirmed_comment['body']}
         id_file = confirmed_comment['post_id']
         counter.append(confirmed_comment['counter'])
         if len(data_issues) > 0:
             for issue in data_issues:
                 if issue['title'] == id_file:
-                    add_new = git_access.add_comment(issue['number'], data_body)
-                    if add_new.status_code == 201:
-                        git_access = GitAccess(git_name, git_repository_blog, args)
-                        get_id = git_access.get_comments()
-                        get_id = [el for el in get_id[id_file] if el['created_at'] == add_new.json()['created_at']]
-                        added_comments.append(get_id)
-                        break
+                    get_id = git_access.get_comments()
+                    get_id = [el for el in get_id[id_file] if el['body'] == confirmed_comment['body']]
+                    added_comments.append(get_id)
+                    break
             continue
     edit_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), counter)
     return jsonify(added_comments)
@@ -418,18 +439,22 @@ def save_comments_to_file(git_name, git_repository_blog):
 @app.route('/<git_name>/<git_repository_blog>/api/get_comments_file', methods=['DELETE'])
 @cross_origin()
 def delete_comments_from_file(git_name, git_repository_blog):
+    args = request.args.get('access_token')
+    if not args:
+        return jsonify({'access_token': args})
+    git_access = GitAccess(git_name, git_repository_blog, args)
     confirmed_comments = request.json
     counter = []
     for confirmed_comment in confirmed_comments:
         counter.append(confirmed_comment['counter'])
-    edit_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), counter)
+    edit_file_comments_2('static/comments_%s_%s.json' % (git_name, git_repository_blog), counter, git_access)
     return jsonify({'message': '%s comments deleted' % counter})
 
 
 # update file with comments
-def get_file_comments(path, id_file, body, title):
+def get_file_comments(path, id_file, body, title, id_com):
     file_comments = open(path, 'a')
-    file_comments.write(json.dumps({'post_id': id_file, 'body': body, 'title': title}) + '\n')
+    file_comments.write(json.dumps({'post_id': id_file, 'body': body, 'title': title, 'id': id_com}) + '\n')
     file_comments.close()
     return '', 200
 
@@ -462,12 +487,17 @@ def add_one_comment(git_name, git_repository_blog, id_file=None):
     if len(data_issues) > 0:
         for issue in data_issues:
             if issue['title'] == id_file:
+                add_new = git_access.add_comment(issue['number'], data_body['body'])
+                add_new = add_new.json()
                 return get_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), id_file,
-                                         data_body['body'], one_post['title'])
+                                         data_body['body'], one_post['title'], add_new['id'])
     add_new_issue = git_access.add_new_issue(id_file)
     if add_new_issue.status_code == 201:
+        issue = add_new_issue.json()
+        add_new = git_access.add_comment(issue['number'], data_body['body'])
+        add_new = add_new.json()
         return get_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), id_file,
-                                 data_body['body'], one_post['title'])
+                                 data_body['body'], one_post['title'], add_new['id'])
     else:
         return jsonify({})
 
@@ -505,7 +535,22 @@ def get_dict_all_comments(git_name, git_repository_blog):
     args = request.args.get('access_token')
     git_access = GitAccess(git_name, git_repository_blog, args)
     list_coms = git_access.get_comments()
-    return jsonify(list_coms)
+    list_of_test_coms = open_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog))
+    if not list_of_test_coms:
+        return jsonify(list_coms)
+    else:
+        for list_of_test_com in list_of_test_coms:
+            key = list_of_test_com['title']
+            val = list_of_test_com['id']
+            try:
+                list_coms[key]
+            except:
+                continue
+            for list_com in list_coms[key]:
+                if list_com['id'] == val:
+                    list_coms[key].remove(list_com)
+                    break
+        return jsonify(list_coms)
 
 
 # lock/unlock comments helping func-1
