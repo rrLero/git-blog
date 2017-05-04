@@ -4,6 +4,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData
 from sqlalchemy import Table
+from sqlalchemy import Column
+from sqlalchemy import select
 
 
 Base = declarative_base()
@@ -19,13 +21,13 @@ class Users(Base):
     def __init__(self, user_name, user_repo_name):
         self.user_name = user_name
         self.user_repo_name = user_repo_name
+        self.engine = create_engine('sqlite:///git-blog.sqlite')
 
     # opens data base to work with it
     def open_base(self):
         Base = declarative_base()
-        engine = create_engine('sqlite:///git-blog.sqlite')
-        Base.metadata.create_all(engine)
-        Base.metadata.bind = engine
+        Base.metadata.create_all(self.engine)
+        Base.metadata.bind = self.engine
         DBSession = sessionmaker(bind=engine)
         session_git = DBSession()
         return session_git
@@ -46,10 +48,55 @@ class Users(Base):
         return new_user
 
     def del_table(self, table_name):
-        engine = create_engine('sqlite:///git-blog.sqlite')
         m = MetaData()
         table = Table('%s' % table_name, m,
                       Column('id', Integer),
                       )
-        table.drop(engine)
+        table.drop(self.engine)
         return 'ok'
+
+    def create_table(self, table_name):
+        m = MetaData()
+        table = Table('%s' % table_name, m,
+                      Column('id', Integer, unique=True),
+                      )
+        table.create(self.engine)
+        return 'ok'
+
+    def insert_row(self, table_name, id_blog):
+        m = MetaData()
+        table = Table('%s' % table_name, m,
+                      Column('id', Integer, unique=True),
+                      )
+        ins = table.insert().values(id=id_blog)
+        conn = self.engine.connect()
+        conn.execute(ins)
+        return 'ok'
+
+    def delete_row(self, table_name, id_blog):
+        conn = self.engine.connect()
+        meta = MetaData(self.engine, reflect=True)
+        user_t = meta.tables[table_name]
+        sel_st = user_t.select()
+        conn.execute(sel_st)
+        del_st = user_t.delete().where(
+            user_t.c.id == id_blog)
+        conn.execute(del_st)
+        sel_st = user_t.select()
+        conn.execute(sel_st)
+        return 'ok'
+
+    def get_row(self, table_name):
+        m = MetaData()
+        conn = self.engine.connect()
+        table = Table('%s' % table_name, m,
+                      Column('id', Integer, unique=True),
+                      )
+        select_st = select([table]).where(
+            table.c.id)
+        res = conn.execute(select_st)
+        return res
+
+
+
+
