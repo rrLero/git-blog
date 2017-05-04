@@ -390,7 +390,7 @@ def open_file_comments(path):
     try:
         f = open(path).readlines()
         json_data = [json.loads(line) for line in f]
-        com_id = [{'title': el['post_id'], 'id': el['id']} for el in json_data]
+        com_id = [{'post_id': el['post_id'], 'id': el['id']} for el in json_data]
         return com_id
     except:
         return False
