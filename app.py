@@ -639,7 +639,7 @@ def get_branch_posts(git_name, git_repository_blog):
     if not branch_posts:
         branch_posts = git_access.get_posts_json('post_branch')
     list_branch_post = []
-    if branch_posts:
+    if branch_posts and branch_posts[0]['date']:
         posts = try_file(git_name, git_repository_blog)
         if not posts:
             posts = git_access.get_posts_json()
