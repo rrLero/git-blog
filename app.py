@@ -487,14 +487,14 @@ def add_one_comment(git_name, git_repository_blog, id_file=None):
     if len(data_issues) > 0:
         for issue in data_issues:
             if issue['title'] == id_file:
-                add_new = git_access.add_comment(issue['number'], data_body['body'])
+                add_new = git_access.add_comment(issue['number'], {'body': data_body['body']})
                 add_new = add_new.json()
                 return get_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), id_file,
                                          data_body['body'], one_post['title'], add_new['id'])
     add_new_issue = git_access.add_new_issue(id_file)
     if add_new_issue.status_code == 201:
         issue = add_new_issue.json()
-        add_new = git_access.add_comment(issue['number'], data_body['body'])
+        add_new = git_access.add_comment(issue['number'], {'body': data_body['body']})
         add_new = add_new.json()
         return get_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog), id_file,
                                  data_body['body'], one_post['title'], add_new['id'])
