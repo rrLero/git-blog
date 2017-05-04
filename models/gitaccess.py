@@ -2,6 +2,7 @@ import requests
 import datetime
 import base64
 from models.textovka import Textovka
+import json
 
 
 textovka = Textovka()
@@ -25,19 +26,19 @@ def open_file_comments(path):
         return False
 
 
-def filtered_comments(list_coms):
+def filtered_comments(list_coms, git_name, git_repository_blog):
     try:
         list_of_test_coms = open_file_comments('static/comments_%s_%s.json' % (git_name, git_repository_blog))
     except:
         return list_coms
     if not list_of_test_coms:
-        return jsonify(coments_dict)
+        return list_coms
     else:
         for list_of_test_com in list_of_test_coms:
             key = list_of_test_com['post_id']
             val = list_of_test_com['id']
             try:
-                coments_dict[key]
+                list_coms[key]
             except:
                 continue
             for list_com in list_coms[key]:
@@ -97,7 +98,7 @@ class GitAccess:
                            'id': one_comment['id']}
                     all_com.append(com)
                 comments_dict[comments.json()[i]['title']] = all_com
-        return filtered_comments(comments_dict)
+        return filtered_comments(comments_dict, self.git_name, self.git_repository_blog)
 
     def del_comment(self, id_file):
         del_comment_ = requests.delete(
