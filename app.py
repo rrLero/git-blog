@@ -10,8 +10,7 @@ from models.gitaccess import GitAccess
 from models.gitgetallposts import GitGetAllPosts
 from flask_cors import CORS, cross_origin
 from flask import abort
-import sqlite3 as lite
-import sys
+import shutil
 
 
 app = Flask(__name__)
@@ -601,6 +600,25 @@ def lock_status(git_name, git_repository_blog, id_file=None):
 
 
 # delete files from repo
+def remove_files(git_name, git_repository_blog):
+    try:
+        path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static/comments_%s_%s.json' % (git_name, git_repository_blog))
+        os.remove(path)
+    except:
+        pass
+    try:
+        path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static/%s_%s.txt' % (git_name, git_repository_blog))
+        os.remove(path)
+    except:
+        pass
+    try:
+        path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static/%s_%s_branch.txt' % (git_name, git_repository_blog))
+        os.remove(path)
+    except:
+        pass
+    return 'ok'
+
+
 @app.route('/<git_name>/<git_repository_blog>/api/del_repo', methods=['DELETE', 'GET', 'POST'])
 @cross_origin()
 def del_repo(git_name, git_repository_blog):
@@ -621,6 +639,7 @@ def del_repo(git_name, git_repository_blog):
         session_git.commit()
         session_git.close()
         git_access.del_branch()
+        remove_files(git_name, git_repository_blog)
         return '', 200
     else:
         for user in users:
@@ -629,6 +648,7 @@ def del_repo(git_name, git_repository_blog):
         session_git.commit()
         session_git.close()
         git_access.del_branch()
+        remove_files(git_name, git_repository_blog)
         return '', 200
 
 
