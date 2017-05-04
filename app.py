@@ -540,7 +540,7 @@ def get_dict_all_comments(git_name, git_repository_blog):
         return jsonify(list_coms)
     else:
         for list_of_test_com in list_of_test_coms:
-            key = list_of_test_com['title']
+            key = list_of_test_com['post_id']
             val = list_of_test_com['id']
             try:
                 list_coms[key]
