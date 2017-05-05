@@ -835,7 +835,11 @@ def delete_id_blog(git_name):
 @cross_origin()
 def get_sub_blogs(git_name):
     favorites = Favorites(git_name, id=None)
-    list_blogs = favorites.get_favor_by_name()
+    list_blogs = []
+    try:
+        list_blogs = favorites.get_favor_by_name()
+    except:
+        pass
     return jsonify(list_blogs)
 
 
