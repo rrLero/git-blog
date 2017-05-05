@@ -6,6 +6,7 @@ from sqlalchemy import MetaData
 from sqlalchemy import Table
 from sqlalchemy import Column
 from sqlalchemy import select
+from sqlalchemy.orm import relationship
 
 
 Base = declarative_base()
@@ -17,6 +18,9 @@ class Users(Base):
     id = Column(Integer, primary_key=True)
     user_name = Column(String(100), nullable=False)
     user_repo_name = Column(String(100), nullable=False)
+
+    # relationships
+    lnk_favorites_users_2 = relationship('Favorites')
 
     def __init__(self, user_name, user_repo_name):
         self.user_name = user_name
@@ -98,5 +102,51 @@ class Users(Base):
         return res
 
 
+class Favorites(Base):
+    __tablename__ = 'favorites'
+
+    user_name = Column(String(100), ForeignKey('users.user_name'), nullable=False,)
+    id = Column(Integer, nullable=False, )
+    user_name_id = Column(String(100), nullable=False, unique=True, primary_key=True)
+
+    def __init__(self, user_name, id):
+        self.engine = create_engine('sqlite:///git-blog.sqlite')
+        self.user_name = user_name
+        self.id = id
+        self.user_name_id = '%s_%s' % (user_name, id)
+
+    def open_base(self):
+        Base = declarative_base()
+        Base.metadata.create_all(self.engine)
+        Base.metadata.bind = self.engine
+        DBSession = sessionmaker(bind=self.engine)
+        session_git = DBSession()
+        return session_git
+
+    def new_favor(self):
+        session_git = self.open_base()
+        new_favor = Favorites(user_name=self.user_name, id=self.id)
+        session_git.add(new_favor)
+        session_git.commit()
+        session_git.close()
+        return 'ok'
+
+    def del_favor(self):
+        session_git = self.open_base()
+        query = session_git.query(Favorites)
+        new_favor = query.get('%s' % self.user_name_id)
+        session_git.delete(new_favor)
+        session_git.commit()
+        session_git.close()
+        return 'ok'
+
+    def get_favor_by_name(self):
+        session_git = self.open_base()
+        list_blogs = []
+        query = session_git.query(Favorites).filter(Favorites.user_name == self.user_name)
+        for one_id in query:
+            list_blogs.append(one_id.id)
+        session_git.close()
+        return list_blogs
 
 

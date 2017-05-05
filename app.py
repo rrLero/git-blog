@@ -4,7 +4,7 @@ import json
 import os
 import copy
 from flask import make_response, request, current_app
-from models.users import Users
+from models.users import Users, Favorites
 from models.pagination import Pagination
 from models.gitaccess import GitAccess
 from models.gitgetallposts import GitGetAllPosts
@@ -796,15 +796,11 @@ def push_master(git_name, git_repository_blog):
 @app.route('/<git_name>/api/add_subscribe', methods=['POST'])
 @cross_origin()
 def add_subscribe(git_name):
-    subscribe = request.json
-    base = Users(git_name, 'git_repo')
-    try:
-        base.create_table(git_name)
-    except:
-        pass
-    for subscrib in subscribe:
+    subscribes = request.json
+    for subscribe in subscribes:
         try:
-            base.insert_row(git_name, subscrib)
+            favorites = Favorites(git_name, subscribe)
+            favorites.new_favor()
         except:
             pass
     return '', 200
@@ -825,29 +821,22 @@ def get_id_blog(git_name, git_repository_blog):
 @app.route('/<git_name>/api/add_subscribe', methods=['DELETE'])
 @cross_origin()
 def delete_id_blog(git_name):
-    base = Users(git_name, 'some')
-    deletions = request.json
-    for deletion in deletions:
-        base.delete_row(git_name, deletion)
-        # try:
-        #     base.delete_row(git_name, deletion)
-        # except:
-        #     continue
-    return jsonify({'message': 'done'})
+    subscribes = request.json
+    for subscribe in subscribes:
+        try:
+            favorites = Favorites(git_name, subscribe)
+            favorites.del_favor()
+        except:
+            pass
+    return '', 200
 
 
 @app.route('/<git_name>/api/get_subscribe', methods=['GET'])
 @cross_origin()
 def get_sub_blogs(git_name):
-    base = Users(git_name, 'some')
-    results = []
-    try:
-        res = base.get_row(git_name)
-        for el in res:
-            results.append(el[0])
-    except:
-        pass
-    return jsonify(results)
+    favorites = Favorites(git_name, id=None)
+    list_blogs = favorites.get_favor_by_name()
+    return jsonify(list_blogs)
 
 
 @app.after_request
