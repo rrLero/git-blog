@@ -10,7 +10,7 @@ from models.gitaccess import GitAccess
 from models.gitgetallposts import GitGetAllPosts
 from flask_cors import CORS, cross_origin
 from flask import abort
-import shutil
+from datetime import datetime, date, time
 
 
 app = Flask(__name__)
@@ -831,12 +831,43 @@ def delete_id_blog(git_name):
     return '', 200
 
 
-@app.route('/<git_name>/api/get_subscribe', methods=['GET'])
+def get_date_filter(date_before, date_after, data_blog):
+    new_list = []
+    date_search = date_after - date_before
+    if date_search == 0:
+        date_after = date_before + 86400
+    for one_blog in data_blog:
+        date_blog = datetime.strptime(one_blog['date'], "%Y-%m-%d %H:%M:%S")
+        date_blog = date_blog.timestamp()
+        if date_after <= int(date_blog) >= date_before:
+            new_list.append(one_blog)
+    return new_list
+
+
+def author_filtered(author, filtered_list):
+    new_list = [one_blog for one_blog in filtered_list if one_blog['author'].lower() == author.lower()]
+    return new_list
+
+
+@app.route('/<git_name>/<git_repository_blog>/api/search', methods=['POST'])
 @cross_origin()
-def get_sub_blogs(git_name):
-    favorites = Favorites(git_name, id=None)
-    list_blogs = favorites.get_favor_by_name()
-    return jsonify(list_blogs)
+def search_data(git_name, git_repository_blog):
+    search_data = request.json
+    ref = request.args.get('ref')
+    data_blog = try_file(git_name, git_repository_blog, ref)
+    if not data_blog:
+        return jsonify([])
+    date_before = search_data['date_before']
+    date_after = search_data['date_after']
+    author = search_data['author']
+    filtered_list = []
+    if date_after and date_before:
+        filtered_list = get_date_filter(date_before, date_after, data_blog)
+    if author and filtered_list:
+        filtered_list = author_filtered(author, filtered_list)
+    elif author and not filtered_list:
+        filtered_list = author_filtered(author, data_blog)
+    return jsonify(filtered_list)
 
 
 @app.after_request
