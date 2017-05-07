@@ -831,6 +831,13 @@ def delete_id_blog(git_name):
     return '', 200
 
 
+@app.route('/<git_name>/api/get_subscribe', methods=['GET'])
+def get_sub_blogs(git_name):
+    favorites = Favorites(git_name, id=None)
+    list_blogs = favorites.get_favor_by_name()
+    return jsonify(list_blogs)
+
+
 def get_date_filter(date_before, date_after, data_blog):
     new_list = []
     date_search = date_after - date_before
