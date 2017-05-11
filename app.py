@@ -630,6 +630,9 @@ def del_repo(git_name, git_repository_blog):
     users_list = Users(git_name, git_repository_blog)
     session_git = users_list.open_base()
     users = session_git.query(Users)
+    query_fav = session_git.query(Favorites).filter(Favorites.user_name == git_name.lower())
+    for one_fav in query_fav:
+        session_git.delete(one_fav)
     if data.status_code == 200:
         for dir_ in data.json():
             git_access.del_one_post(dir_['sha'], dir_['path'])

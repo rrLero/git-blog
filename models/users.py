@@ -149,4 +149,3 @@ class Favorites(Base):
         session_git.close()
         return list_blogs
 
-
