@@ -110,8 +110,9 @@ class GitAccess:
         return del_comment_
 
     def data_issue_json(self):
+        headers = {'Accept': 'application/vnd.github.squirrel-girl-preview'}
         return requests.get('https://api.github.com/repos/%s/%s/issues?%s'
-                                % (self.git_name, self.git_repository_blog, self.auth_))
+                                % (self.git_name, self.git_repository_blog, self.auth_), headers=headers)
 
     def lock_issue(self, issue_id):
         return requests.put('https://api.github.com/repos/%s/%s/issues/%s/lock?%s'
@@ -233,3 +234,15 @@ class GitAccess:
     def try_on_empty(self):
         return requests.get('https://api.github.com/repos/%s/%s/contents?%s'
                                 % (self.git_name, self.git_repository_blog, self.auth_))
+
+    def get_reaction(self, id_comment):
+        headers = {'Accept': 'application/vnd.github.squirrel-girl-preview'}
+        return requests.get('https://api.github.com/repos/%s/%s/issues/%s/reactions?%s'
+                            % (self.git_name, self.git_repository_blog, id_comment, self.auth_), headers=headers)
+
+    def create_reaction(self, id_comment, json_data):
+        headers = {'Accept': 'application/vnd.github.squirrel-girl-preview'}
+        return requests.post('https://api.github.com/repos/%s/%s/issues/%s/reactions?%s'
+                            % (self.git_name, self.git_repository_blog, id_comment, self.auth_), json=json_data, headers=headers)
+
+

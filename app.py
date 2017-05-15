@@ -11,9 +11,12 @@ from models.gitgetallposts import GitGetAllPosts
 from flask_cors import CORS, cross_origin
 from flask import abort
 from datetime import datetime, date, time
+from flask_restful import Api
+from likes.likes import Likes
 
 
 app = Flask(__name__)
+api = Api(app)
 CORS(app)
 app.config.from_object(__name__)
 app.config.update(dict(
@@ -893,6 +896,8 @@ def add_cors(resp):
     if app.debug:
         resp.headers['Access-Control-Max-Age'] = '1'
     return resp
+
+api.add_resource(Likes, '/<git_name>/<git_repository_blog>/<id_comment>/api/likes')
 
 
 if __name__ == '__main__':

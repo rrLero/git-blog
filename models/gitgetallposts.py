@@ -77,6 +77,7 @@ class GitGetAllPosts(GitAccess):
         f = open('static/%s_%s.txt' % (self.git_name.lower(), self.git_repository_blog.lower()), 'w')
         f.close()
         data_comments = self.get_comments()
+        data_issues = self.data_issue_json().json()
         for git_object in git_objects:
             if git_object['type'] == 'file':
                 val = {}
@@ -102,12 +103,20 @@ class GitGetAllPosts(GitAccess):
                 val['preview'] = 'No Preview'
                 val['text_full_strings'] = ''
                 val['comments_for_post'] = 'No comments'
-                # val['text_full_md'] = ''
+                val['reactions'] = []
                 val['comments'] = 0
                 val['comments_status'] = self.lock_status_comment(val['id'])
+                val['issue'] = False
                 if val['id'] in data_comments:
                     val['comments'] = len(data_comments[val['id']])
                     val['comments_for_post'] = data_comments[val['id']]
+                for issue in data_issues:
+                    if val['id'] == issue['title']:
+                        val['reactions'] = issue['reactions']
+                        val['issue'] = issue['number']
+                if not val['issue']:
+                    response = self.add_new_issue(val['id'])
+                    val['issue'] = response.json()['number']
                 counter = 0
                 str_counter = 0
                 new_key = []
