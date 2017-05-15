@@ -19,7 +19,7 @@ class Likes(Resource):
     def get(self, git_name, git_repository_blog, id_comment):
         access_token = auth()
         if not access_token:
-            return jsonify({'access_token': access_token})
+            return {'access_token': access_token}, 401
         git_access = GitAccess(git_name, git_repository_blog, access_token)
         likes = git_access.get_reaction(id_comment)
         list_likes = [one_like for one_like in likes.json()]
@@ -28,7 +28,7 @@ class Likes(Resource):
     def post(self, git_name, git_repository_blog, id_comment):
         access_token = auth()
         if not access_token:
-            return jsonify({'access_token': access_token})
+            return {'access_token': access_token}, 401
         git_access = GitAccess(git_name, git_repository_blog, access_token)
         root_parser = parser.add_argument('content', required=True, type=str, location='json')
         json_data = root_parser.parse_args(strict=True)
